@@ -1,5 +1,12 @@
 # AudioLivreur - Convertisseur Ebook vers Audiobook
 
+# AudioLivreur 🎧
+> Convertisseur Ebook vers Audiobook
+
+[![Télécharger la dernière version](https://img.shields.io/badge/Télécharger-Windows_(.exe)-blue?style=for-the-badge&logo=windows)](https://github.com/jul1n/AudioLivreur/releases/latest/download/AudioLivreur.exe)
+
+[Voir les instructions d'installation](#-installation-rapide)
+
 **Version:** 0.3.1  
 **Date:** 29 novembre 2025
 
