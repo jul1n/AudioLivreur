@@ -1,0 +1,4 @@
+2025-11-30 22:16:14,349 [INFO] AudioLivreur started
+2025-11-30 22:16:14,719 [DEBUG] Using proactor: IocpProactor
+2025-12-01 08:19:18,790 [INFO] on_closing called
+2025-12-01 08:19:18,800 [INFO] Forcing exit
