@@ -1,4 +1,5 @@
 import os
+import subprocess
 import threading
 import asyncio
 import sys
@@ -9,7 +10,7 @@ import tkinter.messagebox
 from tkinter import filedialog, ttk
 import customtkinter as ctk
 from tkinterdnd2 import DND_FILES, TkinterDnD
-from PIL import Image
+from PIL import Image, ImageTk
 from converter import Converter
 from translator import Translator
 import shutil
@@ -33,6 +34,7 @@ def get_default_ffmpeg_path():
     if ffmpeg:
         return ffmpeg
     
+    
     # Try common Windows locations
     if os.name == 'nt':
         common_paths = [
@@ -44,9 +46,33 @@ def get_default_ffmpeg_path():
         for path in common_paths:
             if Path(path).exists():
                 return str(path)
+    # macOS / Linux
+    else:
+        common_paths = [
+            "/usr/local/bin/ffmpeg",
+            "/opt/homebrew/bin/ffmpeg",
+            "/usr/bin/ffmpeg",
+            Path.home() / "bin" / "ffmpeg"
+        ]
+        for path in common_paths:
+            if Path(path).exists():
+                return str(path)
     
     # Return empty string if not found
     return ""
+
+def open_file_explorer(path):
+    """Open file explorer at the given path."""
+    try:
+        if os.name == 'nt':
+            os.startfile(path)
+        elif sys.platform == 'darwin':
+            subprocess.call(['open', path])
+        else:
+            # Linux/Unix
+            subprocess.call(['xdg-open', path])
+    except Exception as e:
+        logging.error(f"Failed to open explorer: {e}")
 
 # Theme Configuration
 PINK_COLOR = "#e2007a"
@@ -486,7 +512,7 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
     def open_folder(self):
         if self.epub_path:
             folder = os.path.dirname(self.epub_path)
-            os.startfile(folder)
+            open_file_explorer(folder)
 
     def export_merged(self):
         if not self.epub_path: return
@@ -712,7 +738,7 @@ class SplashScreen(tk.Toplevel):
         
         try:
             # Load splash image
-            image_path = SCRIPT_DIR / "splash_logo.png"
+            image_path = SCRIPT_DIR / "assets" / "splash_logo.png"
             if image_path.exists():
                 pil_image = Image.open(image_path)
                 # Resize if too big
@@ -743,15 +769,16 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         
         # Set Icon
         try:
-            icon_path = SCRIPT_DIR / "app_icon.png"
+            icon_path = SCRIPT_DIR / "assets" / "app_icon.png"
             if icon_path.exists():
                 # Window Icon
                 icon_image = Image.open(icon_path)
                 self.iconphoto(True, ImageTk.PhotoImage(icon_image))
-                # Taskbar Icon (Windows)
-                import ctypes
-                myappid = 'audiolivreur.app.1.0' # arbitrary string
-                ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+                # Taskbar Icon (Windows only)
+                if os.name == 'nt':
+                    import ctypes
+                    myappid = 'audiolivreur.app.1.0' # arbitrary string
+                    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
         except Exception as e:
             print(f"Error loading icon: {e}")
             
@@ -777,8 +804,8 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         
         # Load flag images
         try:
-            self.fr_flag = ctk.CTkImage(Image.open(SCRIPT_DIR / "french_flag.png"), size=(24, 16))
-            self.en_flag = ctk.CTkImage(Image.open(SCRIPT_DIR / "english_flag.png"), size=(24, 16))
+            self.fr_flag = ctk.CTkImage(Image.open(SCRIPT_DIR / "assets" / "french_flag.png"), size=(24, 16))
+            self.en_flag = ctk.CTkImage(Image.open(SCRIPT_DIR / "assets" / "english_flag.png"), size=(24, 16))
         except Exception as e:
             print(f"Error loading flags: {e}")
             self.fr_flag = None

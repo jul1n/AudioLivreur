@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / Build
+build/
+dist/
+*.spec
+
+# AudioLivreur specific
+*.log
+temp/
+*_MP3s/
+
+# Test files
+*.epub
+*.pdf
+*.docx
+*.mobi
+*.azw3
+*.m4b
+*.mp3
+
+# OS
+.DS_Store
+Thumbs.db

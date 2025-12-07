@@ -1,7 +1,12 @@
 # AudioLivreur - Convertisseur Ebook vers Audiobook
 
-**Version:** 0.3.1  
-**Date:** 29 novembre 2025
+# AudioLivreur 🎧
+> Convertisseur Ebook vers Audiobook
+
+[![Télécharger la dernière version](https://img.shields.io/badge/Télécharger-Windows_(.exe)-blue?style=for-the-badge&logo=windows)](https://github.com/jul1n/AudioLivreur/releases/latest/download/AudioLivreur.exe)
+
+[Voir les instructions d'installation](#-installation-rapide)
+<img width="791" height="721" alt="image" src="https://github.com/user-attachments/assets/9e6cc9c1-4025-4ab3-8abe-6ec325cee48a" />
 
 Convertissez vos ebooks (EPUB, PDF, DOCX, etc.) en audiobooks M4B avec chapitres, utilisant la synthèse vocale Microsoft Edge TTS.
 
