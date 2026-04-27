@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 class Converter:
     def __init__(self, epub_path, ffmpeg_path, voice, rate, volume, keep_mp3s=False, max_parallel=3, 
                  progress_callback=None, log_callback=None, finished_callback=None, text_callback=None,
-                 keep_global_mp3=True, embed_text=True):
+                 on_status_change=None, keep_global_mp3=True, embed_text=True):
         self.epub_path = epub_path
         self.ffmpeg_path = ffmpeg_path
         self.voice = voice
@@ -24,8 +24,11 @@ class Converter:
         self.cancel_requested = False
         self.pause_event = asyncio.Event()
         self.pause_event.set() # Start in non-paused state
-        self.temp_dir = None
-        self.cover_path = None
+        
+        # Cooldown management
+        self.cooldown_event = asyncio.Event()
+        self.cooldown_event.set() # Set = No cooldown
+        self.on_status_change = on_status_change
         
         self.progress_callback = progress_callback
         self.log_callback = log_callback
@@ -55,6 +58,10 @@ class Converter:
     def emit_finished(self, success, msg):
         if self.finished_callback:
             self.finished_callback(success, msg)
+
+    def emit_status(self, color):
+        if self.on_status_change:
+            self.on_status_change(color)
 
     def run(self):
         try:
@@ -388,41 +395,80 @@ class Converter:
 
     async def generate_tts(self, text, filepath, start_word_count, total_words, title=""):
         import edge_tts
+        import xml.etree.ElementTree as ET
         
         max_retries = 3
         retry_delay = 2  # seconds
         
+        # Extract language code from voice (e.g., fr-FR-RemyMultilingualNeural -> fr-FR)
+        lang_code = "-".join(self.voice.split("-")[:2])
+        
+        # Escape text for XML
+        def xml_escape(t):
+            return t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&apos;")
+        
+        safe_text = xml_escape(text)
+        
+        # Construct SSML to force language and handle prosody
+        ssml = f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="{lang_code}">' \
+               f'<voice name="{self.voice}">' \
+               f'<prosody rate="{self.rate:+d}%" volume="{self.volume:+d}%">' \
+               f'{safe_text}' \
+               f'</prosody></voice></speak>'
+        
         for attempt in range(max_retries):
             try:
-                communicate = edge_tts.Communicate(text, self.voice, rate=f"{self.rate:+d}%", volume=f"{self.volume:+d}%")
+                # If a cooldown is active, wait for it to clear
+                if not self.cooldown_event.is_set():
+                    self.emit_log(f"[INFO] Serveur surchargé, attente avant reprise...")
+                    await self.cooldown_event.wait()
+
+                # Check for cancellation
+                if self.cancel_requested: return
+                
+                # Use SSML instead of plain text
+                communicate = edge_tts.Communicate(ssml)
                 current_words = 0
                 
                 with open(filepath, "wb") as f:
                     async for chunk in communicate.stream():
+                        if self.cancel_requested:
+                            f.close()
+                            if os.path.exists(filepath): os.remove(filepath)
+                            return
+                            
                         if chunk["type"] == "audio":
                             f.write(chunk["data"])
                         elif chunk["type"] == "WordBoundary":
                             # Update progress
                             current_words += 1
-                            # Update every 50 words to avoid spamming the GUI too much but keep it fluid
+                            # Update every 50 words
                             if current_words % 50 == 0:
                                 total_current = start_word_count + current_words
                                 percent = int((total_current / total_words) * 100) if total_words > 0 else 0
                                 msg = f"{total_current}/{total_words} mots"
                                 self.emit_text(msg)
-                                
-                                # Emit progress for the bar
                                 self.emit_progress(total_current, total_words, f"TTS: {title} ({percent}%)")
                 
-                # If successful, return the word count
+                # If we get here, it worked! Restore green light
+                self.emit_status("green")
+                self.cooldown_event.set()
                 return current_words
                 
             except Exception as e:
+                self.emit_status("orange")
+                # Trigger global cooldown to avoid spamming
+                self.cooldown_event.clear()
+                
                 if attempt < max_retries - 1:
-                    self.emit_log(f"[WARNING] Retry {attempt+1}/{max_retries} for {title} due to: {e}")
-                    await asyncio.sleep(retry_delay * (attempt + 1))
+                    wait_time = retry_delay * (attempt + 1) * 2 # Exponential backoff
+                    self.emit_log(f"[WARNING] Erreur serveur pour '{title}'. Nouvelle tentative dans {wait_time}s... ({e})")
+                    await asyncio.sleep(wait_time)
+                    # We only restore the event after waiting
+                    self.cooldown_event.set()
                 else:
-                    self.emit_log(f"[ERROR] Final failure for {title}: {e}")
+                    self.emit_status("red")
+                    self.emit_log(f"[ERROR] Échec définitif pour '{title}' après {max_retries} tentatives : {e}")
                     raise e
 
     def get_audio_duration(self, filepath):

@@ -8,6 +8,7 @@ from logging.handlers import RotatingFileHandler
 import tkinter as tk
 import tkinter.messagebox
 from tkinter import filedialog, ttk
+import webbrowser
 import customtkinter as ctk
 from tkinterdnd2 import DND_FILES, TkinterDnD
 from PIL import Image, ImageTk
@@ -22,9 +23,11 @@ from pathlib import Path
 if getattr(sys, 'frozen', False):
     # Running as compiled executable
     SCRIPT_DIR = Path(sys._MEIPASS)
+    IS_FULL_VERSION = (SCRIPT_DIR / "ffmpeg.exe").exists()
 else:
     # Running as script
     SCRIPT_DIR = Path(__file__).parent
+    IS_FULL_VERSION = True
 
 # Helper function to detect FFmpeg installation
 def get_default_ffmpeg_path():
@@ -201,7 +204,7 @@ LANGUAGES = {
         "visit_github": "🌐 Visit GitHub Project", "github_url": "https://github.com/jul1n/AudioLivreur",
         "tab_trans": "Translation", "tab_conv": "Audiobook Creation", "target_lang": "Target Language:", 
         "translate": "Translate", "init": "Initializing...",
-        "gender": "Voice:", "female": "Woman", "male": "Man",
+        "gender": "Voice:", "female": "Woman", "male": "Man", "preview": "▶️ Preview", "pause": "Pause", "resume": "Resume",
         "keep_global_mp3": "Export one global MP3 file", "embed_text": "Embed text (lyrics) in audio",
         "lang_names": {
             "en": "English", "fr": "French", "es": "Spanish", "de": "German", "it": "Italian", 
@@ -238,8 +241,10 @@ LANGUAGES = {
         "export_title": "Guardar audio fusionado como", "analyzing": "Analizando...", 
         "file_info": "Capítulos: {} | Palabras: {}", "parallel": "Paralelo:", "download_ffmpeg": "⬇️ Descargar FFmpeg", 
         "loading_voices": "Cargando voces...", "no_voices": "No se encontraron voces",
-        "tab_trans": "Traducción", "tab_conv": "Conversión", "target_lang": "Idioma de destino:", 
+        "visit_github": "🌐 Ver el proyecto en GitHub", "github_url": "https://github.com/jul1n/AudioLivreur",
+        "tab_trans": "Traducción", "tab_conv": "Creación Audio", "target_lang": "Idioma de destino:", 
         "translate": "Traducir", "init": "Inicializando...",
+        "gender": "Voz:", "female": "Mujer", "male": "Hombre", "preview": "▶️ Vista previa", "pause": "Pausa", "resume": "Reanudar",
         "keep_global_mp3": "Exportar un solo archivo MP3 global", "embed_text": "Incrustar texto (letra) en el audio",
         "lang_names": {
             "en": "Inglés", "fr": "Francés", "es": "Español", "de": "Alemán", "it": "Italiano", 
@@ -256,8 +261,10 @@ LANGUAGES = {
         "export_title": "Zusammengeführtes Audio speichern unter", "analyzing": "Analysieren...", 
         "file_info": "Kapitel: {} | Wörter: {}", "parallel": "Parallel:", "download_ffmpeg": "⬇️ FFmpeg herunterladen", 
         "loading_voices": "Stimmen laden...", "no_voices": "Keine Stimmen gefunden",
+        "visit_github": "🌐 Projekt auf GitHub ansehen", "github_url": "https://github.com/jul1n/AudioLivreur",
         "tab_trans": "Übersetzung", "tab_conv": "Konvertierung", "target_lang": "Zielsprache:", 
         "translate": "Übersetzen", "init": "Initialisierung...",
+        "gender": "Stimme:", "female": "Frau", "male": "Mann", "preview": "▶️ Vorschau", "pause": "Pause", "resume": "Fortsetzen",
         "keep_global_mp3": "Eine globale MP3-Datei exportieren", "embed_text": "Text (Lyrics) in Audio einbetten",
         "lang_names": {
             "en": "Englisch", "fr": "Französisch", "es": "Spanisch", "de": "Deutsch", "it": "Italienisch", 
@@ -274,8 +281,10 @@ LANGUAGES = {
         "export_title": "Salva audio unito come", "analyzing": "Analisi...", 
         "file_info": "Capitoli: {} | Parole: {}", "parallel": "Parallelo:", "download_ffmpeg": "⬇️ Scarica FFmpeg", 
         "loading_voices": "Caricamento voci...", "no_voices": "Nessuna voce trovata",
+        "visit_github": "🌐 Vedi il progetto su GitHub", "github_url": "https://github.com/jul1n/AudioLivreur",
         "tab_trans": "Traduzione", "tab_conv": "Conversione", "target_lang": "Lingua di destinazione:", 
         "translate": "Traduci", "init": "Inizializzazione...",
+        "gender": "Voce:", "female": "Donna", "male": "Uomo", "preview": "▶️ Anteprima", "pause": "Pausa", "resume": "Riprendi",
         "keep_global_mp3": "Esporta un unico file MP3 globale", "embed_text": "Incorpora testo (testi) nell'audio",
         "lang_names": {
             "en": "Inglese", "fr": "Francese", "es": "Spagnolo", "de": "Tedesco", "it": "Italiano", 
@@ -290,10 +299,12 @@ LANGUAGES = {
         "voice": "Voz:", "rate": "Velocidade:", "volume": "Volume:", "ffmpeg": "Caminho FFmpeg:", 
         "keep_mp3": "Salvar auto. MP3s", "open_folder": "Abrir Pasta", "export_merged": "Exportar Fundido", 
         "export_title": "Salvar áudio fundido como", "analyzing": "Analisando...", 
-        "file_info": "Capítulos: {} | Palavras: {}", "parallel": "Paralelo:", "download_ffmpeg": "⬇️ Baixar FFmpeg", 
+        "file_info": "Capítulos: {} | Palabras: {}", "parallel": "Paralelo:", "download_ffmpeg": "⬇️ Baixar FFmpeg", 
         "loading_voices": "Carregando vozes...", "no_voices": "Nenhuma voz encontrada",
+        "visit_github": "🌐 Ver o projeto no GitHub", "github_url": "https://github.com/jul1n/AudioLivreur",
         "tab_trans": "Tradução", "tab_conv": "Conversão", "target_lang": "Idioma de destino:", 
         "translate": "Traduzir", "init": "Inicializando...",
+        "gender": "Voz:", "female": "Mulher", "male": "Homem", "preview": "▶️ Pré-visualização", "pause": "Pausa", "resume": "Retomar",
         "keep_global_mp3": "Exportar um arquivo MP3 global único", "embed_text": "Incorporar texto (letras) no áudio",
         "lang_names": {
             "en": "Inglês", "fr": "Francês", "es": "Espanhol", "de": "Alemão", "it": "Italiano", 
@@ -310,8 +321,11 @@ LANGUAGES = {
         "export_title": "保存合并音频为", "analyzing": "分析中...", 
         "file_info": "章节: {} | 字数: {}", "parallel": "并行:", "download_ffmpeg": "⬇️ 下载 FFmpeg", 
         "loading_voices": "加载语音中...", "no_voices": "未找到语音",
+        "visit_github": "🌐 在 GitHub 上查看项目", "github_url": "https://github.com/jul1n/AudioLivreur",
         "tab_trans": "翻译", "tab_conv": "转换", "target_lang": "目标语言:", 
         "translate": "翻译", "init": "正在初始化...",
+        "gender": "声音:", "female": "女性", "male": "男性", "preview": "▶️ 预览", "pause": "暂停", "resume": "恢复",
+        "keep_global_mp3": "导出一个全局 MP3 文件", "embed_text": "在音频中嵌入文本（歌词）",
         "lang_names": {
             "en": "英语", "fr": "法语", "es": "西班牙语", "de": "德语", "it": "意大利语", 
             "pt": "葡萄牙语", "zh": "中文", "ja": "日语", "ru": "俄语", "ar": "阿拉伯语", "hi": "印地语"
@@ -327,8 +341,11 @@ LANGUAGES = {
         "export_title": "結合オーディオを保存", "analyzing": "分析中...", 
         "file_info": "章: {} | 単語数: {}", "parallel": "並列:", "download_ffmpeg": "⬇️ FFmpegをダウンロード", 
         "loading_voices": "音声を読み込み中...", "no_voices": "音声が見つかりません",
+        "visit_github": "🌐 GitHubでプロジェクトを表示", "github_url": "https://github.com/jul1n/AudioLivreur",
         "tab_trans": "翻訳", "tab_conv": "変換", "target_lang": "ターゲット言語:", 
         "translate": "翻訳", "init": "初期化中...",
+        "gender": "音声:", "female": "女性", "male": "男性", "preview": "▶️ プレビュー", "pause": "一時停止", "resume": "再開",
+        "keep_global_mp3": "1つのグローバルMP3ファイルをエクスポート", "embed_text": "オーディオにテキスト（歌詞）を埋め込む",
         "lang_names": {
             "en": "英語", "fr": "フランス語", "es": "スペイン語", "de": "ドイツ語", "it": "イタリア語", 
             "pt": "ポルトガル語", "zh": "中国語", "ja": "日本語", "ru": "ロシア語", "ar": "アラビア語", "hi": "ヒンディー語"
@@ -344,8 +361,11 @@ LANGUAGES = {
         "export_title": "Сохранить объединенное аудио как", "analyzing": "Анализ...", 
         "file_info": "Главы: {} | Слова: {}", "parallel": "Параллельно:", "download_ffmpeg": "⬇️ Скачать FFmpeg", 
         "loading_voices": "Загрузка голосов...", "no_voices": "Голоса не найдены",
+        "visit_github": "🌐 Посмотреть проект на GitHub", "github_url": "https://github.com/jul1n/AudioLivreur",
         "tab_trans": "Перевод", "tab_conv": "Конвертация", "target_lang": "Целевой язык:", 
         "translate": "Перевести", "init": "Инициализация...",
+        "gender": "Голос:", "female": "Женщина", "male": "Мужчина", "preview": "▶️ Предпросмотр", "pause": "Пауза", "resume": "Продолжить",
+        "keep_global_mp3": "Экспортировать один общий MP3 файл", "embed_text": "Встроить текст (тексты песен) в аудио",
         "lang_names": {
             "en": "Английский", "fr": "Французский", "es": "Испанский", "de": "Немецкий", "it": "Итальянский", 
             "pt": "Португальский", "zh": "Китайский", "ja": "Японский", "ru": "Русский", "ar": "Арабский", "hi": "Хинди"
@@ -361,8 +381,11 @@ LANGUAGES = {
         "export_title": "حفظ الصوت المدمج باسم", "analyzing": "جاري التحليل...", 
         "file_info": "الفصول: {} | الكلمات: {}", "parallel": "توازي:", "download_ffmpeg": "⬇️ تحميل FFmpeg", 
         "loading_voices": "جاري تحميل الأصوات...", "no_voices": "لم يتم العثور على أصوات",
+        "visit_github": "🌐 عرض المشروع على GitHub", "github_url": "https://github.com/jul1n/AudioLivreur",
         "tab_trans": "ترجمة", "tab_conv": "تحويل", "target_lang": "اللغة المستهدفة:", 
         "translate": "ترجم", "init": "تهيئة...",
+        "gender": "الصوت:", "female": "أنثى", "male": "ذكر", "preview": "▶️ معاينة", "pause": "إيقاف مؤقت", "resume": "استئناف",
+        "keep_global_mp3": "تصدير ملف MP3 عالمي واحد", "embed_text": "تضمين النص (كلمات الأغاني) in الصوت",
         "lang_names": {
             "en": "الإنجليزية", "fr": "الفرنسية", "es": "الإسبانية", "de": "الألمانية", "it": "الإيطالية", 
             "pt": "البرتغالية", "zh": "الصينية", "ja": "اليابانية", "ru": "الروسية", "ar": "العربية", "hi": "الهندية"
@@ -378,15 +401,17 @@ LANGUAGES = {
         "export_title": "मर्ज किया हुआ ऑडियो इस रूप में सहेजें", "analyzing": "विश्लेषण कर रहा है...", 
         "file_info": "अध्याय: {} | शब्द: {}", "parallel": "समानांतर:", "download_ffmpeg": "⬇️ FFmpeg डाउनलोड करें", 
         "loading_voices": "आवाज़ें लोड हो रही हैं...", "no_voices": "कोई आवाज़ नहीं मिली",
+        "visit_github": "🌐 GitHub पर प्रोजेक्ट देखें", "github_url": "https://github.com/jul1n/AudioLivreur",
         "tab_trans": "अनुवाद", "tab_conv": "रूपांतरण", "target_lang": "लक्ष्य भाषा:", 
         "translate": "अनुवाद करें", "init": "प्रारंभ हो रहा है...",
+        "gender": "आवाज़:", "female": "महिला", "male": "पुरुष", "preview": "▶️ पूर्वावलोकन", "pause": "विराम", "resume": "फिर से शुरू करें",
+        "keep_global_mp3": "एक वैश्विक MP3 फ़ाइल निर्यात करें", "embed_text": "ऑडियो में टेक्स्ट (बोल) एम्बेड करें",
         "lang_names": {
-            "en": "अंग्रेज़ी", "fr": "फ्रेंच", "es": "स्पेनिश", "de": "जर्मन", "it": "इतालवी", 
+            "en": "अंग्रेज़ी", "fr": "फ्रेंच", "es": "स्पेनish", "de": "जर्मन", "it": "इतालवी", 
             "pt": "पुर्तगाली", "zh": "चीनी", "ja": "जापानी", "ru": "रूसी", "ar": "अरबी", "hi": "हिन्दी"
         }
     }
 }
-
 class AnimatedButton(ctk.CTkButton):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -496,8 +521,17 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.progress_frame.grid(row=1, column=0, padx=40, pady=(0, 20), sticky="ew")
         self.progress_frame.grid_columnconfigure(0, weight=1)
         
-        self.status_label = ctk.CTkLabel(self.progress_frame, text=self.app.t["ready"], anchor="w", font=ctk.CTkFont(family=FONT_FAMILY, size=12), text_color="gray50")
-        self.status_label.grid(row=0, column=0, sticky="w")
+        # Status and LED container
+        self.status_container = ctk.CTkFrame(self.progress_frame, fg_color="transparent")
+        self.status_container.grid(row=0, column=0, sticky="w")
+        
+        self.status_led_canvas = tk.Canvas(self.status_container, width=15, height=15, bg=LIGHT_BG, highlightthickness=0)
+        self.status_led_canvas.pack(side="left", padx=(0, 5))
+        self.status_led = self.status_led_canvas.create_oval(2, 2, 13, 13, fill="gray", outline="gray")
+        
+        self.status_label = ctk.CTkLabel(self.status_container, text=self.app.t["ready"], anchor="w", font=ctk.CTkFont(family=FONT_FAMILY, size=12), text_color=PINK_COLOR, cursor="hand2")
+        self.status_label.pack(side="left")
+        self.status_label.bind("<Button-1>", lambda e: webbrowser.open(self.app.t["github_url"]))
         
         # Histogram
         self.histogram = HistogramProgress(self.progress_frame, height=40, bg=LIGHT_BG, highlightthickness=0)
@@ -622,6 +656,17 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
             print(f"Error analyzing file: {e}")
             self.after(0, lambda: self.file_info_label.configure(text=self.app.t["error"]))
 
+    def update_status_led(self, color):
+        """Update the connection status LED color."""
+        # Map simple colors to hex
+        colors = {
+            "green": "#2ECC71",
+            "orange": "#F39C12",
+            "red": "#E74C3C",
+            "gray": "#95A5A6"
+        }
+        self.status_led_canvas.itemconfig(self.status_led, fill=colors.get(color, "gray"), outline=colors.get(color, "gray"))
+
     def start_conversion(self):
         if not self.epub_paths: return
         
@@ -631,6 +676,7 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.pause_btn.pack(side="right", padx=10)
         self.status_label.configure(text=self.app.t["converting"])
         self.histogram.set_progress(0)
+        self.update_status_led("green")
         
         threading.Thread(target=self.run_batch_conversion, daemon=True).start()
 
@@ -668,6 +714,7 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
                 log_callback=self.log_message,
                 finished_callback=on_finished,
                 text_callback=self.update_scrolling_text,
+                on_status_change=self.update_status_led,
                 keep_global_mp3=keep_global_mp3,
                 embed_text=embed_text
             )
@@ -1017,16 +1064,15 @@ class SplashScreen(tk.Toplevel):
                 pil_image.thumbnail((380, 280))
                 self.image = ImageTk.PhotoImage(pil_image)
                 tk.Label(self, image=self.image, bg='white').pack(expand=True)
-            # GitHub Link
-            github_btn = tk.Label(self, text=parent.t["visit_github"], fg="blue", bg="white", cursor="hand2", font=("Segoe UI", 10, "underline"))
-            github_btn.pack(pady=(10, 0))
-            github_btn.bind("<Button-1>", lambda e: webbrowser.open(parent.t["github_url"]))
-            
-            # Version Info
-            tk.Label(self, text="AudioLivreur v0.5.0", font=("Arial", 10), bg='white').pack()
-            
             else:
                 tk.Label(self, text="AudioLivreur", font=("Arial", 24, "bold"), bg='white', fg=PINK_COLOR).pack(expand=True)
+            
+            # Version & GitHub Info (Always shown)
+            tk.Label(self, text=f"AudioLivreur {parent.full_version}", font=("Arial", 10), bg='white').pack()
+            github_btn = tk.Label(self, text=parent.t["visit_github"], fg="blue", bg="white", cursor="hand2", font=("Segoe UI", 10, "underline"))
+            github_btn.pack(pady=(5, 10))
+            github_btn.bind("<Button-1>", lambda e: webbrowser.open(parent.t["github_url"]))
+            
         except Exception as e:
             logging.error(f"Failed to load splash: {e}")
             tk.Label(self, text="AudioLivreur", font=("Arial", 24, "bold"), bg='white', fg=PINK_COLOR).pack(expand=True)
@@ -1041,7 +1087,18 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.lang = "fr" 
         self.t = LANGUAGES[self.lang]
         
-        self.title("AudioLivreur")
+        # Detect Version (Full or Light)
+        if getattr(sys, 'frozen', False):
+            # In EXE, ffmpeg is at the root
+            self.is_full = (SCRIPT_DIR / "ffmpeg.exe").exists()
+        else:
+            # In script mode, ffmpeg is in bin/
+            self.is_full = (SCRIPT_DIR / "bin" / "ffmpeg.exe").exists()
+            
+        self.version_type = " (Full)" if self.is_full else " (Light)"
+        self.full_version = f"v0.6.0{self.version_type}"
+        
+        self.title(f"AudioLivreur {self.full_version}")
         self.geometry("800x700") # Increased height for toggle
         self.resizable(False, False)
         self.attributes("-alpha", 0.97)
@@ -1344,7 +1401,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             github_label.bind("<Button-1>", lambda e: webbrowser.open(self.t["github_url"]))
             
             # Version info at bottom
-            tk.Label(layout, text=f"AudioLivreur v0.5.0", bg="white", fg="gray", font=("Arial", 8)).pack(side="bottom", pady=(5, 0))
+            tk.Label(layout, text=f"AudioLivreur {self.app.full_version}", bg="white", fg="gray", font=("Arial", 8)).pack(side="bottom", pady=(5, 0))
 
             # Close Button
             tk.Button(layout, text=self.t["close"], bg=PINK_COLOR, fg="white", height=2, command=self.close_settings).pack(side="bottom", fill="x", pady=10)

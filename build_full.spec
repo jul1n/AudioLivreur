@@ -20,11 +20,11 @@ datas += [('assets', 'assets'), ('docs', 'docs'), ('bin', 'bin')]
 icon_file = 'assets/app_icon.png' if os.path.exists('assets/app_icon.png') else None
 
 a = Analysis(
-    ['main.py'],
-    pathex=[],
+    ['main.py', 'gui.py', 'converter.py'],
+    pathex=['.'],
     binaries=binaries,
     datas=datas,
-    hiddenimports=hiddenimports + ['converter', 'gui'],
+    hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

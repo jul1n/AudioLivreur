@@ -3,7 +3,10 @@ import shutil
 import tempfile
 import asyncio
 import time
-import shutil
+import json
+import re
+import hashlib
+from concurrent.futures import ThreadPoolExecutor
 from deep_translator import GoogleTranslator
 import ebooklib
 from ebooklib import epub
@@ -11,6 +14,45 @@ from bs4 import BeautifulSoup
 import fitz
 import docx
 import mobi
+import logging
+
+class TranslationCache:
+    def __init__(self, cache_file):
+        self.cache_file = Path(cache_file)
+        self.cache_file.parent.mkdir(parents=True, exist_ok=True)
+        self.data = {}
+        self.load()
+
+    def load(self):
+        if self.cache_file.exists():
+            try:
+                with open(self.cache_file, 'r', encoding='utf-8') as f:
+                    self.data = json.load(f)
+            except:
+                self.data = {}
+
+    def save(self):
+        try:
+            with open(self.cache_file, 'w', encoding='utf-8') as f:
+                json.dump(self.data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logging.error(f"Failed to save cache: {e}")
+
+    def get_key(self, text, target_lang):
+        # Use MD5 of text to avoid huge keys
+        hash_obj = hashlib.md5(text.encode('utf-8'))
+        return f"{target_lang}_{hash_obj.hexdigest()}"
+
+    def get(self, text, target_lang):
+        key = self.get_key(text, target_lang)
+        return self.data.get(key)
+
+    def set(self, text, target_lang, translated):
+        key = self.get_key(text, target_lang)
+        self.data[key] = translated
+        # Save every few updates or at the end
+        if len(self.data) % 10 == 0:
+            self.save()
 
 class Translator:
     def __init__(self, file_path, target_lang, progress_callback=None, log_callback=None, finished_callback=None):
@@ -20,7 +62,11 @@ class Translator:
         self.log_callback = log_callback
         self.finished_callback = finished_callback
         self.cancel_requested = False
-        self.temp_dir = None
+        
+        # Setup Cache
+        from pathlib import Path
+        app_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+        self.cache = TranslationCache(app_dir / "cache" / "translations.json")
 
     def emit_log(self, msg):
         if self.log_callback:
@@ -42,141 +88,141 @@ class Translator:
             self.emit_log(traceback.format_exc())
             self.emit_finished(False, str(e))
 
+    def translate_chunk(self, translator, chunk, lang_code):
+        if not chunk.strip(): return ""
+        
+        # Check Cache
+        cached = self.cache.get(chunk, lang_code)
+        if cached:
+            return cached
+            
+        # Translate with retry
+        for attempt in range(3):
+            try:
+                # Add a small jitter to avoid perfect synchronization of threads
+                time.sleep(attempt * 0.5) 
+                result = translator.translate(chunk)
+                if result:
+                    self.cache.set(chunk, lang_code, result)
+                    return result
+            except Exception as e:
+                if attempt == 2:
+                    logging.error(f"Translation failed for chunk: {e}")
+                    return chunk # Fallback
+        return chunk
+
     def do_work(self):
-        self.emit_log(f"[DEBUG] Starting translation of {self.file_path} to {self.target_lang}")
+        self.emit_log(f"[v0.6] Starting optimized translation of {self.file_path}")
         
-        # 1. Extract Text & Metadata
-        self.emit_progress(0, 100, "Extracting text and metadata...")
+        # 1. Extract Data
+        self.emit_progress(0, 100, "Extracting text...")
         data = self.extract_data(self.file_path)
-        
         if not data or not data.get('chapters'):
             raise Exception("No text found in file.")
 
         chapters = data['chapters']
         metadata = data['metadata']
         cover_data = data.get('cover')
-
-        total_chars = sum(len(text) for _, text in chapters)
-        self.emit_log(f"[DEBUG] Total characters to translate: {total_chars}")
-
-        # 2. Translate
-        translated_chapters = []
-        chars_processed = 0
         
-        # Map generic codes to Google Translator codes if needed
         lang_code = self.target_lang.split('-')[0] if '-' in self.target_lang else self.target_lang
-        self.emit_log(f"[DEBUG] Target language code resolved to: {lang_code}")
-        
         translator = GoogleTranslator(source='auto', target=lang_code)
-        
-        # Translate Metadata (Title)
-        translated_metadata = metadata.copy()
-        try:
-            if metadata.get('title'):
-                translated_metadata['title'] = translator.translate(metadata['title'])
-                self.emit_log(f"[DEBUG] Translated title: {translated_metadata['title']}")
-        except Exception as e:
-            self.emit_log(f"[WARN] Failed to translate title: {e}")
 
-        for i, (title, text) in enumerate(chapters):
-            if self.cancel_requested:
-                self.emit_finished(False, "Cancelled")
-                return
+        # 2. Preparation
+        all_chunks = []
+        for title, text in chapters:
+            chapter_chunks = self.split_text_smart(text, 4000)
+            all_chunks.append({
+                'title': title,
+                'chunks': chapter_chunks,
+                'translated_chunks': [None] * len(chapter_chunks)
+            })
 
-            self.emit_log(f"Translating chapter {i+1}/{len(chapters)}: {title}")
+        total_chunks = sum(len(c['chunks']) for c in all_chunks)
+        self.emit_log(f"Total chunks to process: {total_chunks}")
+
+        # 3. Parallel Translation
+        processed_count = 0
+        with ThreadPoolExecutor(max_workers=3) as executor: # Keep workers low for free API
+            futures = []
             
-            # Translate Title
-            try:
-                trans_title = translator.translate(title)
-            except:
-                trans_title = title
+            # Submit all chunks
+            for ch_idx, chapter in enumerate(all_chunks):
+                for chunk_idx, chunk in enumerate(chapter['chunks']):
+                    future = executor.submit(self.translate_chunk, translator, chunk, lang_code)
+                    futures.append((future, ch_idx, chunk_idx))
 
-            # Translate Content
-            chunks = self.split_text(text, 4500)
-            self.emit_log(f"[DEBUG] Chapter split into {len(chunks)} chunks")
-            trans_chunks = []
-            
-            for chunk in chunks:
-                if self.cancel_requested: return
-                try:
-                    # Retry logic
-                    for attempt in range(3):
-                        try:
-                            self.emit_log(f"[DEBUG] Translating chunk {len(trans_chunks)+1}/{len(chunks)} (Attempt {attempt+1})")
-                            trans_chunk = translator.translate(chunk)
-                            trans_chunks.append(trans_chunk)
-                            break
-                        except Exception as e:
-                            if attempt == 2: raise e
-                            time.sleep(1)
-                    
-                    chars_processed += len(chunk)
-                    percent = int((chars_processed / total_chars) * 90) # Scale to 90%
-                    self.emit_progress(percent, 100, f"Translating... ({percent}%)")
-                    
-                    # Small delay to be nice to the API
-                    time.sleep(0.1)
-                    
-                except Exception as e:
-                    self.emit_log(f"[ERROR] Failed to translate chunk: {e}")
-                    trans_chunks.append(chunk) # Fallback to original
+            for future, ch_idx, chunk_idx in futures:
+                if self.cancel_requested: break
+                
+                result = future.result()
+                all_chunks[ch_idx]['translated_chunks'][chunk_idx] = result
+                
+                processed_count += 1
+                percent = int((processed_count / total_chunks) * 90)
+                self.emit_progress(percent, 100, f"Translating... ({processed_count}/{total_chunks})")
 
-            translated_text = "\n".join(trans_chunks)
-            translated_chapters.append((trans_title, translated_text))
+        if self.cancel_requested:
+            self.emit_finished(False, "Cancelled")
+            return
 
-        # 3. Save Output
-        self.emit_progress(95, 100, "Saving file...")
-        output_path = self.save_epub(translated_chapters, translated_metadata, cover_data, lang_code)
+        # 4. Reconstruct Chapters
+        translated_chapters = []
+        for chapter in all_chunks:
+            # Also translate the title
+            trans_title = self.translate_chunk(translator, chapter['title'], lang_code)
+            trans_text = "\n".join([c for c in chapter['translated_chunks'] if c])
+            translated_chapters.append((trans_title, trans_text))
+
+        # 5. Save and Cleanup
+        self.cache.save()
+        self.emit_progress(95, 100, "Saving Output...")
+        output_path = self.save_epub(translated_chapters, metadata, cover_data, lang_code)
         
         self.emit_progress(100, 100, "Done!")
-        self.emit_finished(True, f"Translation complete: {output_path}")
+        self.emit_finished(True, f"File saved: {os.path.basename(output_path)}")
 
-    def split_text(self, text, max_chars):
+    def split_text_smart(self, text, max_chars):
+        if len(text) <= max_chars: return [text]
+        
         chunks = []
-        while len(text) > max_chars:
-            split_idx = text.rfind('.', 0, max_chars)
-            if split_idx == -1:
-                split_idx = text.rfind(' ', 0, max_chars)
-            if split_idx == -1:
-                split_idx = max_chars
-            
-            chunks.append(text[:split_idx+1])
-            text = text[split_idx+1:]
-        if text:
-            chunks.append(text)
+        current_chunk = ""
+        paragraphs = text.split('\n')
+        
+        for para in paragraphs:
+            if not para.strip(): continue
+            if len(current_chunk) + len(para) + 1 <= max_chars:
+                current_chunk += (para + '\n')
+            else:
+                if current_chunk:
+                    chunks.append(current_chunk.strip())
+                    current_chunk = ""
+                
+                if len(para) > max_chars:
+                    # Split by sentences
+                    sentences = re.split(r'(?<=[.!?]) +', para)
+                    for sentence in sentences:
+                        if len(current_chunk) + len(sentence) + 1 <= max_chars:
+                            current_chunk += (sentence + ' ')
+                        else:
+                            if current_chunk:
+                                chunks.append(current_chunk.strip())
+                            current_chunk = sentence + ' '
+                else:
+                    current_chunk = para + '\n'
+                    
+        if current_chunk:
+            chunks.append(current_chunk.strip())
         return chunks
 
     def extract_data(self, file_path):
         ext = os.path.splitext(file_path)[1].lower()
-        self.emit_log(f"[DEBUG] Extracting data from {ext} file...")
-        
-        metadata = {
-            'title': os.path.splitext(os.path.basename(file_path))[0],
-            'creator': "AudioLivreur"
-        }
+        metadata = {'title': os.path.splitext(os.path.basename(file_path))[0], 'creator': "AudioLivreur"}
         cover_data = None
         chapters = []
 
         if ext == '.epub':
             book = epub.read_epub(file_path)
             metadata['title'] = book.get_metadata('DC', 'title')[0][0] if book.get_metadata('DC', 'title') else metadata['title']
-            metadata['creator'] = book.get_metadata('DC', 'creator')[0][0] if book.get_metadata('DC', 'creator') else metadata['creator']
-            
-            # Extract Cover
-            try:
-                cover_id = book.get_metadata('OPF', 'cover')
-                if cover_id:
-                    cover_item = book.get_item_with_id(cover_id[0][0])
-                    if cover_item:
-                        cover_data = {'name': cover_item.get_name(), 'content': cover_item.get_content(), 'media_type': cover_item.media_type}
-            except: pass
-            
-            if not cover_data:
-                for item in book.get_items():
-                    if item.get_type() == ebooklib.ITEM_IMAGE and 'cover' in item.get_name().lower():
-                        cover_data = {'name': item.get_name(), 'content': item.get_content(), 'media_type': item.media_type}
-                        break
-
             # Extract Chapters
             for item in book.get_items():
                 if item.get_type() == ebooklib.ITEM_DOCUMENT:
@@ -184,63 +230,35 @@ class Translator:
                     text = soup.get_text(separator='\n').strip()
                     if len(text) > 50:
                         title = "Chapter"
-                        h1 = soup.find('h1')
+                        h1 = soup.find(['h1', 'h2', 'h3'])
                         if h1: title = h1.get_text().strip()
                         chapters.append((title, text))
-        
         elif ext == '.pdf':
             doc = fitz.open(file_path)
             text = "\n".join([page.get_text() for page in doc])
             chapters = [("Document", text)]
-            
         elif ext == '.docx':
             doc = docx.Document(file_path)
             text = "\n".join([para.text for para in doc.paragraphs])
             chapters = [("Document", text)]
-            
         elif ext in ['.txt', '.md']:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 text = f.read()
             chapters = [("Document", text)]
-            
-        elif ext in ['.mobi', '.azw3']:
-            tempdir = None
-            try:
-                tempdir, filepath = mobi.extract(file_path)
-                with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-                    content = f.read()
-                soup = BeautifulSoup(content, 'html.parser')
-                text = soup.get_text(separator='\n').strip()
-                chapters = [("Document", text)]
-            finally:
-                if tempdir and os.path.exists(tempdir):
-                    shutil.rmtree(tempdir, ignore_errors=True)
         else:
-            raise Exception(f"Unsupported file format for translation: {ext}")
+            raise Exception(f"Unsupported format: {ext}")
             
-        return {
-            'chapters': chapters,
-            'metadata': metadata,
-            'cover': cover_data
-        }
+        return {'chapters': chapters, 'metadata': metadata, 'cover': cover_data}
 
     def save_epub(self, chapters, metadata, cover_data, lang):
         book = epub.EpubBook()
-        
         base_name = os.path.splitext(os.path.basename(self.file_path))[0]
-        book.set_identifier(f'{base_name}_{lang}')
-        book.set_title(metadata.get('title', 'Unknown Title'))
+        book.set_title(f"{metadata.get('title', 'Unknown')} ({lang.upper()})")
         book.set_language(lang)
-        book.add_author(metadata.get('creator', 'Unknown Author'))
-        
-        # Add Cover
-        if cover_data:
-            book.set_cover(cover_data['name'], cover_data['content'])
         
         epub_chapters = []
         for i, (title, text) in enumerate(chapters):
             c = epub.EpubHtml(title=title, file_name=f'chap_{i+1}.xhtml', lang=lang)
-            # Basic HTML formatting
             html_content = f"<h1>{title}</h1>"
             for para in text.split('\n'):
                 if para.strip():
@@ -252,15 +270,7 @@ class Translator:
         book.toc = (epub_chapters)
         book.add_item(epub.EpubNcx())
         book.add_item(epub.EpubNav())
-        
-        style = 'body { font-family: Helvetica, Arial, sans-serif; }'
-        nav_css = epub.EpubItem(uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
-        book.add_item(nav_css)
-        
         book.spine = ['nav'] + epub_chapters
-        if cover_data:
-            # Ensure cover is in spine if set_cover doesn't do it automatically (it usually does add a cover page)
-            pass 
         
         output_path = os.path.join(os.path.dirname(self.file_path), f"{base_name}_{lang}.epub")
         epub.write_epub(output_path, book, {})
