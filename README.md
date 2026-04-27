@@ -22,24 +22,45 @@ Convertissez vos ebooks (EPUB, PDF, DOCX, etc.) en audiobooks M4B avec chapitres
 - 💾 **Export Avancé** : MP3 Global, Chapitres séparés, Intégration des paroles (Lyrics) et Transcript texte
 - 🌍 **Interface Polyglotte** : Français, Anglais, Espagnol, Allemand, Italien, Portugais, Chinois, etc.
 
-## 🚀 Installation Rapide
+## 🚀 Installation & Téléchargement
 
-### Version Exécutable (Recommandé)
-Téléchargez simplement `AudioLivreur.exe` et lancez-le. Tout est inclus (FFmpeg compris) !
+### 1. Choisir votre version
+Rendez-vous sur la page des [Releases GitHub](https://github.com/jul1n/AudioLivreur/releases/latest) pour télécharger la dernière version :
 
-### Version Source
+*   📦 **Version FULL (`AudioLivreur-Full.exe`)** : **Recommandé.** Tout est inclus (FFmpeg/FFprobe). Téléchargez, lancez, profitez ! (~210 Mo)
+*   🪶 **Version LIGHT (`AudioLivreur-Light.exe`)** : Pour les utilisateurs ayant déjà FFmpeg sur leur PC. Ultra-léger (~25 Mo).
+
+---
+
+### 2. Guide d'installation étape par étape
+
+#### Pour la version FULL (Autonome) :
+1.  **Téléchargez** `AudioLivreur-Full.exe`.
+2.  **Double-cliquez** sur le fichier pour lancer l'application.
+3.  C'est tout ! L'application détectera automatiquement les outils internes.
+
+#### Pour la version LIGHT (Sans FFmpeg) :
+1.  **Téléchargez** `AudioLivreur-Light.exe`.
+2.  **Installez FFmpeg** (si pas déjà fait) :
+    *   Téléchargez les binaires sur [ffmpeg.org](https://ffmpeg.org/download.html#build-windows).
+    *   Extrayez-les (ex: dans `C:\ffmpeg`).
+3.  **Configurez l'application** :
+    *   Lancez `AudioLivreur-Light.exe`.
+    *   Allez dans les **Paramètres ⚙️**.
+    *   Si FFmpeg n'est pas détecté, cliquez sur l'icône dossier 📂 à côté de "Chemin FFmpeg" et sélectionnez votre fichier `ffmpeg.exe`.
+
+---
+
+### Version Source (Développeurs)
 1. **Python 3.12+**
 2. **Installation des dépendances** : `pip install -r requirements.txt`
 3. **Lancement** : `python main.py`
 
-## 📖 Utilisation
+## 📖 Utilisation Rapide
+1. **Glissez-déposez** un ou plusieurs ebooks (EPUB, PDF, etc.).
+2. **Sélectionnez la langue** et écoutez un **aperçu** de la voix.
+3. **Lancez la conversion** et récupérez vos fichiers dans le dossier source.
 
-1. **Lancez AudioLivreur**
-2. **Glissez-déposez** un ou plusieurs ebooks
-3. **Choisissez** la langue et la voix (Femme/Homme) et écoutez un **aperçu**
-4. **Configurez** vos options d'export (MP3, Paroles, Transcript) dans les Paramètres ⚙️
-5. **Cliquez** sur "Créer le Livre Audio"
-6. **Récupérez** votre pack complet (M4B, MP3, Transcript) !
 
 Pour plus de détails, consultez le [Guide Utilisateur](GUIDE_UTILISATEUR.md).
 
@@ -52,7 +73,7 @@ Pour plus de détails, consultez le [Guide Utilisateur](GUIDE_UTILISATEUR.md).
 - 💾 **Exports enrichis** : Option pour générer un fichier MP3 global fusionné avec pochette.
 - 📜 **Intégration du texte** : Inclusion automatique du texte des chapitres dans les métadonnées (Lyrics) et export d'un transcript `.txt`.
 - 🖼️ **Pochette robuste** : Amélioration de l'extraction des couvertures EPUB (compatibilité EPUB 2/3).
-- 🛠️ **Correctifs** : Correction du multiplexage FFmpeg pour une meilleure compatibilité avec les lecteurs audio.
+- 🛠️ **Correctifs** : Correction du multiplexage FFmpeg pour une meilleure compatibilité
 
 ### v0.4.0
 **Nouveautés majeures :**

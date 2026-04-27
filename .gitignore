@@ -31,6 +31,12 @@ ENV/
 *.swp
 *.swo
 
+# Binaries
+bin/
+dist/
+build/
+*.spec
+
 # Project specific
 temp_audio/
 *.mp3
@@ -40,11 +46,6 @@ temp_audio/
 !README.md
 !LICENSE
 !metadata.txt
-
-# Binaries (FFmpeg etc should be downloaded or provided separately in releases)
-# bin/ffmpeg.exe
-# bin/ffprobe.exe
-# bin/ffplay.exe
 
 # OS
 .DS_Store

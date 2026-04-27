@@ -198,6 +198,7 @@ LANGUAGES = {
         "export_title": "Save Merged Audio As", "analyzing": "Analyzing...", 
         "file_info": "Chapters: {} | Words: {}", "parallel": "Parallel:", "download_ffmpeg": "⬇️ Download FFmpeg", 
         "loading_voices": "Loading voices...", "no_voices": "No voices found",
+        "visit_github": "🌐 Visit GitHub Project", "github_url": "https://github.com/jul1n/AudioLivreur",
         "tab_trans": "Translation", "tab_conv": "Audiobook Creation", "target_lang": "Target Language:", 
         "translate": "Translate", "init": "Initializing...",
         "gender": "Voice:", "female": "Woman", "male": "Man",
@@ -217,6 +218,7 @@ LANGUAGES = {
         "export_title": "Enregistrer l'audio fusionné sous", "analyzing": "Analyse...", 
         "file_info": "Chapitres : {} | Mots : {}", "parallel": "Parallèle :", "download_ffmpeg": "⬇️ Télécharger FFmpeg", 
         "loading_voices": "Chargement des voix...", "no_voices": "Aucune voix trouvée",
+        "visit_github": "🌐 Voir le projet sur GitHub", "github_url": "https://github.com/jul1n/AudioLivreur",
         "tab_trans": "Traduction", "tab_conv": "Création Audio", "target_lang": "Langue cible :", 
         "translate": "Traduire", "init": "Initialisation...",
         "gender": "Voix :", "female": "Femme", "male": "Homme", "preview": "▶️ Aperçu", "pause": "Pause", "resume": "Reprendre",
@@ -1015,6 +1017,14 @@ class SplashScreen(tk.Toplevel):
                 pil_image.thumbnail((380, 280))
                 self.image = ImageTk.PhotoImage(pil_image)
                 tk.Label(self, image=self.image, bg='white').pack(expand=True)
+            # GitHub Link
+            github_btn = tk.Label(self, text=parent.t["visit_github"], fg="blue", bg="white", cursor="hand2", font=("Segoe UI", 10, "underline"))
+            github_btn.pack(pady=(10, 0))
+            github_btn.bind("<Button-1>", lambda e: webbrowser.open(parent.t["github_url"]))
+            
+            # Version Info
+            tk.Label(self, text="AudioLivreur v0.5.0", font=("Arial", 10), bg='white').pack()
+            
             else:
                 tk.Label(self, text="AudioLivreur", font=("Arial", 24, "bold"), bg='white', fg=PINK_COLOR).pack(expand=True)
         except Exception as e:
@@ -1325,6 +1335,17 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             tk.Checkbutton(layout, text=self.t["keep_global_mp3"], variable=self.app.keep_global_mp3_var, bg="white", fg=TEXT_COLOR, selectcolor="white").pack(anchor="w", pady=5)
             tk.Checkbutton(layout, text=self.t["embed_text"], variable=self.app.embed_text_var, bg="white", fg=TEXT_COLOR, selectcolor="white").pack(anchor="w", pady=(0, 20))
             
+            # GitHub Link & Support
+            github_frame = tk.Frame(layout, bg="white")
+            github_frame.pack(fill="x", pady=(10, 0))
+            
+            github_label = tk.Label(github_frame, text=self.t["visit_github"], bg="white", fg=PINK_COLOR, cursor="hand2", font=("Arial", 10, "underline"))
+            github_label.pack(side="left")
+            github_label.bind("<Button-1>", lambda e: webbrowser.open(self.t["github_url"]))
+            
+            # Version info at bottom
+            tk.Label(layout, text=f"AudioLivreur v0.5.0", bg="white", fg="gray", font=("Arial", 8)).pack(side="bottom", pady=(5, 0))
+
             # Close Button
             tk.Button(layout, text=self.t["close"], bg=PINK_COLOR, fg="white", height=2, command=self.close_settings).pack(side="bottom", fill="x", pady=10)
 
