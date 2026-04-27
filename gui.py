@@ -18,6 +18,10 @@ import shutil
 import math
 import time
 from pathlib import Path
+try:
+    import pywinstyles
+except ImportError:
+    pywinstyles = None
 
 # Get the directory where the script is located
 if getattr(sys, 'frozen', False):
@@ -481,19 +485,32 @@ class ScrollingText(ctk.CTkLabel):
     def stop(self):
         pass
 
+class FileListItem(ctk.CTkFrame):
+    def __init__(self, master, file_path, on_remove, **kwargs):
+        super().__init__(master, fg_color="white", corner_radius=10, height=40, **kwargs)
+        self.file_path = file_path
+        
+        file_name = os.path.basename(file_path)
+        # Truncate if too long
+        if len(file_name) > 40:
+            file_name = file_name[:37] + "..."
+            
+        self.label = ctk.CTkLabel(self, text=file_name, font=ctk.CTkFont(family=FONT_FAMILY, size=12), text_color="black")
+        self.label.pack(side="left", padx=15, pady=5)
+        
+        self.remove_btn = ctk.CTkButton(self, text="✕", width=24, height=24, corner_radius=12, fg_color="transparent", text_color="gray60", hover_color="#feeef5", command=lambda: on_remove(self))
+        self.remove_btn.pack(side="right", padx=10)
+
 class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
     def __init__(self, master, app, **kwargs):
         super().__init__(master, **kwargs)
         self.app = app
         self.TkdndVersion = TkinterDnD._require(self)
         
-        self.epub_paths = []
-        self.converter = None
+        self.file_queue = [] # List of (path, item_widget)
+        self.current_index = -1
         self.is_converting = False
-        
-        self.epub_path = None
         self.converter = None
-        self.is_converting = False
         
         # Grid Layout
         self.grid_columnconfigure(0, weight=1)
@@ -508,17 +525,19 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.drop_label = ctk.CTkLabel(self.drop_frame, text=self.app.t["drop_text"], font=ctk.CTkFont(family=FONT_FAMILY, size=18), text_color="gray40")
         self.drop_label.grid(row=0, column=0, padx=20, pady=20)
         
-        self.file_info_label = ctk.CTkLabel(self.drop_frame, text="", font=ctk.CTkFont(family=FONT_FAMILY, size=12), text_color="gray50")
-        self.file_info_label.grid(row=1, column=0, pady=(10, 0))
-        
         self.drop_frame.drop_target_register(DND_FILES)
         self.drop_frame.dnd_bind('<<Drop>>', self.drop_file)
         self.drop_frame.bind("<Button-1>", self.browse_file)
         self.drop_label.bind("<Button-1>", self.browse_file)
 
+        # File List Area (Scrollable)
+        self.scroll_frame = ctk.CTkScrollableFrame(self, fg_color="transparent", height=150)
+        self.scroll_frame.grid(row=1, column=0, padx=40, pady=(0, 10), sticky="nsew")
+        self.scroll_frame.grid_remove() # Hidden if empty
+
         # Progress Area
         self.progress_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.progress_frame.grid(row=1, column=0, padx=40, pady=(0, 20), sticky="ew")
+        self.progress_frame.grid(row=2, column=0, padx=40, pady=(0, 20), sticky="ew")
         self.progress_frame.grid_columnconfigure(0, weight=1)
         
         # Status and LED container
@@ -543,7 +562,7 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
 
         # Gender Selection
         self.gender_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.gender_frame.grid(row=2, column=0, padx=40, pady=(10, 20), sticky="ew")
+        self.gender_frame.grid(row=3, column=0, padx=40, pady=(10, 20), sticky="ew")
         
         self.gender_label = ctk.CTkLabel(self.gender_frame, text=self.app.t["gender"], font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold"))
         self.gender_label.pack(side="left", padx=(0, 10))
@@ -581,7 +600,7 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
 
         # Action Buttons
         self.action_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.action_frame.grid(row=3, column=0, padx=40, pady=(0, 30), sticky="ew")
+        self.action_frame.grid(row=4, column=0, padx=40, pady=(0, 30), sticky="ew")
         
         self.start_btn = AnimatedButton(self.action_frame, text=self.app.t["start"], height=45, font=ctk.CTkFont(family=FONT_FAMILY, size=16, weight="bold"), fg_color=PINK_COLOR, hover_color="#c20068", text_color="white", command=self.start_conversion, state="disabled")
         self.start_btn.pack(side="right", padx=10, fill="x", expand=True)
@@ -617,28 +636,41 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         # Properly parse multiple paths (e.g. {path 1} path2 {path 3})
         paths = re.findall(r'\{.*?\}|\S+', data)
         paths = [p[1:-1] if p.startswith('{') else p for p in paths]
-        self.load_file(paths)
+        self.load_files(paths)
 
     def browse_file(self, event=None):
         file_paths = filedialog.askopenfilenames(filetypes=[("Ebook Files", "*.epub *.pdf *.docx *.txt *.mobi *.azw3")])
         if file_paths:
-            self.load_file(list(file_paths))
+            self.load_files(list(file_paths))
 
-    def load_file(self, paths):
-        self.epub_paths = paths
-        self.file_info_label.configure(text=self.app.t["analyzing"])
-        self.status_label.configure(text=self.app.t["ready"])
-        self.start_btn.pack_forget()
-        self.open_folder_btn.pack_forget()
-        self.export_merged_btn.pack_forget()
+    def load_files(self, paths):
+        for path in paths:
+            self.add_file_to_queue(path)
         
-        if len(paths) == 1:
-            threading.Thread(target=self.analyze_file, daemon=True).start()
-        else:
-            # For multiple files, just show count
-            self.file_info_label.configure(text=f"{len(paths)} fichiers sélectionnés")
-            self.start_btn.pack(side="right", padx=10, fill="x", expand=True)
+        if self.file_queue:
+            self.scroll_frame.grid()
             self.start_btn.configure(state="normal")
+            self.start_btn.pack(side="right", padx=10, fill="x", expand=True)
+
+    def add_file_to_queue(self, path):
+        # Check if already in queue
+        if any(f[0] == path for f in self.file_queue):
+            return
+            
+        item = FileListItem(self.scroll_frame, path, self.remove_file_from_queue)
+        item.pack(fill="x", padx=5, pady=2)
+        self.file_queue.append((path, item))
+        
+    def remove_file_from_queue(self, item_widget):
+        for i, (path, widget) in enumerate(self.file_queue):
+            if widget == item_widget:
+                self.file_queue.pop(i)
+                widget.destroy()
+                break
+        
+        if not self.file_queue:
+            self.scroll_frame.grid_remove()
+            self.start_btn.configure(state="disabled")
 
     def analyze_file(self):
         try:
@@ -668,7 +700,7 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.status_led_canvas.itemconfig(self.status_led, fill=colors.get(color, "gray"), outline=colors.get(color, "gray"))
 
     def start_conversion(self):
-        if not self.epub_paths: return
+        if not self.file_queue: return
         
         self.is_converting = True
         self.start_btn.configure(state="disabled", fg_color="white", text_color=PINK_COLOR, border_width=2, border_color=PINK_COLOR)
@@ -692,21 +724,28 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         
         error_msgs = []
         
-        for i, path in enumerate(self.epub_paths):
+        # Clone the queue to avoid issues if files are removed during processing
+        queue_to_process = list(self.file_queue)
+        
+        for i, (path, widget) in enumerate(queue_to_process):
             if self.converter and self.converter.cancel_requested:
                 break
                 
-            self.after(0, lambda p=path, idx=i: self.status_label.configure(text=f"[{idx+1}/{len(self.epub_paths)}] {os.path.basename(p)}"))
+            # Highlight current item
+            self.after(0, lambda w=widget: w.configure(fg_color="#feeef5", border_width=1, border_color=PINK_COLOR))
+            self.after(0, lambda p=path, idx=i: self.status_label.configure(text=f"[{idx+1}/{len(queue_to_process)}] {os.path.basename(p)}"))
             
-            # Need a way to wait for each conversion to finish before starting next
-            # We use a threading Event
             finished_event = threading.Event()
             
-            def on_finished(success, msg):
+            def on_finished(success, msg, p=path, w=widget):
                 finished_event.set()
                 if not success:
-                    error_msgs.append(f"{os.path.basename(path)} : {msg}")
-                    print(f"Error converting {path}: {msg}")
+                    error_msgs.append(f"{os.path.basename(p)} : {msg}")
+                    self.after(0, lambda: w.configure(fg_color="#ffebee")) # Error color
+                else:
+                    self.after(0, lambda: w.configure(fg_color="#e8f5e9")) # Success color
+                    # Remove from visual queue once done? No, keep it but mark success
+                    # self.after(0, lambda: self.remove_file_from_queue(w))
 
             self.converter = Converter(
                 path, ffmpeg_path, voice, rate, volume, keep_mp3s, max_parallel,
@@ -719,10 +758,7 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
                 embed_text=embed_text
             )
             
-            # Start conversion for this file
             self.converter.run()
-            
-            # Wait for it to finish
             finished_event.wait()
 
         # Batch finished
@@ -1096,7 +1132,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self.is_full = (SCRIPT_DIR / "bin" / "ffmpeg.exe").exists()
             
         self.version_type = " (Full)" if self.is_full else " (Light)"
-        self.full_version = f"v0.6.0{self.version_type}"
+        self.full_version = f"v0.7.0{self.version_type}"
         
         self.title(f"AudioLivreur {self.full_version}")
         self.geometry("800x700") # Increased height for toggle
@@ -1122,7 +1158,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         # Show Splash
         self.withdraw()
         splash = SplashScreen(self)
-        self.after(3000, lambda: [splash.destroy(), self.deiconify()])
+        self.after(3000, lambda: [splash.destroy(), self.deiconify(), self.apply_glass_effect()])
         
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -1225,6 +1261,16 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         
         # Settings Window
         self.settings_window = None
+
+    def apply_glass_effect(self):
+        if pywinstyles and os.name == 'nt':
+            try:
+                # Apply Acrylic effect for Windows 11 look
+                pywinstyles.apply_style(self, "acrylic")
+                # Optional: make background slightly transparent to let acrylic shine through
+                self.attributes("-alpha", 0.95)
+            except Exception as e:
+                logging.error(f"Failed to apply glass effect: {e}")
 
     def toggle_dark_mode(self):
         if self.dark_mode_var.get():
