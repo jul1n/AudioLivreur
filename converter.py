@@ -10,16 +10,22 @@ from bs4 import BeautifulSoup
 
 class Converter:
     def __init__(self, epub_path, ffmpeg_path, voice, rate, volume, keep_mp3s=False, max_parallel=3, 
-                 progress_callback=None, log_callback=None, finished_callback=None, text_callback=None):
+                 progress_callback=None, log_callback=None, finished_callback=None, text_callback=None,
+                 keep_global_mp3=True, embed_text=True):
         self.epub_path = epub_path
         self.ffmpeg_path = ffmpeg_path
         self.voice = voice
         self.rate = rate
         self.volume = volume
         self.keep_mp3s = keep_mp3s
+        self.keep_global_mp3 = keep_global_mp3
+        self.embed_text = embed_text
         self.max_parallel = max_parallel
         self.cancel_requested = False
+        self.pause_event = asyncio.Event()
+        self.pause_event.set() # Start in non-paused state
         self.temp_dir = None
+        self.cover_path = None
         
         self.progress_callback = progress_callback
         self.log_callback = log_callback
@@ -100,7 +106,9 @@ class Converter:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         
+        import time
         try:
+            self.start_time = time.time()
             total_words_so_far = 0
             processing_queue = []
             
@@ -148,6 +156,9 @@ class Converter:
             async def process_item(item):
                 nonlocal completed_tasks, total_words_so_far
                 async with sem:
+                    # Wait if paused
+                    await self.pause_event.wait()
+                    
                     if self.cancel_requested: return None
                     
                     try:
@@ -155,17 +166,30 @@ class Converter:
                         # Pass title for progress updates
                         await self.generate_tts(item['text'], item['filepath'], total_words_so_far, total_words, item['title'])
                         
+                        duration = self.get_audio_duration(item['filepath'])
                         completed_tasks += 1
                         
                         # Update word count safely
                         total_words_so_far += item['word_count']
                         
+                        # Calculate time remaining
+                        elapsed = time.time() - self.start_time
+                        speed = total_words_so_far / elapsed if elapsed > 0 else 0
+                        remaining_words = total_words - total_words_so_far
+                        remaining_seconds = remaining_words / speed if speed > 0 else 0
+                        
+                        time_str = ""
+                        if remaining_seconds > 60:
+                            time_str = f" (~{int(remaining_seconds // 60)}m {int(remaining_seconds % 60)}s)"
+                        else:
+                            time_str = f" (~{int(remaining_seconds)}s)"
+
                         # Final progress update for this item
                         percent = int((total_words_so_far / total_words) * 100) if total_words > 0 else 0
-                        self.emit_progress(total_words_so_far, total_words, f"TTS: {item['title']} ({percent}%)")
+                        self.emit_progress(total_words_so_far, total_words, f"TTS: {item['title']} ({percent}%){time_str}")
                         self.emit_text(f"{total_words_so_far}/{total_words} mots")
                         
-                        return (item['title'], item['filepath'])
+                        return (item['title'], item['filepath'], duration)
                     except Exception as e:
                         self.emit_log(f"Error in {item['title']}: {e}")
                         raise e
@@ -174,7 +198,8 @@ class Converter:
             results = loop.run_until_complete(asyncio.gather(*tasks))
             
             # Filter out None results (cancelled) and sort by filename to ensure correct order
-            mp3_files = sorted([r for r in results if r], key=lambda x: x[1])
+            mp3_files_with_durations = sorted([r for r in results if r], key=lambda x: x[1])
+            mp3_files = [(r[0], r[1]) for r in mp3_files_with_durations]
 
             # 4. Merge
             if self.cancel_requested:
@@ -189,8 +214,26 @@ class Converter:
             base_name = os.path.splitext(os.path.basename(self.epub_path))[0]
             output_m4b = os.path.join(output_dir, f"{base_name}.m4b")
             
-            self.merge_audio(mp3_files, output_m4b)
+            # Generate metadata file for chapters
+            metadata_path = os.path.join(self.temp_dir, "metadata.txt")
+            self.generate_metadata_file(mp3_files_with_durations, metadata_path)
+            
+            self.merge_audio(mp3_files, output_m4b, metadata_path, chapters)
             self.emit_log(f"Created M4B: {output_m4b}")
+
+            # 4.5 Global MP3
+            if self.keep_global_mp3:
+                output_mp3 = os.path.join(output_dir, f"{base_name}.mp3")
+                self.merge_audio(mp3_files, output_mp3, metadata_path, chapters, is_mp3=True)
+                self.emit_log(f"Created global MP3: {output_mp3}")
+                
+            # 4.6 Transcript file
+            if self.embed_text:
+                transcript_path = os.path.join(output_dir, f"{base_name}_transcript.txt")
+                with open(transcript_path, 'w', encoding='utf-8') as f:
+                    for title, text in chapters:
+                        f.write(f"=== {title} ===\n\n{text}\n\n")
+                self.emit_log(f"Transcript saved to: {transcript_path}")
 
             # 5. Keep MP3s
             if self.keep_mp3s:
@@ -239,6 +282,13 @@ class Converter:
         book = epub.read_epub(epub_path)
         chapters = []
         
+        # Try to find cover image using metadata
+        cover_id = None
+        # EPUB 2 cover detection
+        cover_meta = book.get_metadata('OPF', 'cover')
+        if cover_meta:
+            cover_id = cover_meta[0][1].get('content')
+            
         # Iterate through items
         for item in book.get_items():
             if item.get_type() == ebooklib.ITEM_DOCUMENT:
@@ -254,6 +304,31 @@ class Converter:
                         title = soup.find('h2').get_text().strip()
                     
                     chapters.append((title, text))
+            
+            # Extract cover image
+            elif item.get_type() == ebooklib.ITEM_IMAGE:
+                name = item.get_name().lower()
+                is_cover = False
+                
+                # Check 1: ID matches cover metadata
+                if cover_id and item.id == cover_id:
+                    is_cover = True
+                # Check 2: Properties contains 'cover-image' (EPUB 3)
+                elif hasattr(item, 'properties') and 'cover-image' in item.properties:
+                    is_cover = True
+                # Check 3: Filename contains cover keywords
+                elif not self.cover_path and ('cover' in name or 'pochette' in name or 'front' in name):
+                    is_cover = True
+                
+                if is_cover and not self.cover_path:
+                    ext = os.path.splitext(name)[1]
+                    if ext in ['.jpg', '.jpeg', '.png']:
+                        # Create a temp file for the cover
+                        suffix = ext if ext else ".jpg"
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                            tmp.write(item.get_content())
+                            self.cover_path = tmp.name
+                        self.emit_log(f"[DEBUG] Found and extracted cover image: {name}")
                     
         return chapters
 
@@ -284,44 +359,110 @@ class Converter:
 
     def extract_mobi(self, mobi_path):
         self.emit_log("[DEBUG] Extracting MOBI/AZW3...")
-        # Requires 'calibre' or similar tool usually, but here we assume text extraction
-        # Since we don't have a direct library, we might need to rely on external tools or simple parsing
-        # For now, placeholder
-        raise Exception("MOBI/AZW3 extraction requires external tools not yet integrated.")
+        import mobi
+        import shutil
+        from bs4 import BeautifulSoup
+        
+        tempdir = None
+        try:
+            # Unpack the mobi file
+            tempdir, filepath = mobi.extract(mobi_path)
+            
+            # Read the extracted content (usually HTML)
+            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+            
+            # Use BeautifulSoup to get clean text
+            soup = BeautifulSoup(content, 'html.parser')
+            text = soup.get_text(separator='\n').strip()
+            
+            return [("Document", text)]
+            
+        except Exception as e:
+            self.emit_log(f"[ERROR] MOBI extraction failed: {e}")
+            raise Exception(f"Failed to extract MOBI: {e}")
+        finally:
+            # Clean up the temporary directory
+            if tempdir and os.path.exists(tempdir):
+                shutil.rmtree(tempdir, ignore_errors=True)
 
     async def generate_tts(self, text, filepath, start_word_count, total_words, title=""):
         import edge_tts
-        communicate = edge_tts.Communicate(text, self.voice, rate=f"{self.rate:+d}%", volume=f"{self.volume:+d}%")
         
-        # Estimate words in this chunk for progress calculation
-        # We'll use the WordBoundary events if available, otherwise we might not get updates
-        # But most Edge voices support it.
+        max_retries = 3
+        retry_delay = 2  # seconds
         
-        current_words = 0
-        
-        with open(filepath, "wb") as f:
-            async for chunk in communicate.stream():
-                if chunk["type"] == "audio":
-                    f.write(chunk["data"])
-                elif chunk["type"] == "WordBoundary":
-                    # Update progress
-                    current_words += 1
-                    # Update every 50 words to avoid spamming the GUI too much but keep it fluid
-                    if current_words % 50 == 0:
-                        total_current = start_word_count + current_words
-                        percent = int((total_current / total_words) * 100) if total_words > 0 else 0
-                        msg = f"{total_current}/{total_words} mots"
-                        self.emit_text(msg)
-                        
-                        # Emit progress for the bar
-                        self.emit_progress(total_current, total_words, f"TTS: {title} ({percent}%)")
-                        
-        # Final update for this chapter
-        return current_words
+        for attempt in range(max_retries):
+            try:
+                communicate = edge_tts.Communicate(text, self.voice, rate=f"{self.rate:+d}%", volume=f"{self.volume:+d}%")
+                current_words = 0
+                
+                with open(filepath, "wb") as f:
+                    async for chunk in communicate.stream():
+                        if chunk["type"] == "audio":
+                            f.write(chunk["data"])
+                        elif chunk["type"] == "WordBoundary":
+                            # Update progress
+                            current_words += 1
+                            # Update every 50 words to avoid spamming the GUI too much but keep it fluid
+                            if current_words % 50 == 0:
+                                total_current = start_word_count + current_words
+                                percent = int((total_current / total_words) * 100) if total_words > 0 else 0
+                                msg = f"{total_current}/{total_words} mots"
+                                self.emit_text(msg)
+                                
+                                # Emit progress for the bar
+                                self.emit_progress(total_current, total_words, f"TTS: {title} ({percent}%)")
+                
+                # If successful, return the word count
+                return current_words
+                
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    self.emit_log(f"[WARNING] Retry {attempt+1}/{max_retries} for {title} due to: {e}")
+                    await asyncio.sleep(retry_delay * (attempt + 1))
+                else:
+                    self.emit_log(f"[ERROR] Final failure for {title}: {e}")
+                    raise e
 
-    def merge_audio(self, mp3_files, output_path):
+    def get_audio_duration(self, filepath):
+        """Get duration of audio file using ffprobe."""
+        ffprobe_path = self.ffmpeg_path.replace('ffmpeg.exe', 'ffprobe.exe').replace('ffmpeg', 'ffprobe')
+        cmd = [
+            ffprobe_path,
+            "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1",
+            filepath
+        ]
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            return float(result.stdout.strip())
+        except Exception as e:
+            self.emit_log(f"[WARNING] Could not get duration for {filepath}: {e}")
+            return 0
+
+    def generate_metadata_file(self, mp3_files_with_durations, metadata_path):
+        """Generate FFmpeg metadata file with chapters."""
+        with open(metadata_path, 'w', encoding='utf-8') as f:
+            f.write(";FFMETADATA1\n")
+            current_time_ms = 0
+            for title, filepath, duration in mp3_files_with_durations:
+                duration_ms = int(duration * 1000)
+                if duration_ms <= 0: continue
+                
+                f.write("[CHAPTER]\n")
+                f.write("TIMEBASE=1/1000\n")
+                f.write(f"START={current_time_ms}\n")
+                f.write(f"END={current_time_ms + duration_ms}\n")
+                # Clean title for metadata
+                clean_title = title.replace('=', '\=').replace(';', '\;').replace('#', '\#').replace('\\', '\\\\')
+                f.write(f"title={clean_title}\n")
+                current_time_ms += duration_ms
+
+    def merge_audio(self, mp3_files, output_path, metadata_path=None, chapters=None, is_mp3=False):
         # Create file list for ffmpeg
-        list_path = os.path.join(self.temp_dir, "files.txt")
+        list_path = os.path.join(self.temp_dir, f"files_{'mp3' if is_mp3 else 'm4b'}.txt")
         with open(list_path, 'w', encoding='utf-8') as f:
             for _, filepath in mp3_files:
                 # Escape backslashes for FFmpeg
@@ -332,12 +473,65 @@ class Converter:
             self.ffmpeg_path,
             "-f", "concat",
             "-safe", "0",
-            "-i", list_path,
-            "-c:a", "aac",
-            "-b:a", "128k",
-            "-y",
-            output_path
+            "-i", list_path
         ]
+        
+        # Add metadata file if provided
+        if metadata_path and os.path.exists(metadata_path):
+            cmd.extend(["-i", metadata_path])
+            
+        # Add cover image if found
+        if self.cover_path and os.path.exists(self.cover_path):
+            cmd.extend(["-i", self.cover_path])
+            
+        if is_mp3:
+            cmd.extend([
+                "-c:a", "libmp3lame",
+                "-b:a", "128k",
+                "-id3v2_version", "3"
+            ])
+        else:
+            cmd.extend([
+                "-c:a", "aac",
+                "-b:a", "128k"
+            ])
+        
+        # Map streams carefully based on input count
+        audio_input = "0:a"
+        metadata_input_idx = -1
+        cover_input_idx = -1
+        
+        current_idx = 1
+        if metadata_path and os.path.exists(metadata_path):
+            metadata_input_idx = current_idx
+            current_idx += 1
+        if self.cover_path and os.path.exists(self.cover_path):
+            cover_input_idx = current_idx
+            current_idx += 1
+            
+        cmd.extend(["-map", audio_input])
+        
+        if cover_input_idx != -1:
+            cmd.extend([
+                "-map", f"{cover_input_idx}:v",
+                "-c:v", "copy",
+                "-disposition:v:0", "attached_pic"
+            ])
+            
+        if metadata_input_idx != -1:
+            cmd.extend(["-map_metadata", str(metadata_input_idx)])
+            
+        # Add Lyrics/Text if requested
+        if self.embed_text and chapters:
+            full_text = "\n\n".join([f"[{title}]\n{text}" for title, text in chapters])
+            # For MP3 we use 'comment' or 'lyrics', for M4B 'description' or 'lyrics'
+            if is_mp3:
+                cmd.extend(["-metadata", f"comment={full_text[:32000]}"]) # Limit size for safety
+            else:
+                cmd.extend(["-metadata", f"description={full_text[:32000]}"])
+                cmd.extend(["-metadata", f"synopsis={full_text[:32000]}"])
+            
+        cmd.extend(["-y", output_path])
         
         process = subprocess.Popen(
             cmd,
@@ -345,7 +539,7 @@ class Converter:
             stderr=subprocess.PIPE,
             universal_newlines=True,
             encoding='utf-8',
-            errors='replace' # Handle potential encoding errors in ffmpeg output
+            errors='replace'
         )
         
         # Capture output for debugging

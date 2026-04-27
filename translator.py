@@ -3,10 +3,14 @@ import shutil
 import tempfile
 import asyncio
 import time
+import shutil
 from deep_translator import GoogleTranslator
 import ebooklib
 from ebooklib import epub
 from bs4 import BeautifulSoup
+import fitz
+import docx
+import mobi
 
 class Translator:
     def __init__(self, file_path, target_lang, progress_callback=None, log_callback=None, finished_callback=None):
@@ -144,42 +148,36 @@ class Translator:
 
     def extract_data(self, file_path):
         ext = os.path.splitext(file_path)[1].lower()
+        self.emit_log(f"[DEBUG] Extracting data from {ext} file...")
+        
+        metadata = {
+            'title': os.path.splitext(os.path.basename(file_path))[0],
+            'creator': "AudioLivreur"
+        }
+        cover_data = None
+        chapters = []
+
         if ext == '.epub':
             book = epub.read_epub(file_path)
-            
-            # Extract Metadata
-            metadata = {
-                'title': book.get_metadata('DC', 'title')[0][0] if book.get_metadata('DC', 'title') else "Unknown Title",
-                'creator': book.get_metadata('DC', 'creator')[0][0] if book.get_metadata('DC', 'creator') else "Unknown Author",
-            }
+            metadata['title'] = book.get_metadata('DC', 'title')[0][0] if book.get_metadata('DC', 'title') else metadata['title']
+            metadata['creator'] = book.get_metadata('DC', 'creator')[0][0] if book.get_metadata('DC', 'creator') else metadata['creator']
             
             # Extract Cover
-            cover_data = None
-            # Try to find cover item
-            cover_item = None
-            # Method 1: Check metadata for cover
             try:
                 cover_id = book.get_metadata('OPF', 'cover')
                 if cover_id:
                     cover_item = book.get_item_with_id(cover_id[0][0])
+                    if cover_item:
+                        cover_data = {'name': cover_item.get_name(), 'content': cover_item.get_content(), 'media_type': cover_item.media_type}
             except: pass
             
-            # Method 2: Iterate items
-            if not cover_item:
+            if not cover_data:
                 for item in book.get_items():
                     if item.get_type() == ebooklib.ITEM_IMAGE and 'cover' in item.get_name().lower():
-                        cover_item = item
+                        cover_data = {'name': item.get_name(), 'content': item.get_content(), 'media_type': item.media_type}
                         break
-            
-            if cover_item:
-                cover_data = {
-                    'name': cover_item.get_name(),
-                    'content': cover_item.get_content(),
-                    'media_type': cover_item.media_type
-                }
 
             # Extract Chapters
-            chapters = []
             for item in book.get_items():
                 if item.get_type() == ebooklib.ITEM_DOCUMENT:
                     soup = BeautifulSoup(item.get_content(), 'html.parser')
@@ -189,14 +187,42 @@ class Translator:
                         h1 = soup.find('h1')
                         if h1: title = h1.get_text().strip()
                         chapters.append((title, text))
+        
+        elif ext == '.pdf':
+            doc = fitz.open(file_path)
+            text = "\n".join([page.get_text() for page in doc])
+            chapters = [("Document", text)]
             
-            return {
-                'chapters': chapters,
-                'metadata': metadata,
-                'cover': cover_data
-            }
+        elif ext == '.docx':
+            doc = docx.Document(file_path)
+            text = "\n".join([para.text for para in doc.paragraphs])
+            chapters = [("Document", text)]
+            
+        elif ext in ['.txt', '.md']:
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                text = f.read()
+            chapters = [("Document", text)]
+            
+        elif ext in ['.mobi', '.azw3']:
+            tempdir = None
+            try:
+                tempdir, filepath = mobi.extract(file_path)
+                with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                soup = BeautifulSoup(content, 'html.parser')
+                text = soup.get_text(separator='\n').strip()
+                chapters = [("Document", text)]
+            finally:
+                if tempdir and os.path.exists(tempdir):
+                    shutil.rmtree(tempdir, ignore_errors=True)
         else:
-            raise Exception("Only EPUB is supported for translation currently.")
+            raise Exception(f"Unsupported file format for translation: {ext}")
+            
+        return {
+            'chapters': chapters,
+            'metadata': metadata,
+            'cover': cover_data
+        }
 
     def save_epub(self, chapters, metadata, cover_data, lang):
         book = epub.EpubBook()

@@ -8,7 +8,7 @@ block_cipher = None
 # Collect dependencies for CustomTkinter and TkinterDnD2
 datas = []
 binaries = []
-hiddenimports = ['customtkinter', 'tkinterdnd2', 'PIL', 'edge_tts', 'ebooklib', 'bs4']
+hiddenimports = ['customtkinter', 'tkinterdnd2', 'PIL', 'edge_tts', 'ebooklib', 'bs4', 'deep_translator', 'mobi', 'fitz', 'docx', 'pypdf']
 
 # Collect CustomTkinter assets
 tmp_ret = collect_all('customtkinter')
@@ -22,8 +22,8 @@ datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('edge_tts')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
-# Add custom assets
-datas += [('assets', 'assets'), ('docs', 'docs')]
+# Add custom assets (including the bundled bin folder)
+datas += [('assets', 'assets'), ('docs', 'docs'), ('bin', 'bin')]
 
 # Determine Icon
 icon_file = None
@@ -31,10 +31,6 @@ if os.path.exists('assets/app_icon.png'):
     icon_file = 'assets/app_icon.png'
 elif os.path.exists('../images/icon.png'):
     icon_file = '../images/icon.png'
-
-# Mac specific adjustments
-if sys.platform == 'darwin':
-    pass
 
 a = Analysis(
     ['gui.py', 'converter.py'],
@@ -56,13 +52,17 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 exe = EXE(
     pyz,
     a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
     [],
-    exclude_binaries=True,
     name='AudioLivreur',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=False,
+    upx_exclude=[],
+    runtime_tmpdir=None,
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
@@ -72,23 +72,3 @@ exe = EXE(
     icon=icon_file,
     version='assets/version.txt' if os.path.exists('assets/version.txt') else None
 )
-
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
-    strip=False,
-    upx=False,
-    upx_exclude=[],
-    name='AudioLivreur',
-)
-
-if sys.platform == 'darwin':
-    app = BUNDLE(
-        coll,
-        name='AudioLivreur.app',
-        icon=icon_file,
-        bundle_identifier='com.julien.audiolivreur',
-        version='0.3.3'
-    )

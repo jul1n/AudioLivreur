@@ -13,71 +13,55 @@ Convertissez vos ebooks (EPUB, PDF, DOCX, etc.) en audiobooks M4B avec chapitres
 ## ✨ Fonctionnalités
 
 - 📚 **Multi-formats** : EPUB, PDF, DOCX, TXT, MD, MOBI, AZW3
-- 🎙️ **Synthèse vocale** : Plus de 400 voix Microsoft Edge TTS (gratuit)
-- 📖 **Chapitrage automatique** : Détection et marquage des chapitres
-- 🌍 **Interface bilingue** : Français et Anglais
-- 💾 **Export MP3** : Sauvegarde optionnelle des fichiers MP3 individuels
-- ⏱️ **Estimation du temps** : Affichage du temps de conversion estimé
-- 🎨 **Interface moderne** : Design épuré avec CustomTkinter
-- 🔄 **Glisser-déposer** : Interface intuitive
+- 🌍 **Support Global** : Plus de 75 langues supportées nativement
+- 🎙️ **Synthèse vocale** : Voix Neural & Multilingual de haute qualité
+- 📖 **Chapitrage & Pochette** : Extraction automatique et robuste
+- 📦 **Standalone** : FFmpeg intégré, aucune installation requise
+- ⏯️ **Pause / Reprise** : Gérez votre progression en temps réel
+- 🧺 **Traitement par lot** : Glissez plusieurs fichiers d'un coup
+- 💾 **Export Avancé** : MP3 Global, Chapitres séparés, Intégration des paroles (Lyrics) et Transcript texte
+- 🌍 **Interface Polyglotte** : Français, Anglais, Espagnol, Allemand, Italien, Portugais, Chinois, etc.
 
 ## 🚀 Installation Rapide
 
-### Prérequis
+### Version Exécutable (Recommandé)
+Téléchargez simplement `AudioLivreur.exe` et lancez-le. Tout est inclus (FFmpeg compris) !
 
-1. **Python 3.8+** (pour la version source)
-2. **FFmpeg** - [Télécharger ici](https://github.com/BtbN/FFmpeg-Builds/releases)
-
-### Installation
-
-```bash
-# Cloner le dépôt
-git clone https://github.com/votre-repo/CalibAudio.git
-cd CalibAudio/CalibAudioStandalone
-
-# Installer les dépendances
-pip install -r requirements.txt
-
-# Lancer l'application
-python gui.py
-```
-
-### Version Exécutable
-
-Téléchargez simplement `AudioLivreur.exe` et lancez-le. Aucune installation requise !
+### Version Source
+1. **Python 3.12+**
+2. **Installation des dépendances** : `pip install -r requirements.txt`
+3. **Lancement** : `python main.py`
 
 ## 📖 Utilisation
 
 1. **Lancez AudioLivreur**
-2. **Glissez-déposez** votre fichier ebook
-3. **Configurez** la voix et les paramètres (optionnel)
-4. **Cliquez** sur "Démarrer la Conversion"
-5. **Récupérez** votre audiobook M4B !
+2. **Glissez-déposez** un ou plusieurs ebooks
+3. **Choisissez** la langue et la voix (Femme/Homme) et écoutez un **aperçu**
+4. **Configurez** vos options d'export (MP3, Paroles, Transcript) dans les Paramètres ⚙️
+5. **Cliquez** sur "Créer le Livre Audio"
+6. **Récupérez** votre pack complet (M4B, MP3, Transcript) !
 
 Pour plus de détails, consultez le [Guide Utilisateur](GUIDE_UTILISATEUR.md).
 
-## 🔧 Configuration
-
-### FFmpeg
-
-AudioLivreur détecte automatiquement FFmpeg s'il est installé dans :
-- Le PATH système
-- `C:\ffmpeg\bin\`
-- `C:\Program Files\ffmpeg\bin\`
-
-Sinon, spécifiez le chemin manuellement dans les paramètres.
-
-### Voix Recommandées
-
-**Français :**
-- `fr-FR-VivienneMultilingualNeural` (Féminine)
-- `fr-FR-RemyMultilingualNeural` (Masculine)
-
-**Anglais :**
-- `en-US-AriaNeural` (Féminine)
-- `en-US-GuyNeural` (Masculine)
-
 ## 📝 Notes de Version
+
+### v0.5.0 (Nouveau)
+**L'AudioLivreur Polyglotte :**
+- 🌍 **75+ Langues** : Support complet de toutes les langues de Microsoft Edge TTS.
+- 🎛️ **Sélecteur de langue direct** : Changez la langue de la voix en un clic sans quitter l'onglet principal.
+- 💾 **Exports enrichis** : Option pour générer un fichier MP3 global fusionné avec pochette.
+- 📜 **Intégration du texte** : Inclusion automatique du texte des chapitres dans les métadonnées (Lyrics) et export d'un transcript `.txt`.
+- 🖼️ **Pochette robuste** : Amélioration de l'extraction des couvertures EPUB (compatibilité EPUB 2/3).
+- 🛠️ **Correctifs** : Correction du multiplexage FFmpeg pour une meilleure compatibilité avec les lecteurs audio.
+
+### v0.4.0
+**Nouveautés majeures :**
+- 🚀 **App Standalone** : FFmpeg et FFprobe sont maintenant intégrés dans l'exécutable.
+- 🖼️ **Métadonnées complètes** : Les fichiers M4B incluent désormais la **pochette** du livre et le **chapitrage** automatique.
+- ⏯️ **Pause & Reprise** : Possibilité de mettre en pause la conversion.
+- 🔊 **Aperçu Vocal** : Bouton pour écouter la voix avant de lancer le traitement.
+- 🧺 **Mode Batch** : Support du glisser-déposer de plusieurs fichiers simultanément.
+- ⏱️ **Estimation affinée** : Calcul en temps réel du temps restant.
 
 ### v0.3.1 (2025-11-29)
 

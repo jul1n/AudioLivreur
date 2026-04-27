@@ -29,7 +29,12 @@ else:
 # Helper function to detect FFmpeg installation
 def get_default_ffmpeg_path():
     """Detect FFmpeg installation on the system."""
-    # Try system PATH first
+    # 1. Try bundled bin folder first (for standalone app)
+    bundled_ffmpeg = SCRIPT_DIR / "bin" / "ffmpeg.exe"
+    if bundled_ffmpeg.exists():
+        return str(bundled_ffmpeg)
+
+    # 2. Try system PATH
     ffmpeg = shutil.which('ffmpeg')
     if ffmpeg:
         return ffmpeg
@@ -83,6 +88,104 @@ FONT_FAMILY = "Segoe UI"
 ctk.set_appearance_mode("Light")
 ctk.set_default_color_theme("blue") 
 
+# Full list of supported languages (from edge-tts)
+GLOBAL_LANG_NAMES = {
+    "af": "Afrikaans", "am": "Amharic", "ar": "Arabic", "az": "Azerbaijani", "bg": "Bulgarian", 
+    "bn": "Bengali", "bs": "Bosnian", "ca": "Catalan", "cs": "Czech", "cy": "Welsh", 
+    "da": "Danish", "de": "German", "el": "Greek", "en": "English", "es": "Spanish", 
+    "et": "Estonian", "fa": "Persian", "fi": "Finnish", "fil": "Filipino", "fr": "French", 
+    "ga": "Irish", "gl": "Galician", "gu": "Gujarati", "he": "Hebrew", "hi": "Hindi", 
+    "hr": "Croatian", "hu": "Hungarian", "id": "Indonesian", "is": "Icelandic", "it": "Italian", 
+    "iu": "Inuktitut", "ja": "Japanese", "jv": "Javanese", "ka": "Georgian", "kk": "Kazakh", 
+    "km": "Khmer", "kn": "Kannada", "ko": "Korean", "lo": "Lao", "lt": "Lithuanian", 
+    "lv": "Latvian", "mk": "Macedonian", "ml": "Malayalam", "mn": "Mongolian", "mr": "Marathi", 
+    "ms": "Malay", "mt": "Maltese", "my": "Burmese", "nb": "Norwegian", "ne": "Nepali", 
+    "nl": "Dutch", "pl": "Polish", "ps": "Pashto", "pt": "Portuguese", "ro": "Romanian", 
+    "ru": "Russian", "si": "Sinhala", "sk": "Slovak", "sl": "Slovenian", "so": "Somali", 
+    "sq": "Albanian", "sr": "Serbian", "su": "Sundanese", "sv": "Swedish", "sw": "Swahili", 
+    "ta": "Tamil", "te": "Telugu", "th": "Thai", "tr": "Turkish", "uk": "Ukrainian", 
+    "ur": "Urdu", "uz": "Uzbek", "vi": "Vietnamese", "zh": "Chinese", "zu": "Zulu"
+}
+
+# Best default voices mapping
+DEFAULT_VOICES = {
+    "af": {"Female": "af-ZA-AdriNeural", "Male": "af-ZA-WillemNeural"},
+    "am": {"Female": "am-ET-MekdesNeural", "Male": "am-ET-AmehaNeural"},
+    "ar": {"Female": "ar-SA-ZariyahNeural", "Male": "ar-SA-HamedNeural"},
+    "az": {"Female": "az-AZ-BanuNeural", "Male": "az-AZ-BabekNeural"},
+    "bg": {"Female": "bg-BG-KalinaNeural", "Male": "bg-BG-BorislavNeural"},
+    "bn": {"Female": "bn-IN-TanishaNeural", "Male": "bn-IN-BashkarNeural"},
+    "bs": {"Female": "bs-BA-VesnaNeural", "Male": "bs-BA-GoranNeural"},
+    "ca": {"Female": "ca-ES-JoanaNeural", "Male": "ca-ES-EnricNeural"},
+    "cs": {"Female": "cs-CZ-VlastaNeural", "Male": "cs-CZ-AntoninNeural"},
+    "cy": {"Female": "cy-GB-NiaNeural", "Male": "cy-GB-AledNeural"},
+    "da": {"Female": "da-DK-ChristelNeural", "Male": "da-DK-JeppeNeural"},
+    "de": {"Female": "de-DE-KatjaNeural", "Male": "de-DE-ConradNeural"},
+    "el": {"Female": "el-GR-AthinaNeural", "Male": "el-GR-NestorasNeural"},
+    "en": {"Female": "en-US-AvaNeural", "Male": "en-US-AndrewNeural"},
+    "es": {"Female": "es-ES-ElviraNeural", "Male": "es-ES-AlvaroNeural"},
+    "et": {"Female": "et-EE-AnuNeural", "Male": "et-EE-KertNeural"},
+    "fa": {"Female": "fa-IR-DilaraNeural", "Male": "fa-IR-FaridNeural"},
+    "fi": {"Female": "fi-FI-NooraNeural", "Male": "fi-FI-HarriNeural"},
+    "fil": {"Female": "fil-PH-BlessicaNeural", "Male": "fil-PH-AngeloNeural"},
+    "fr": {"Female": "fr-FR-VivienneMultilingualNeural", "Male": "fr-FR-RemyMultilingualNeural"},
+    "ga": {"Female": "ga-IE-OrlaNeural", "Male": "ga-IE-ColmNeural"},
+    "gl": {"Female": "gl-ES-SabelaNeural", "Male": "gl-ES-RoiNeural"},
+    "gu": {"Female": "gu-IN-DhwaniNeural", "Male": "gu-IN-NiranjanNeural"},
+    "he": {"Female": "he-IL-HilaNeural", "Male": "he-IL-AvriNeural"},
+    "hi": {"Female": "hi-IN-SwaraNeural", "Male": "hi-IN-MadhurNeural"},
+    "hr": {"Female": "hr-HR-GabrijelaNeural", "Male": "hr-HR-SreckoNeural"},
+    "hu": {"Female": "hu-HU-NoemiNeural", "Male": "hu-HU-TamasNeural"},
+    "id": {"Female": "id-ID-GadisNeural", "Male": "id-ID-ArdiNeural"},
+    "is": {"Female": "is-IS-GudrunNeural", "Male": "is-IS-GunnarNeural"},
+    "it": {"Female": "it-IT-ElsaNeural", "Male": "it-IT-DiegoNeural"},
+    "iu": {"Female": "iu-Cans-CA-SiqiniqNeural", "Male": "iu-Cans-CA-TaqqiqNeural"},
+    "ja": {"Female": "ja-JP-NanamiNeural", "Male": "ja-JP-KeitaNeural"},
+    "jv": {"Female": "jv-ID-SitiNeural", "Male": "jv-ID-DimasNeural"},
+    "ka": {"Female": "ka-GE-EkaNeural", "Male": "ka-GE-GiorgiNeural"},
+    "kk": {"Female": "kk-KZ-AigulNeural", "Male": "kk-KZ-DauletNeural"},
+    "km": {"Female": "km-KH-SreymomNeural", "Male": "km-KH-PisethNeural"},
+    "kn": {"Female": "kn-IN-SapnaNeural", "Male": "kn-IN-GaganNeural"},
+    "ko": {"Female": "ko-KR-SunHiNeural", "Male": "ko-KR-InJoonNeural"},
+    "lo": {"Female": "lo-LA-KeomanyNeural", "Male": "lo-LA-ChanthavongNeural"},
+    "lt": {"Female": "lt-LT-OnaNeural", "Male": "lt-LT-LeonasNeural"},
+    "lv": {"Female": "lv-LV-EvitaNeural", "Male": "lv-LV-NilsNeural"},
+    "mk": {"Female": "mk-MK-MarijaNeural", "Male": "mk-MK-AleksandarNeural"},
+    "ml": {"Female": "ml-IN-SobhanaNeural", "Male": "ml-IN-MidhunNeural"},
+    "mn": {"Female": "mn-MN-YesuiNeural", "Male": "mn-MN-BataarNeural"},
+    "mr": {"Female": "mr-IN-AarohiNeural", "Male": "mr-IN-ManoharNeural"},
+    "ms": {"Female": "ms-MY-YasminNeural", "Male": "ms-MY-OsmanNeural"},
+    "mt": {"Female": "mt-MT-GraceNeural", "Male": "mt-MT-JosephNeural"},
+    "my": {"Female": "my-MM-NilarNeural", "Male": "my-MM-ThihaNeural"},
+    "nb": {"Female": "nb-NO-PernilleNeural", "Male": "nb-NO-FinnNeural"},
+    "ne": {"Female": "ne-NP-HemkalaNeural", "Male": "ne-NP-SagarNeural"},
+    "nl": {"Female": "nl-NL-FennaNeural", "Male": "nl-NL-MaartenNeural"},
+    "pl": {"Female": "pl-PL-ZofiaNeural", "Male": "pl-PL-MarekNeural"},
+    "ps": {"Female": "ps-AF-LatifaNeural", "Male": "ps-AF-GulKhanNeural"},
+    "pt": {"Female": "pt-BR-FranciscaNeural", "Male": "pt-BR-AntonioNeural"},
+    "ro": {"Female": "ro-RO-AlinaNeural", "Male": "ro-RO-EmilNeural"},
+    "ru": {"Female": "ru-RU-SvetlanaNeural", "Male": "ru-RU-DmitryNeural"},
+    "si": {"Female": "si-LK-ThiliniNeural", "Male": "si-LK-SameeraNeural"},
+    "sk": {"Female": "sk-SK-ViktoriaNeural", "Male": "sk-SK-LukasNeural"},
+    "sl": {"Female": "sl-SI-PetraNeural", "Male": "sl-SI-RadoNeural"},
+    "so": {"Female": "so-SO-UbaxNeural", "Male": "so-SO-MuuseNeural"},
+    "sq": {"Female": "sq-AL-AnilaNeural", "Male": "sq-AL-IlirNeural"},
+    "sr": {"Female": "sr-RS-SophieNeural", "Male": "sr-RS-NicholasNeural"},
+    "su": {"Female": "su-ID-TutiNeural", "Male": "su-ID-JajangNeural"},
+    "sv": {"Female": "sv-SE-SofieNeural", "Male": "sv-SE-MattiasNeural"},
+    "sw": {"Female": "sw-KE-ZuriNeural", "Male": "sw-KE-RafikiNeural"},
+    "ta": {"Female": "ta-IN-PallaviNeural", "Male": "ta-IN-ValluvarNeural"},
+    "te": {"Female": "te-IN-ShrutiNeural", "Male": "te-IN-MohanNeural"},
+    "th": {"Female": "th-TH-PremwadeeNeural", "Male": "th-TH-NiwatNeural"},
+    "tr": {"Female": "tr-TR-EmelNeural", "Male": "tr-TR-AhmetNeural"},
+    "uk": {"Female": "uk-UA-PolinaNeural", "Male": "uk-UA-OstapNeural"},
+    "ur": {"Female": "ur-IN-GulNeural", "Male": "ur-IN-SalmanNeural"},
+    "uz": {"Female": "uz-UZ-MadinaNeural", "Male": "uz-UZ-SardorNeural"},
+    "vi": {"Female": "vi-VN-HoaiMyNeural", "Male": "vi-VN-NamMinhNeural"},
+    "zh": {"Female": "zh-CN-XiaoxiaoNeural", "Male": "zh-CN-YunxiNeural"},
+    "zu": {"Female": "zu-ZA-ThandoNeural", "Male": "zu-ZA-ThembaNeural"}
+}
+
 # Localization
 LANGUAGES = {
     "en": {
@@ -95,8 +198,10 @@ LANGUAGES = {
         "export_title": "Save Merged Audio As", "analyzing": "Analyzing...", 
         "file_info": "Chapters: {} | Words: {}", "parallel": "Parallel:", "download_ffmpeg": "⬇️ Download FFmpeg", 
         "loading_voices": "Loading voices...", "no_voices": "No voices found",
-        "tab_trans": "Translation", "tab_conv": "Conversion", "target_lang": "Target Language:", 
+        "tab_trans": "Translation", "tab_conv": "Audiobook Creation", "target_lang": "Target Language:", 
         "translate": "Translate", "init": "Initializing...",
+        "gender": "Voice:", "female": "Woman", "male": "Man",
+        "keep_global_mp3": "Export one global MP3 file", "embed_text": "Embed text (lyrics) in audio",
         "lang_names": {
             "en": "English", "fr": "French", "es": "Spanish", "de": "German", "it": "Italian", 
             "pt": "Portuguese", "zh": "Chinese", "ja": "Japanese", "ru": "Russian", "ar": "Arabic", "hi": "Hindi"
@@ -105,15 +210,17 @@ LANGUAGES = {
     "fr": {
         "name": "Français", "title": "AudioLivreur", "by": "par Julien", 
         "drop_text": "Glissez-déposez un fichier ici\n(EPUB, PDF, DOCX, MOBI...)", 
-        "ready": "Prêt", "converting": "Conversion en cours...", "success": "Terminé !", "error": "Erreur", 
-        "start": "Démarrer la Conversion", "cancel": "Annuler", "close": "Quitter", "settings": "Paramètres", 
+        "ready": "Prêt", "converting": "Création en cours...", "success": "Terminé !", "error": "Erreur", 
+        "start": "Créer le Livre Audio", "cancel": "Annuler", "close": "Quitter", "settings": "Paramètres", 
         "voice": "Voix :", "rate": "Vitesse :", "volume": "Volume :", "ffmpeg": "Chemin FFmpeg :", 
         "keep_mp3": "Sauvegarder auto. les MP3", "open_folder": "Ouvrir Dossier", "export_merged": "Exporter Fusionné", 
         "export_title": "Enregistrer l'audio fusionné sous", "analyzing": "Analyse...", 
         "file_info": "Chapitres : {} | Mots : {}", "parallel": "Parallèle :", "download_ffmpeg": "⬇️ Télécharger FFmpeg", 
         "loading_voices": "Chargement des voix...", "no_voices": "Aucune voix trouvée",
-        "tab_trans": "Traduction", "tab_conv": "Conversion", "target_lang": "Langue cible :", 
+        "tab_trans": "Traduction", "tab_conv": "Création Audio", "target_lang": "Langue cible :", 
         "translate": "Traduire", "init": "Initialisation...",
+        "gender": "Voix :", "female": "Femme", "male": "Homme", "preview": "▶️ Aperçu", "pause": "Pause", "resume": "Reprendre",
+        "keep_global_mp3": "Exporter un seul MP3 global", "embed_text": "Intégrer le texte (paroles) dans l'audio",
         "lang_names": {
             "en": "Anglais", "fr": "Français", "es": "Espagnol", "de": "Allemand", "it": "Italien", 
             "pt": "Portugais", "zh": "Chinois", "ja": "Japonais", "ru": "Russe", "ar": "Arabe", "hi": "Hindi"
@@ -131,6 +238,7 @@ LANGUAGES = {
         "loading_voices": "Cargando voces...", "no_voices": "No se encontraron voces",
         "tab_trans": "Traducción", "tab_conv": "Conversión", "target_lang": "Idioma de destino:", 
         "translate": "Traducir", "init": "Inicializando...",
+        "keep_global_mp3": "Exportar un solo archivo MP3 global", "embed_text": "Incrustar texto (letra) en el audio",
         "lang_names": {
             "en": "Inglés", "fr": "Francés", "es": "Español", "de": "Alemán", "it": "Italiano", 
             "pt": "Portugués", "zh": "Chino", "ja": "Japonés", "ru": "Ruso", "ar": "Árabe", "hi": "Hindi"
@@ -148,6 +256,7 @@ LANGUAGES = {
         "loading_voices": "Stimmen laden...", "no_voices": "Keine Stimmen gefunden",
         "tab_trans": "Übersetzung", "tab_conv": "Konvertierung", "target_lang": "Zielsprache:", 
         "translate": "Übersetzen", "init": "Initialisierung...",
+        "keep_global_mp3": "Eine globale MP3-Datei exportieren", "embed_text": "Text (Lyrics) in Audio einbetten",
         "lang_names": {
             "en": "Englisch", "fr": "Französisch", "es": "Spanisch", "de": "Deutsch", "it": "Italienisch", 
             "pt": "Portugiesisch", "zh": "Chinesisch", "ja": "Japanisch", "ru": "Russisch", "ar": "Arabisch", "hi": "Hindi"
@@ -165,6 +274,7 @@ LANGUAGES = {
         "loading_voices": "Caricamento voci...", "no_voices": "Nessuna voce trovata",
         "tab_trans": "Traduzione", "tab_conv": "Conversione", "target_lang": "Lingua di destinazione:", 
         "translate": "Traduci", "init": "Inizializzazione...",
+        "keep_global_mp3": "Esporta un unico file MP3 globale", "embed_text": "Incorpora testo (testi) nell'audio",
         "lang_names": {
             "en": "Inglese", "fr": "Francese", "es": "Spagnolo", "de": "Tedesco", "it": "Italiano", 
             "pt": "Portoghese", "zh": "Cinese", "ja": "Giapponese", "ru": "Russo", "ar": "Arabo", "hi": "Hindi"
@@ -182,6 +292,7 @@ LANGUAGES = {
         "loading_voices": "Carregando vozes...", "no_voices": "Nenhuma voz encontrada",
         "tab_trans": "Tradução", "tab_conv": "Conversão", "target_lang": "Idioma de destino:", 
         "translate": "Traduzir", "init": "Inicializando...",
+        "keep_global_mp3": "Exportar um arquivo MP3 global único", "embed_text": "Incorporar texto (letras) no áudio",
         "lang_names": {
             "en": "Inglês", "fr": "Francês", "es": "Espanhol", "de": "Alemão", "it": "Italiano", 
             "pt": "Português", "zh": "Chinês", "ja": "Japonês", "ru": "Russo", "ar": "Árabe", "hi": "Hindi"
@@ -349,6 +460,10 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.app = app
         self.TkdndVersion = TkinterDnD._require(self)
         
+        self.epub_paths = []
+        self.converter = None
+        self.is_converting = False
+        
         self.epub_path = None
         self.converter = None
         self.is_converting = False
@@ -390,11 +505,53 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.scrolling_text = ScrollingText(self.progress_frame, text="", height=30, text_color="gray40", font=ctk.CTkFont(family=FONT_FAMILY, size=10))
         self.scrolling_text.grid(row=2, column=0, sticky="ew", pady=(5, 0))
 
+        # Gender Selection
+        self.gender_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.gender_frame.grid(row=2, column=0, padx=40, pady=(10, 20), sticky="ew")
+        
+        self.gender_label = ctk.CTkLabel(self.gender_frame, text=self.app.t["gender"], font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold"))
+        self.gender_label.pack(side="left", padx=(0, 10))
+        
+        # Voice Language selection
+        self.voice_lang_var = ctk.StringVar(value=self.app.lang)
+        self.display_to_lang = {v: k for k, v in GLOBAL_LANG_NAMES.items()}
+        self.lang_options = sorted(GLOBAL_LANG_NAMES.values())
+        
+        self.voice_lang_menu = ctk.CTkOptionMenu(
+            self.gender_frame, 
+            values=self.lang_options,
+            command=self.on_voice_lang_change,
+            width=140,
+            height=28,
+            fg_color="white",
+            button_color=PINK_COLOR,
+            button_hover_color="#c20068",
+            text_color="black",
+            font=ctk.CTkFont(family=FONT_FAMILY, size=11)
+        )
+        current_lang_name = GLOBAL_LANG_NAMES.get(self.app.lang, "French")
+        self.voice_lang_menu.set(current_lang_name)
+        self.voice_lang_menu.pack(side="left", padx=(0, 10))
+        
+        self.gender_var = ctk.StringVar(value="female")
+        self.female_radio = ctk.CTkRadioButton(self.gender_frame, text=self.app.t["female"], variable=self.gender_var, value="female", command=self.on_gender_change, fg_color=PINK_COLOR, hover_color="#c20068")
+        self.female_radio.pack(side="left", padx=5)
+        
+        self.male_radio = ctk.CTkRadioButton(self.gender_frame, text=self.app.t["male"], variable=self.gender_var, value="male", command=self.on_gender_change, fg_color=PINK_COLOR, hover_color="#c20068")
+        self.male_radio.pack(side="left", padx=5)
+        
+        self.preview_btn = ctk.CTkButton(self.gender_frame, text=self.app.t["preview"], width=70, height=28, fg_color="gray90", hover_color="gray80", text_color="black", command=self.preview_voice)
+        self.preview_btn.pack(side="left", padx=(15, 0))
+
         # Action Buttons
         self.action_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.action_frame.grid(row=2, column=0, padx=40, pady=(0, 30), sticky="ew")
+        self.action_frame.grid(row=3, column=0, padx=40, pady=(0, 30), sticky="ew")
         
         self.start_btn = AnimatedButton(self.action_frame, text=self.app.t["start"], height=45, font=ctk.CTkFont(family=FONT_FAMILY, size=16, weight="bold"), fg_color=PINK_COLOR, hover_color="#c20068", text_color="white", command=self.start_conversion, state="disabled")
+        self.start_btn.pack(side="right", padx=10, fill="x", expand=True)
+
+        self.pause_btn = AnimatedButton(self.action_frame, text=self.app.t["pause"], height=45, fg_color="gray90", hover_color="gray80", text_color="black", command=self.toggle_pause)
+        # self.pause_btn.pack(side="right", padx=10) # Hidden by default
         
         self.cancel_btn = AnimatedButton(self.action_frame, text=self.app.t["close"], height=45, fg_color="transparent", border_width=2, border_color="gray50", text_color="gray50", command=self.app.close_app)
         self.cancel_btn.pack(side="right", padx=(20, 0))
@@ -411,34 +568,46 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
              self.cancel_btn.configure(text=self.app.t["close"])
         self.open_folder_btn.configure(text=self.app.t["open_folder"])
         self.export_merged_btn.configure(text=self.app.t["export_merged"])
+        self.gender_label.configure(text=self.app.t["gender"])
+        self.female_radio.configure(text=self.app.t["female"])
+        self.male_radio.configure(text=self.app.t["male"])
+        self.preview_btn.configure(text=self.app.t["preview"])
         if not self.is_converting and not self.epub_path:
             self.status_label.configure(text=self.app.t["ready"])
 
     def drop_file(self, event):
-        path = event.data
-        if path.startswith('{') and path.endswith('}'):
-            path = path[1:-1]
-        self.load_file(path)
+        data = event.data
+        import re
+        # Properly parse multiple paths (e.g. {path 1} path2 {path 3})
+        paths = re.findall(r'\{.*?\}|\S+', data)
+        paths = [p[1:-1] if p.startswith('{') else p for p in paths]
+        self.load_file(paths)
 
     def browse_file(self, event=None):
-        file_path = filedialog.askopenfilename(filetypes=[("Ebook Files", "*.epub *.pdf *.docx *.txt *.mobi *.azw3")])
-        if file_path:
-            self.load_file(file_path)
+        file_paths = filedialog.askopenfilenames(filetypes=[("Ebook Files", "*.epub *.pdf *.docx *.txt *.mobi *.azw3")])
+        if file_paths:
+            self.load_file(list(file_paths))
 
-    def load_file(self, path):
-        self.epub_path = path
+    def load_file(self, paths):
+        self.epub_paths = paths
         self.file_info_label.configure(text=self.app.t["analyzing"])
         self.status_label.configure(text=self.app.t["ready"])
         self.start_btn.pack_forget()
         self.open_folder_btn.pack_forget()
         self.export_merged_btn.pack_forget()
         
-        threading.Thread(target=self.analyze_file, daemon=True).start()
+        if len(paths) == 1:
+            threading.Thread(target=self.analyze_file, daemon=True).start()
+        else:
+            # For multiple files, just show count
+            self.file_info_label.configure(text=f"{len(paths)} fichiers sélectionnés")
+            self.start_btn.pack(side="right", padx=10, fill="x", expand=True)
+            self.start_btn.configure(state="normal")
 
     def analyze_file(self):
         try:
             # Temporary converter just for scanning
-            temp_converter = Converter(self.epub_path, "", "", 0, 0)
+            temp_converter = Converter(self.epub_paths[0], "", "", 0, 0)
             num_chapters, word_count = temp_converter.scan_file()
             
             def _update():
@@ -452,30 +621,67 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
             self.after(0, lambda: self.file_info_label.configure(text=self.app.t["error"]))
 
     def start_conversion(self):
-        if not self.epub_path: return
+        if not self.epub_paths: return
         
         self.is_converting = True
         self.start_btn.configure(state="disabled", fg_color="white", text_color=PINK_COLOR, border_width=2, border_color=PINK_COLOR)
         self.cancel_btn.configure(text=self.app.t["cancel"])
+        self.pause_btn.pack(side="right", padx=10)
         self.status_label.configure(text=self.app.t["converting"])
         self.histogram.set_progress(0)
         
+        threading.Thread(target=self.run_batch_conversion, daemon=True).start()
+
+    def run_batch_conversion(self):
         voice = self.app.voice_var.get()
         rate = self.app.rate_var.get()
         volume = self.app.volume_var.get()
         ffmpeg_path = self.app.ffmpeg_path_var.get()
         keep_mp3s = self.app.keep_mp3s_var.get()
+        keep_global_mp3 = self.app.keep_global_mp3_var.get()
+        embed_text = self.app.embed_text_var.get()
         max_parallel = self.app.parallel_var.get()
         
-        self.converter = Converter(
-            self.epub_path, ffmpeg_path, voice, rate, volume, keep_mp3s, max_parallel,
-            progress_callback=self.update_progress,
-            log_callback=self.log_message,
-            finished_callback=self.conversion_finished,
-            text_callback=self.update_scrolling_text
-        )
+        error_msgs = []
         
-        threading.Thread(target=self.converter.run, daemon=True).start()
+        for i, path in enumerate(self.epub_paths):
+            if self.converter and self.converter.cancel_requested:
+                break
+                
+            self.after(0, lambda p=path, idx=i: self.status_label.configure(text=f"[{idx+1}/{len(self.epub_paths)}] {os.path.basename(p)}"))
+            
+            # Need a way to wait for each conversion to finish before starting next
+            # We use a threading Event
+            finished_event = threading.Event()
+            
+            def on_finished(success, msg):
+                finished_event.set()
+                if not success:
+                    error_msgs.append(f"{os.path.basename(path)} : {msg}")
+                    print(f"Error converting {path}: {msg}")
+
+            self.converter = Converter(
+                path, ffmpeg_path, voice, rate, volume, keep_mp3s, max_parallel,
+                progress_callback=self.update_progress,
+                log_callback=self.log_message,
+                finished_callback=on_finished,
+                text_callback=self.update_scrolling_text,
+                keep_global_mp3=keep_global_mp3,
+                embed_text=embed_text
+            )
+            
+            # Start conversion for this file
+            self.converter.run()
+            
+            # Wait for it to finish
+            finished_event.wait()
+
+        # Batch finished
+        if error_msgs:
+            error_text = "\n".join(error_msgs)
+            self.after(0, lambda: self.conversion_finished(False, f"Des erreurs sont survenues :\n{error_text}"))
+        else:
+            self.after(0, lambda: self.conversion_finished(True, "Toutes les conversions sont terminées !"))
 
     def update_progress(self, current, total, msg):
         progress = current / total if total > 0 else 0
@@ -490,12 +696,73 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
     def update_scrolling_text(self, text):
         self.after(0, lambda: self.scrolling_text.set_text(text))
 
+    def on_voice_lang_change(self, choice):
+        lang_code = self.display_to_lang.get(choice, "fr")
+        self.voice_lang_var.set(lang_code)
+        self.on_gender_change()
+
+    def on_gender_change(self):
+        gender = self.gender_var.get()
+        lang_code = self.voice_lang_var.get()
+        
+        gender_key = "Female" if gender == "female" else "Male"
+        voice_data = DEFAULT_VOICES.get(lang_code, DEFAULT_VOICES.get("en"))
+        voice = voice_data.get(gender_key, list(voice_data.values())[0])
+        
+        self.app.voice_var.set(voice)
+        logging.info(f"Voice language changed to {lang_code}, gender {gender} -> voice {voice}")
+
+    def preview_voice(self):
+        voice = self.app.voice_var.get()
+        rate = self.app.rate_var.get()
+        volume = self.app.volume_var.get()
+        text = "Bonjour, je suis votre voix pour ce livre audio. J'espère qu'elle vous plaira."
+        if "en-" in voice:
+            text = "Hello, I am your voice for this audiobook. I hope you like it."
+            
+        threading.Thread(target=self._run_preview, args=(text, voice, rate, volume), daemon=True).start()
+
+    def _run_preview(self, text, voice, rate, volume):
+        try:
+            import edge_tts
+            import tempfile
+            import subprocess
+            
+            temp_mp3 = os.path.join(tempfile.gettempdir(), "preview.mp3")
+            communicate = edge_tts.Communicate(text, voice, rate=f"{rate:+d}%", volume=f"{volume:+d}%")
+            asyncio.run(communicate.save(temp_mp3))
+            
+            # Use bundled ffplay (next to ffmpeg)
+            ffmpeg_path = self.app.ffmpeg_path_var.get()
+            ffplay_path = ffmpeg_path.replace('ffmpeg.exe', 'ffplay.exe')
+            
+            if os.path.exists(ffplay_path):
+                subprocess.run([ffplay_path, "-nodisp", "-autoexit", temp_mp3], capture_output=True)
+            else:
+                # Fallback to system startfile
+                os.startfile(temp_mp3)
+        except Exception as e:
+            print(f"Preview failed: {e}")
+
+    def toggle_pause(self):
+        if not self.converter: return
+        
+        if self.converter.pause_event.is_set():
+            self.converter.pause_event.clear()
+            self.pause_btn.configure(text=self.app.t["resume"])
+            self.status_label.configure(text="PAUSE")
+        else:
+            self.converter.pause_event.set()
+            self.pause_btn.configure(text=self.app.t["pause"])
+            self.status_label.configure(text=self.app.t["converting"])
+
     def conversion_finished(self, success, msg):
         self.is_converting = False
         def _update():
             self.start_btn.configure(state="normal", fg_color=PINK_COLOR, text_color="white", border_width=0)
-            self.start_btn.pack_forget() # Hide start button
+            self.start_btn.pack(side="right", padx=10, fill="x", expand=True)
             self.cancel_btn.configure(text=self.app.t["close"])
+            self.pause_btn.pack_forget()
             
             if success:
                 self.status_label.configure(text=self.app.t["success"], text_color=PINK_COLOR)
@@ -624,18 +891,21 @@ class TranslationFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.display_to_code = {}
         display_values = []
         
-        # Sort by code to keep stable order or sort by name? Code is fine.
-        codes = sorted(LANGUAGES.keys())
+        # Use GLOBAL_LANG_NAMES to populate the list
+        codes = sorted(GLOBAL_LANG_NAMES.keys())
         
         for code in codes:
-            # Format: "Local Name - English Name - Interface Name"
-            # Example: "Français - French - Francés"
+            # Format: "Local Name - English Name"
+            english_name = GLOBAL_LANG_NAMES[code]
             
-            local_name = LANGUAGES[code]["name"]
-            english_name = LANGUAGES["en"]["lang_names"].get(code, code)
-            interface_name = LANGUAGES[self.app.lang]["lang_names"].get(code, code)
+            # If we have a translation for this language code, use it
+            if code in LANGUAGES:
+                 local_name = LANGUAGES[code]["name"]
+            else:
+                 local_name = english_name
             
-            # Avoid redundancy if names are identical
+            interface_name = LANGUAGES[self.app.lang]["lang_names"].get(code, english_name)
+            
             parts = [local_name]
             if english_name != local_name:
                 parts.append(english_name)
@@ -667,7 +937,7 @@ class TranslationFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.load_file(path)
 
     def browse_file(self, event=None):
-        file_path = filedialog.askopenfilename(filetypes=[("EPUB Files", "*.epub")])
+        file_path = filedialog.askopenfilename(filetypes=[("All Supported Files", "*.epub *.pdf *.docx *.txt *.mobi *.azw3"), ("EPUB Files", "*.epub"), ("PDF Files", "*.pdf"), ("DOCX Files", "*.docx"), ("MOBI Files", "*.mobi *.azw3")])
         if file_path:
             self.load_file(file_path)
 
@@ -795,7 +1065,9 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.rate_var = tk.IntVar(value=0)
         self.volume_var = tk.IntVar(value=0)
         self.parallel_var = tk.IntVar(value=3)
-        self.keep_mp3s_var = tk.BooleanVar(value=False)
+        self.keep_mp3s_var = tk.BooleanVar(value=True)
+        self.keep_global_mp3_var = tk.BooleanVar(value=True)
+        self.embed_text_var = tk.BooleanVar(value=True)
         self.ffmpeg_path_var = tk.StringVar(value=get_default_ffmpeg_path())
         
         self.available_voices = []
@@ -845,6 +1117,19 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         
         self.settings_btn = AnimatedButton(self.header_frame, text=self.t["settings"], width=80, height=24, fg_color="gray90", hover_color="gray80", text_color="black", command=self.toggle_settings)
         self.settings_btn.pack(side="right")
+        
+        self.dark_mode_var = ctk.BooleanVar(value=False)
+        self.dark_mode_btn = ctk.CTkButton(
+            self.header_frame, 
+            text="🌙" if not self.dark_mode_var.get() else "☀️", 
+            width=30, 
+            height=24, 
+            fg_color="gray90", 
+            hover_color="gray80", 
+            text_color="black", 
+            command=self.toggle_dark_mode
+        )
+        self.dark_mode_btn.pack(side="right", padx=(0, 10))
 
         # 2. Toggle Switch (Translation / Conversion)
         self.toggle_frame = ctk.CTkFrame(self.main_container, fg_color="gray90", corner_radius=10, height=40)
@@ -873,6 +1158,19 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         
         # Settings Window
         self.settings_window = None
+
+    def toggle_dark_mode(self):
+        if self.dark_mode_var.get():
+            ctk.set_appearance_mode("Light")
+            self.dark_mode_var.set(False)
+            self.dark_mode_btn.configure(text="🌙")
+            self.configure(fg_color=LIGHT_BG)
+        else:
+            ctk.set_appearance_mode("Dark")
+            self.dark_mode_var.set(True)
+            self.dark_mode_btn.configure(text="☀️")
+            # In dark mode, we might want a darker background
+            self.configure(fg_color="#1a1a1a")
 
     def show_translation(self):
         self.conversion_frame.pack_forget()
@@ -1022,8 +1320,10 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             ffmpeg_link.pack(anchor="w", pady=(0, 20))
             ffmpeg_link.bind("<Button-1>", lambda e: self.open_ffmpeg_download())
             
-            # Keep MP3 Checkbox
-            tk.Checkbutton(layout, text=self.t["keep_mp3"], variable=self.keep_mp3s_var, bg="white", fg=TEXT_COLOR, selectcolor="white").pack(anchor="w", pady=(0, 20))
+            # MP3 Settings
+            tk.Checkbutton(layout, text=self.t["keep_mp3"], variable=self.app.keep_mp3s_var, bg="white", fg=TEXT_COLOR, selectcolor="white").pack(anchor="w", pady=5)
+            tk.Checkbutton(layout, text=self.t["keep_global_mp3"], variable=self.app.keep_global_mp3_var, bg="white", fg=TEXT_COLOR, selectcolor="white").pack(anchor="w", pady=5)
+            tk.Checkbutton(layout, text=self.t["embed_text"], variable=self.app.embed_text_var, bg="white", fg=TEXT_COLOR, selectcolor="white").pack(anchor="w", pady=(0, 20))
             
             # Close Button
             tk.Button(layout, text=self.t["close"], bg=PINK_COLOR, fg="white", height=2, command=self.close_settings).pack(side="bottom", fill="x", pady=10)
