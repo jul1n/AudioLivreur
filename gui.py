@@ -23,8 +23,12 @@ from pathlib import Path
 if getattr(sys, 'frozen', False):
     # Running as compiled executable
     SCRIPT_DIR = Path(sys._MEIPASS)
-    # Check for ffmpeg in root or bin/
-    IS_FULL_VERSION = (SCRIPT_DIR / "ffmpeg.exe").exists() or (SCRIPT_DIR / "bin" / "ffmpeg.exe").exists()
+    # Detect version by file size (> 100MB is Full, else Light)
+    try:
+        exe_size = os.path.getsize(sys.executable)
+        IS_FULL_VERSION = exe_size > 100 * 1024 * 1024 # 100 MB threshold
+    except:
+        IS_FULL_VERSION = (SCRIPT_DIR / "ffmpeg.exe").exists()
 else:
     # Running as script
     SCRIPT_DIR = Path(__file__).parent
@@ -329,7 +333,7 @@ LANGUAGES = {
         "file_info": "章节: {} | 字数: {}", "parallel": "并行:", "download_ffmpeg": "⬇️ 下载 FFmpeg", 
         "loading_voices": "加载语音中...", "no_voices": "未找到语音",
         "visit_github": "🌐 在 GitHub 上查看项目", "github_url": "https://github.com/jul1n/AudioLivreur",
-        "tab_trans": "翻译", "tab_conv": "转换", "target_lang": "目标语言:", 
+        "tab_trans": "翻译", "tab_conv": "音频制作", "target_lang": "目标语言:", 
         "translate": "翻译", "init": "正在初始化...",
         "gender": "声音:", "female": "女性", "male": "男性", "preview": "▶️ 预览", "pause": "暂停", "resume": "恢复",
         "keep_global_mp3": "导出一个全局 MP3 文件", "embed_text": "在音频中嵌入文本（歌词）",
@@ -928,7 +932,7 @@ class TranslationFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.settings_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.settings_frame.grid(row=1, column=0, padx=40, pady=(0, 20), sticky="ew")
         
-        self.lang_label = tk.Label(self.settings_frame, text=self.app.t["target_lang"], bg="white", font=("Arial", 10, "bold"))
+        self.lang_label = ctk.CTkLabel(self.settings_frame, text=self.app.t["target_lang"], font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold"))
         self.lang_label.pack(anchor="w")
         
         self.target_lang_var = tk.StringVar()
@@ -1128,19 +1132,23 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         
         # Detect Version (Full or Light)
         if getattr(sys, 'frozen', False):
-            # In EXE, ffmpeg is at the root
-            self.is_full = (SCRIPT_DIR / "ffmpeg.exe").exists()
+            # Running as compiled executable
+            try:
+                exe_size = os.path.getsize(sys.executable)
+                self.is_full = exe_size > 100 * 1024 * 1024 # 100 MB threshold
+            except:
+                self.is_full = (SCRIPT_DIR / "ffmpeg.exe").exists()
         else:
-            # In script mode, ffmpeg is in bin/
+            # Running as script
             self.is_full = (SCRIPT_DIR / "bin" / "ffmpeg.exe").exists()
             
         self.version_type = " (Full)" if self.is_full else " (Light)"
         self.full_version = f"v0.7.0{self.version_type}"
         
         self.title(f"AudioLivreur {self.full_version}")
-        self.geometry("800x700") # Increased height for toggle
+        self.geometry("800x700") 
         self.resizable(False, False)
-        self.configure(fg_color=LIGHT_BG)
+        self.configure(fg_color=("#ffffff", "#1a1a1a"))
         
         # Set Icon
         try:
@@ -1237,15 +1245,15 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.dark_mode_btn.pack(side="right", padx=(0, 10))
 
         # 2. Toggle Switch (Translation / Conversion)
-        self.toggle_frame = ctk.CTkFrame(self.main_container, fg_color="gray90", corner_radius=10, height=40)
+        self.toggle_frame = ctk.CTkFrame(self.main_container, fg_color=("gray90", "gray20"), corner_radius=10, height=40)
         self.toggle_frame.grid(row=1, column=0, padx=60, pady=(10, 20), sticky="ew")
         self.toggle_frame.grid_columnconfigure(0, weight=1)
         self.toggle_frame.grid_columnconfigure(1, weight=1)
         
-        self.trans_btn = ctk.CTkButton(self.toggle_frame, text=self.t["tab_trans"], fg_color="transparent", text_color="gray50", hover_color="gray85", corner_radius=8, command=self.show_translation)
+        self.trans_btn = ctk.CTkButton(self.toggle_frame, text=self.t["tab_trans"], fg_color="transparent", text_color="gray50", hover_color=("gray85", "gray25"), corner_radius=8, command=self.show_translation)
         self.trans_btn.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
         
-        self.conv_btn = ctk.CTkButton(self.toggle_frame, text=self.t["tab_conv"], fg_color="white", text_color="black", hover_color="white", corner_radius=8, command=self.show_conversion)
+        self.conv_btn = ctk.CTkButton(self.toggle_frame, text=self.t["tab_conv"], fg_color=("white", "gray25"), text_color="black", hover_color=("white", "gray25"), corner_radius=8, command=self.show_conversion)
         self.conv_btn.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
 
         # 3. Content Area
@@ -1269,20 +1277,17 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             ctk.set_appearance_mode("Light")
             self.dark_mode_var.set(False)
             self.dark_mode_btn.configure(text="🌙")
-            self.configure(fg_color=LIGHT_BG)
         else:
             ctk.set_appearance_mode("Dark")
             self.dark_mode_var.set(True)
             self.dark_mode_btn.configure(text="☀️")
-            # In dark mode, we might want a darker background
-            self.configure(fg_color="#1a1a1a")
 
     def show_translation(self):
         self.conversion_frame.pack_forget()
         self.translation_frame.pack(fill="both", expand=True)
         
         # Update Toggle Style
-        self.trans_btn.configure(fg_color="white", text_color="black")
+        self.trans_btn.configure(fg_color=("white", "gray25"), text_color=("black", "white"))
         self.conv_btn.configure(fg_color="transparent", text_color="gray50")
 
     def show_conversion(self):
@@ -1290,7 +1295,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.conversion_frame.pack(fill="both", expand=True)
         
         # Update Toggle Style
-        self.conv_btn.configure(fg_color="white", text_color="black")
+        self.conv_btn.configure(fg_color=("white", "gray25"), text_color=("black", "white"))
         self.trans_btn.configure(fg_color="transparent", text_color="gray50")
 
     def load_voices_bg(self):
@@ -1352,12 +1357,12 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def create_stepper(self, parent, label_text, variable, min_val, max_val, step=10, format_str="{:+d}%"):
         try:
-            frame = tk.Frame(parent, bg="white")
+            frame = ctk.CTkFrame(parent, fg_color="transparent")
             frame.pack(fill="x", pady=(5, 10))
             
-            tk.Label(frame, text=label_text, bg="white", fg="black", width=15, anchor="w").pack(side="left")
+            ctk.CTkLabel(frame, text=label_text, width=120, anchor="w", font=ctk.CTkFont(family=FONT_FAMILY, size=12)).pack(side="left")
             
-            value_label = tk.Label(frame, text=format_str.format(variable.get()), bg="white", fg="black", width=5)
+            value_label = ctk.CTkLabel(frame, text=format_str.format(variable.get()), width=50, font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold"))
             
             def change_value(delta):
                 new_val = variable.get() + delta
@@ -1365,12 +1370,12 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
                     variable.set(new_val)
                     value_label.configure(text=format_str.format(new_val))
             
-            btn_minus = tk.Button(frame, text="-", width=3, bg=PINK_COLOR, fg="white", command=lambda: change_value(-step))
+            btn_minus = ctk.CTkButton(frame, text="-", width=30, height=28, fg_color=PINK_COLOR, hover_color="#c20068", text_color="white", command=lambda: change_value(-step))
             btn_minus.pack(side="left", padx=(10, 5))
             
             value_label.pack(side="left", padx=5)
             
-            btn_plus = tk.Button(frame, text="+", width=3, bg=PINK_COLOR, fg="white", command=lambda: change_value(step))
+            btn_plus = ctk.CTkButton(frame, text="+", width=30, height=28, fg_color=PINK_COLOR, hover_color="#c20068", text_color="white", command=lambda: change_value(step))
             btn_plus.pack(side="left", padx=(5, 0))
         except Exception as e:
             logging.error(f"Error creating stepper for {label_text}: {e}")
@@ -1381,17 +1386,19 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.settings_window.focus()
                 return
 
-            self.settings_window = tk.Toplevel(self)
+            self.settings_window = ctk.CTkToplevel(self)
             self.settings_window.title(self.t["settings"])
-            self.settings_window.geometry("500x600")
-            self.settings_window.configure(bg="white")
+            self.settings_window.geometry("520x650")
+            self.settings_window.configure(fg_color=("#ffffff", "#1a1a1a"))
+            self.settings_window.attributes("-topmost", True)
             self.settings_window.protocol("WM_DELETE_WINDOW", self.close_settings)
             
-            layout = tk.Frame(self.settings_window, bg="white")
+            # Scrollable frame for settings if they grow
+            layout = ctk.CTkScrollableFrame(self.settings_window, fg_color="transparent")
             layout.pack(fill="both", expand=True, padx=20, pady=20)
             
             # Voice Selection
-            tk.Label(layout, text=self.t["voice"], bg="white", fg=TEXT_COLOR, font=("Arial", 10, "bold")).pack(anchor="w", pady=(0, 5))
+            ctk.CTkLabel(layout, text=self.t["voice"], font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold")).pack(anchor="w", pady=(0, 5))
             
             if not self.voices_loaded:
                 voice_values = [self.t["loading_voices"]]
@@ -1400,7 +1407,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             else:
                 voice_values = [self.t["no_voices"]]
                 
-            voice_combo = ttk.Combobox(layout, values=voice_values, textvariable=self.voice_var, width=50)
+            voice_combo = ctk.CTkComboBox(layout, values=voice_values, variable=self.voice_var, width=400)
             voice_combo.pack(fill="x", pady=(0, 20))
             
             # Rate Stepper
@@ -1413,29 +1420,26 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self.create_stepper(layout, self.t["parallel"], self.parallel_var, 1, 10, 1, format_str="{:d}")
             
             # FFmpeg Path
-            tk.Label(layout, text=self.t["ffmpeg"], bg="white", fg=TEXT_COLOR, font=("Arial", 10, "bold")).pack(anchor="w", pady=(10, 5))
-            ffmpeg_frame = tk.Frame(layout, bg="white")
+            ctk.CTkLabel(layout, text=self.t["ffmpeg"], font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold")).pack(anchor="w", pady=(10, 5))
+            ffmpeg_frame = ctk.CTkFrame(layout, fg_color="transparent")
             ffmpeg_frame.pack(fill="x", pady=(0, 5))
             
-            tk.Entry(ffmpeg_frame, textvariable=self.ffmpeg_path_var).pack(side="left", fill="x", expand=True)
-            tk.Button(ffmpeg_frame, text="📂", width=3, bg=PINK_COLOR, fg="white", command=self.browse_ffmpeg).pack(side="right", padx=(10, 0))
+            ctk.CTkEntry(ffmpeg_frame, textvariable=self.ffmpeg_path_var).pack(side="left", fill="x", expand=True)
+            ctk.CTkButton(ffmpeg_frame, text="📂", width=40, height=28, fg_color=PINK_COLOR, hover_color="#c20068", text_color="white", command=self.browse_ffmpeg).pack(side="right", padx=(10, 0))
             
             # FFmpeg Download Link
-            ffmpeg_link = tk.Label(layout, text=self.t["download_ffmpeg"], bg="white", fg=PINK_COLOR, cursor="hand2", font=("Arial", 10, "underline"))
+            ffmpeg_link = ctk.CTkLabel(layout, text=self.t["download_ffmpeg"], text_color=PINK_COLOR, cursor="hand2", font=ctk.CTkFont(family=FONT_FAMILY, size=12, underline=True))
             ffmpeg_link.pack(anchor="w", pady=(0, 20))
             ffmpeg_link.bind("<Button-1>", lambda e: self.open_ffmpeg_download())
             
             # MP3 Settings
-            tk.Checkbutton(layout, text=self.t["keep_mp3"], variable=self.app.keep_mp3s_var, bg="white", fg=TEXT_COLOR, selectcolor="white").pack(anchor="w", pady=5)
-            tk.Checkbutton(layout, text=self.t["keep_global_mp3"], variable=self.app.keep_global_mp3_var, bg="white", fg=TEXT_COLOR, selectcolor="white").pack(anchor="w", pady=5)
-            tk.Checkbutton(layout, text=self.t["embed_text"], variable=self.app.embed_text_var, bg="white", fg=TEXT_COLOR, selectcolor="white").pack(anchor="w", pady=(0, 20))
+            ctk.CTkCheckBox(layout, text=self.t["keep_mp3"], variable=self.app.keep_mp3s_var, fg_color=PINK_COLOR, hover_color="#c20068").pack(anchor="w", pady=5)
+            ctk.CTkCheckBox(layout, text=self.t["keep_global_mp3"], variable=self.app.keep_global_mp3_var, fg_color=PINK_COLOR, hover_color="#c20068").pack(anchor="w", pady=5)
+            ctk.CTkCheckBox(layout, text=self.t["embed_text"], variable=self.app.embed_text_var, fg_color=PINK_COLOR, hover_color="#c20068").pack(anchor="w", pady=(0, 20))
             
             # GitHub Link & Support
-            github_frame = tk.Frame(layout, bg="white")
-            github_frame.pack(fill="x", pady=(10, 0))
-            
-            github_label = tk.Label(github_frame, text=self.t["visit_github"], bg="white", fg=PINK_COLOR, cursor="hand2", font=("Arial", 10, "underline"))
-            github_label.pack(side="left")
+            github_label = ctk.CTkLabel(layout, text=self.t["visit_github"], text_color=PINK_COLOR, cursor="hand2", font=ctk.CTkFont(family=FONT_FAMILY, size=12, underline=True))
+            github_label.pack(anchor="w", pady=(10, 0))
             github_label.bind("<Button-1>", lambda e: webbrowser.open(self.t["github_url"]))
             
             # Version info at bottom
