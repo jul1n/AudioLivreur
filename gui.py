@@ -18,25 +18,28 @@ import shutil
 import math
 import time
 from pathlib import Path
-try:
-    import pywinstyles
-except ImportError:
-    pywinstyles = None
 
 # Get the directory where the script is located
 if getattr(sys, 'frozen', False):
     # Running as compiled executable
     SCRIPT_DIR = Path(sys._MEIPASS)
-    IS_FULL_VERSION = (SCRIPT_DIR / "ffmpeg.exe").exists()
+    # Check for ffmpeg in root or bin/
+    IS_FULL_VERSION = (SCRIPT_DIR / "ffmpeg.exe").exists() or (SCRIPT_DIR / "bin" / "ffmpeg.exe").exists()
 else:
     # Running as script
     SCRIPT_DIR = Path(__file__).parent
-    IS_FULL_VERSION = True
+    IS_FULL_VERSION = (SCRIPT_DIR / "bin" / "ffmpeg.exe").exists()
 
 # Helper function to detect FFmpeg installation
 def get_default_ffmpeg_path():
     """Detect FFmpeg installation on the system."""
-    # 1. Try bundled bin folder first (for standalone app)
+    # 1. Try bundled locations first (for standalone app)
+    # Check root (for frozen EXE)
+    root_ffmpeg = SCRIPT_DIR / "ffmpeg.exe"
+    if root_ffmpeg.exists():
+        return str(root_ffmpeg)
+        
+    # Check bin/ folder
     bundled_ffmpeg = SCRIPT_DIR / "bin" / "ffmpeg.exe"
     if bundled_ffmpeg.exists():
         return str(bundled_ffmpeg)
@@ -1137,7 +1140,6 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.title(f"AudioLivreur {self.full_version}")
         self.geometry("800x700") # Increased height for toggle
         self.resizable(False, False)
-        self.attributes("-alpha", 0.97)
         self.configure(fg_color=LIGHT_BG)
         
         # Set Icon
@@ -1158,7 +1160,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         # Show Splash
         self.withdraw()
         splash = SplashScreen(self)
-        self.after(3000, lambda: [splash.destroy(), self.deiconify(), self.apply_glass_effect()])
+        self.after(3000, lambda: [splash.destroy(), self.deiconify()])
         
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -1261,16 +1263,6 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         
         # Settings Window
         self.settings_window = None
-
-    def apply_glass_effect(self):
-        if pywinstyles and os.name == 'nt':
-            try:
-                # Apply Acrylic effect for Windows 11 look
-                pywinstyles.apply_style(self, "acrylic")
-                # Optional: make background slightly transparent to let acrylic shine through
-                self.attributes("-alpha", 0.95)
-            except Exception as e:
-                logging.error(f"Failed to apply glass effect: {e}")
 
     def toggle_dark_mode(self):
         if self.dark_mode_var.get():
