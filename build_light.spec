@@ -43,7 +43,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='AudioLivreur-Light',
+    name='AudioLivreur-v0.8.0-Light',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -58,3 +58,15 @@ exe = EXE(
     entitlements_file=None,
     icon=icon_file,
 )
+
+if sys.platform == 'darwin':
+    app = BUNDLE(
+        exe,
+        name='AudioLivreur.app',
+        icon=icon_file,
+        bundle_identifier='com.jul1n.audiolivreur',
+        info_plist={
+            'NSPrincipalClass': 'NSApplication',
+            'NSAppleScriptEnabled': False,
+        },
+    )

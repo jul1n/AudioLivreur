@@ -1,0 +1,59 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Se déclenche lors d'un tag comme v0.8.0
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Windows (Full & Light)
+        if: matrix.os == 'windows-latest'
+        run: |
+          pyinstaller build_light.spec
+          pyinstaller build_full.spec
+        shell: pwsh
+
+      - name: Build macOS (Light)
+        if: matrix.os == 'macos-latest'
+        run: |
+          pyinstaller build_light.spec
+          # Sur Mac, PyInstaller crée un dossier .app, on va le zipper
+          cd dist
+          zip -r AudioLivreur_mac.zip AudioLivreur.app
+        shell: bash
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/AudioLivreur-v0.8.0-Light.exe
+            dist/AudioLivreur-v0.8.0-Full.exe
+            dist/AudioLivreur_mac.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
