@@ -1,6 +1,7 @@
 import os
 import subprocess
 import threading
+import tempfile
 import asyncio
 import sys
 import logging
@@ -518,6 +519,8 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.current_index = -1
         self.is_converting = False
         self.converter = None
+        self.selected_cover_path = None
+        self.current_temp_dir = None
         
         # Grid Layout
         self.grid_columnconfigure(0, weight=1)
@@ -525,7 +528,7 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         
         # Drop Zone
         self.drop_frame = ctk.CTkFrame(self, fg_color=("gray95", "gray90"), corner_radius=15, border_width=2, border_color=("gray80", "gray70"))
-        self.drop_frame.grid(row=0, column=0, padx=40, pady=20, sticky="nsew")
+        self.drop_frame.grid(row=0, column=0, padx=40, pady=10, sticky="nsew")
         self.drop_frame.grid_columnconfigure(0, weight=1)
         self.drop_frame.grid_rowconfigure(0, weight=1)
         
@@ -538,13 +541,13 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.drop_label.bind("<Button-1>", self.browse_file)
 
         # File List Area (Scrollable)
-        self.scroll_frame = ctk.CTkScrollableFrame(self, fg_color="transparent", height=150)
-        self.scroll_frame.grid(row=1, column=0, padx=40, pady=(0, 10), sticky="nsew")
+        self.scroll_frame = ctk.CTkScrollableFrame(self, fg_color="transparent", height=130)
+        self.scroll_frame.grid(row=1, column=0, padx=40, pady=(0, 5), sticky="nsew")
         self.scroll_frame.grid_remove() # Hidden if empty
 
         # Progress Area
         self.progress_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.progress_frame.grid(row=2, column=0, padx=40, pady=(0, 20), sticky="ew")
+        self.progress_frame.grid(row=2, column=0, padx=40, pady=(0, 10), sticky="ew")
         self.progress_frame.grid_columnconfigure(0, weight=1)
         
         # Status and LED container
@@ -569,7 +572,7 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
 
         # Gender Selection
         self.gender_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.gender_frame.grid(row=3, column=0, padx=40, pady=(10, 20), sticky="ew")
+        self.gender_frame.grid(row=3, column=0, padx=40, pady=(5, 10), sticky="ew")
         
         self.gender_label = ctk.CTkLabel(self.gender_frame, text=self.app.t["gender"], font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold"))
         self.gender_label.pack(side="left", padx=(0, 10))
@@ -605,9 +608,41 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.preview_btn = ctk.CTkButton(self.gender_frame, text=self.app.t["preview"], width=70, height=28, fg_color="gray90", hover_color="gray80", text_color="black", command=self.preview_voice)
         self.preview_btn.pack(side="left", padx=(15, 0))
 
+        # Metadata Frame (New!)
+        self.meta_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.meta_frame.grid(row=4, column=0, padx=40, pady=(0, 15), sticky="ew")
+        self.meta_frame.grid_columnconfigure(1, weight=1)
+        self.meta_frame.grid_columnconfigure(3, weight=1)
+        
+        self.meta_title_var = ctk.StringVar()
+        self.meta_author_var = ctk.StringVar()
+        
+        ctk.CTkLabel(self.meta_frame, text="Titre :", font=ctk.CTkFont(family=FONT_FAMILY, size=11, weight="bold")).grid(row=0, column=0, padx=(5, 2), sticky="w")
+        self.meta_title_entry = ctk.CTkEntry(self.meta_frame, textvariable=self.meta_title_var, height=24, font=(FONT_FAMILY, 11))
+        self.meta_title_entry.grid(row=0, column=1, padx=5, sticky="ew")
+        
+        ctk.CTkLabel(self.meta_frame, text="Auteur :", font=ctk.CTkFont(family=FONT_FAMILY, size=11, weight="bold")).grid(row=0, column=2, padx=(10, 2), sticky="w")
+        self.meta_author_entry = ctk.CTkEntry(self.meta_frame, textvariable=self.meta_author_var, height=24, font=(FONT_FAMILY, 11))
+        self.meta_author_entry.grid(row=0, column=3, padx=5, sticky="ew")
+
+        # Cover Gallery Area (Scrollable horizontal)
+        self.gallery_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.gallery_frame.grid(row=5, column=0, padx=40, pady=(0, 20), sticky="ew")
+        self.gallery_frame.grid_remove() # Hidden by default
+        
+        self.gallery_label = ctk.CTkLabel(self.gallery_frame, text="📸 Choisir la couverture :", font=ctk.CTkFont(family=FONT_FAMILY, size=11, weight="bold"), text_color="gray50")
+        self.gallery_label.pack(anchor="w", padx=5)
+        
+        self.gallery_scroll = ctk.CTkScrollableFrame(self.gallery_frame, height=120, orientation="horizontal", fg_color=("gray95", "gray85"))
+        self.gallery_scroll.pack(fill="x", pady=5)
+        self.gallery_buttons = [] # To keep track of buttons for feedback
+        
+        self.selected_cover_label = ctk.CTkLabel(self.gallery_frame, text="Aucune sélection", font=ctk.CTkFont(family=FONT_FAMILY, size=11, slant="italic"), text_color="gray60")
+        self.selected_cover_label.pack(anchor="e", padx=10)
+
         # Action Buttons
         self.action_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.action_frame.grid(row=4, column=0, padx=40, pady=(0, 30), sticky="ew")
+        self.action_frame.grid(row=6, column=0, padx=40, pady=(0, 30), sticky="ew")
         
         self.start_btn = AnimatedButton(self.action_frame, text=self.app.t["start"], height=45, font=ctk.CTkFont(family=FONT_FAMILY, size=16, weight="bold"), fg_color=PINK_COLOR, hover_color="#c20068", text_color="white", command=self.start_conversion, state="disabled")
         self.start_btn.pack(side="right", padx=10, fill="x", expand=True)
@@ -619,23 +654,25 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.cancel_btn.pack(side="right", padx=(20, 0))
 
         self.open_folder_btn = AnimatedButton(self.action_frame, text=self.app.t["open_folder"], height=45, fg_color="gray90", hover_color="gray80", text_color="black", command=self.open_folder)
+        self.edit_text_btn = AnimatedButton(self.action_frame, text="📝 Éditer", height=45, fg_color="gray90", hover_color="gray80", text_color="black", command=self.open_edit_folder)
         self.export_merged_btn = AnimatedButton(self.action_frame, text=self.app.t["export_merged"], height=45, fg_color="gray90", hover_color="gray80", text_color="black", command=self.export_merged)
 
     def update_texts(self):
-        self.drop_label.configure(text=self.app.t["drop_text"])
-        self.start_btn.configure(text=self.app.t["start"])
+        t = LANGUAGES[self.app.lang]
+        self.drop_label.configure(text=t["drop_text"])
+        self.start_btn.configure(text=t["start"])
         if self.is_converting:
-             self.cancel_btn.configure(text=self.app.t["cancel"])
+             self.cancel_btn.configure(text=t["cancel"])
         else:
-             self.cancel_btn.configure(text=self.app.t["close"])
-        self.open_folder_btn.configure(text=self.app.t["open_folder"])
-        self.export_merged_btn.configure(text=self.app.t["export_merged"])
-        self.gender_label.configure(text=self.app.t["gender"])
-        self.female_radio.configure(text=self.app.t["female"])
-        self.male_radio.configure(text=self.app.t["male"])
-        self.preview_btn.configure(text=self.app.t["preview"])
-        if not self.is_converting and not self.epub_path:
-            self.status_label.configure(text=self.app.t["ready"])
+             self.cancel_btn.configure(text=t["close"])
+        self.open_folder_btn.configure(text=t["open_folder"])
+        self.export_merged_btn.configure(text=t["export_merged"])
+        self.gender_label.configure(text=t["gender"])
+        self.female_radio.configure(text=t["female"])
+        self.male_radio.configure(text=t["male"])
+        self.preview_btn.configure(text=t["preview"])
+        if not self.is_converting and not self.file_queue:
+            self.status_label.configure(text=t["ready"])
 
     def drop_file(self, event):
         data = event.data
@@ -658,6 +695,7 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
             self.scroll_frame.grid()
             self.start_btn.configure(state="normal")
             self.start_btn.pack(side="right", padx=10, fill="x", expand=True)
+            self.edit_text_btn.pack(side="right", padx=10, fill="x", expand=True)
 
     def add_file_to_queue(self, path):
         # Check if already in queue
@@ -667,6 +705,10 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         item = FileListItem(self.scroll_frame, path, self.remove_file_from_queue)
         item.pack(fill="x", padx=5, pady=2)
         self.file_queue.append((path, item))
+        
+        # Auto-scan metadata if it's the first file
+        if len(self.file_queue) == 1:
+            threading.Thread(target=self.analyze_file, args=(path,), daemon=True).start()
         
     def remove_file_from_queue(self, item_widget):
         for i, (path, widget) in enumerate(self.file_queue):
@@ -679,21 +721,29 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
             self.scroll_frame.grid_remove()
             self.start_btn.configure(state="disabled")
 
-    def analyze_file(self):
+    def analyze_file(self, path):
         try:
+            # Calculate temp dir early
+            folder = os.path.dirname(path)
+            base_name = os.path.splitext(os.path.basename(path))[0]
+            self.current_temp_dir = os.path.join(folder, f".{base_name}_tmp")
+            if not os.path.exists(self.current_temp_dir): os.makedirs(self.current_temp_dir)
+            
             # Temporary converter just for scanning
-            temp_converter = Converter(self.epub_paths[0], "", "", 0, 0)
-            num_chapters, word_count = temp_converter.scan_file()
+            temp_converter = Converter(path, "", "", 0, 0, on_images_callback=self.on_images_found)
+            num_chapters, word_count, title, author = temp_converter.scan_file()
             
             def _update():
-                self.file_info_label.configure(text=self.app.t["file_info"].format(num_chapters, word_count))
-                self.start_btn.pack(side="right", padx=10, fill="x", expand=True)
-                self.start_btn.configure(state="normal")
+                if not self.meta_title_var.get():
+                    self.meta_title_var.set(title)
+                if not self.meta_author_var.get():
+                    self.meta_author_var.set(author)
+                # If there's an info label, update it
+                # self.file_info_label.configure(text=f"{num_chapters} chapitres | {word_count} mots")
             self.after(0, _update)
             
         except Exception as e:
             print(f"Error analyzing file: {e}")
-            self.after(0, lambda: self.file_info_label.configure(text=self.app.t["error"]))
 
     def update_status_led(self, color):
         """Update the connection status LED color."""
@@ -709,6 +759,25 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
     def start_conversion(self):
         if not self.file_queue: return
         
+        # Validation of Cover Selection
+        if not self.selected_cover_path:
+            choice = tk.messagebox.askyesnocancel("Pochette", 
+                "Vous n'avez pas sélectionné de pochette personnalisée.\n\n"
+                "- 'Oui' : Utiliser la détection automatique (celle du livre).\n"
+                "- 'Non' : Choisir une image maintenant.\n"
+                "- 'Annuler' : Arrêter.")
+            
+            if choice is None: # Cancel
+                return
+            if choice is False: # No -> Choose now
+                # Try to scroll or highlight gallery? Or just return and let them click
+                self.log_message("Veuillez sélectionner une image dans la galerie ou en ajouter une avec le bouton (+).")
+                return
+            # choice is True -> Proceed with auto-detection
+        else:
+            # Confirm the selected one
+            self.log_message(f"🚀 Démarrage avec la pochette : {os.path.basename(self.selected_cover_path)}")
+
         self.is_converting = True
         self.start_btn.configure(state="disabled", fg_color="white", text_color=PINK_COLOR, border_width=2, border_color=PINK_COLOR)
         self.cancel_btn.configure(text=self.app.t["cancel"])
@@ -720,7 +789,8 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         threading.Thread(target=self.run_batch_conversion, daemon=True).start()
 
     def run_batch_conversion(self):
-        voice = self.app.voice_var.get()
+        gender = self.gender_var.get()
+        voice = self.app.voice_female_var.get() if gender == "female" else self.app.voice_male_var.get()
         rate = self.app.rate_var.get()
         volume = self.app.volume_var.get()
         ffmpeg_path = self.app.ffmpeg_path_var.get()
@@ -762,8 +832,14 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
                 text_callback=self.update_scrolling_text,
                 on_status_change=self.update_status_led,
                 keep_global_mp3=keep_global_mp3,
-                embed_text=embed_text
+                embed_text=embed_text,
+                on_images_callback=self.on_images_found,
+                meta_title=self.meta_title_var.get(),
+                meta_artist=self.meta_author_var.get(),
+                manual_cover_path=self.selected_cover_path
             )
+            
+            self.after(0, lambda: self.gallery_frame.grid_remove()) # Hide gallery at start of new file
             
             self.converter.run()
             finished_event.wait()
@@ -791,21 +867,18 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
     def on_voice_lang_change(self, choice):
         lang_code = self.display_to_lang.get(choice, "fr")
         self.voice_lang_var.set(lang_code)
-        self.on_gender_change()
+        
+        # Update default voice vars for settings
+        voice_data = DEFAULT_VOICES.get(lang_code, DEFAULT_VOICES.get("en"))
+        self.app.voice_male_var.set(voice_data.get("Male", ""))
+        self.app.voice_female_var.set(voice_data.get("Female", ""))
 
     def on_gender_change(self):
-        gender = self.gender_var.get()
-        lang_code = self.voice_lang_var.get()
-        
-        gender_key = "Female" if gender == "female" else "Male"
-        voice_data = DEFAULT_VOICES.get(lang_code, DEFAULT_VOICES.get("en"))
-        voice = voice_data.get(gender_key, list(voice_data.values())[0])
-        
-        self.app.voice_var.set(voice)
-        logging.info(f"Voice language changed to {lang_code}, gender {gender} -> voice {voice}")
+        pass # Voice is now derived dynamically at conversion time
 
     def preview_voice(self):
-        voice = self.app.voice_var.get()
+        gender = self.gender_var.get()
+        voice = self.app.voice_female_var.get() if gender == "female" else self.app.voice_male_var.get()
         rate = self.app.rate_var.get()
         volume = self.app.volume_var.get()
         text = "Bonjour, je suis votre voix pour ce livre audio. J'espère qu'elle vous plaira."
@@ -829,7 +902,10 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
             ffplay_path = ffmpeg_path.replace('ffmpeg.exe', 'ffplay.exe')
             
             if os.path.exists(ffplay_path):
-                subprocess.run([ffplay_path, "-nodisp", "-autoexit", temp_mp3], capture_output=True)
+                creationflags = 0
+                if os.name == 'nt':
+                    creationflags = subprocess.CREATE_NO_WINDOW
+                subprocess.run([ffplay_path, "-nodisp", "-autoexit", temp_mp3], capture_output=True, creationflags=creationflags)
             else:
                 # Fallback to system startfile
                 os.startfile(temp_mp3)
@@ -869,14 +945,41 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.after(0, _update)
 
     def open_folder(self):
-        if self.epub_path:
-            folder = os.path.dirname(self.epub_path)
+        if self.file_queue:
+            folder = os.path.dirname(self.file_queue[0][0])
             open_file_explorer(folder)
 
+    def open_edit_folder(self):
+        if self.file_queue:
+            path = self.file_queue[0][0]
+            folder = os.path.dirname(path)
+            base_name = os.path.splitext(os.path.basename(path))[0]
+            temp_dir = os.path.join(folder, f".{base_name}_tmp")
+            
+            if not os.path.exists(temp_dir):
+                # Trigger a quick extraction if not exists
+                tk.messagebox.showinfo("Édition", "Extraction initiale en cours... Veuillez patienter quelques secondes.")
+                def _extract():
+                    try:
+                        c = Converter(path, "", "", 0, 0)
+                        # We need to set temp_dir for it to work
+                        c.temp_dir = temp_dir
+                        if not os.path.exists(temp_dir): os.makedirs(temp_dir)
+                        chapters = c.extract_text(path)
+                        import json
+                        with open(os.path.join(temp_dir, "chapters.json"), 'w', encoding='utf-8') as f:
+                            json.dump(chapters, f, ensure_ascii=False, indent=2)
+                        self.after(0, lambda: open_file_explorer(temp_dir))
+                    except Exception as e:
+                        self.after(0, lambda: tk.messagebox.showerror("Erreur", f"Échec de l'extraction : {e}"))
+                threading.Thread(target=_extract, daemon=True).start()
+            else:
+                open_file_explorer(temp_dir)
+
     def export_merged(self):
-        if not self.epub_path: return
+        if not self.file_queue: return
         
-        base_name = os.path.splitext(os.path.basename(self.epub_path))[0]
+        base_name = os.path.splitext(os.path.basename(self.file_queue[0][0]))[0]
         default_name = f"{base_name}.m4b"
         
         file_path = filedialog.asksaveasfilename(
@@ -885,18 +988,115 @@ class ConversionFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
             initialfile=default_name,
             title=self.app.t["export_title"]
         )
-        
         if file_path:
-            # The file is already created in the source folder, we just copy it
-            source_m4b = os.path.join(os.path.dirname(self.epub_path), default_name)
-            if os.path.exists(source_m4b):
-                try:
-                    shutil.copy2(source_m4b, file_path)
-                    tk.messagebox.showinfo(self.app.t["success"], f"File saved to {file_path}")
-                except Exception as e:
-                    tk.messagebox.showerror(self.app.t["error"], f"Failed to save file: {e}")
-            else:
-                tk.messagebox.showerror(self.app.t["error"], "Source file not found.")
+            source = os.path.join(os.path.dirname(self.file_queue[0][0]), default_name)
+            if os.path.exists(source):
+                shutil.copy(source, file_path)
+                messagebox.showinfo("Export", "Fichier exporté avec succès.")
+
+    def on_images_found(self, images):
+        self.after(0, lambda: self._populate_gallery(images))
+
+    def _populate_gallery(self, images):
+        # Clear previous gallery buttons
+        for widget in self.gallery_scroll.winfo_children():
+            widget.destroy()
+        self.gallery_buttons = []
+            
+        # Add "Add Custom" button
+        try:
+            add_btn = tk.Button(self.gallery_scroll, text="➕\nAjouter", 
+                               command=self.browse_custom_cover,
+                               font=(FONT_FAMILY, 10, "bold"),
+                               fg=PINK_COLOR, bg="white", 
+                               width=10, height=5,
+                               relief="flat", borderwidth=2)
+            add_btn.pack(side="left", padx=5, pady=5)
+        except Exception as e:
+            print(f"Error adding custom btn: {e}")
+
+        if not images:
+            self.gallery_frame.grid() # Still show frame for custom button
+            return
+            
+        import io
+        from PIL import Image, ImageTk
+        
+        found_any = False
+        for name, content in images:
+            try:
+                ext = os.path.splitext(name)[1].lower()
+                if ext not in ['.jpg', '.jpeg', '.png', '.webp']: continue
+                
+                img_data = io.BytesIO(content)
+                pil_img = Image.open(img_data)
+                
+                # Thumbnail
+                pil_img.thumbnail((80, 80))
+                tk_img = ImageTk.PhotoImage(pil_img)
+                
+                btn = tk.Button(self.gallery_scroll, image=tk_img, 
+                               command=lambda c=content, n=name, b=None: self.set_cover(c, n, b), 
+                               bg="white", activebackground=PINK_COLOR, borderwidth=3, relief="flat", padx=2, pady=2)
+                # Fix the lambda capturing issue by passing the button itself later
+                btn.configure(command=lambda c=content, n=name, b=btn: self.set_cover(c, n, b))
+                
+                btn.image = tk_img # Keep reference
+                btn.pack(side="left", padx=5, pady=5)
+                self.gallery_buttons.append(btn)
+                found_any = True
+            except Exception as e:
+                print(f"Gallery error for {name}: {e}")
+                continue
+        
+        self.gallery_frame.grid()
+
+    def browse_custom_cover(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Images", "*.jpg *.jpeg *.png *.webp")])
+        if file_path:
+            try:
+                with open(file_path, "rb") as f:
+                    content = f.read()
+                name = os.path.basename(file_path)
+                self.set_cover(content, name, None)
+                
+                # Add a temporary thumbnail for this custom cover? 
+                # For now just set it and log.
+                self.log_message(f"📸 Pochette personnalisée chargée : {name}")
+            except Exception as e:
+                self.log_message(f"❌ Erreur chargement pochette : {e}")
+
+    def set_cover(self, content, name, selected_btn=None):
+        # Visual feedback
+        for btn in self.gallery_buttons:
+            btn.configure(bg="white", highlightbackground="white")
+        
+        if selected_btn:
+            selected_btn.configure(bg=PINK_COLOR)
+            
+        ext = os.path.splitext(name)[1] or ".jpg"
+        
+        # Save to a stable path in the current temp dir if possible
+        if self.current_temp_dir:
+            if not os.path.exists(self.current_temp_dir): os.makedirs(self.current_temp_dir)
+            save_path = os.path.join(self.current_temp_dir, f"selected_cover{ext}")
+            with open(save_path, "wb") as f:
+                f.write(content)
+            self.selected_cover_path = save_path
+        else:
+            # Fallback to system temp
+            with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
+                tmp.write(content)
+                self.selected_cover_path = tmp.name
+            
+        # If conversion is already running, update it on the fly
+        if self.converter:
+            self.converter.cover_path = self.selected_cover_path
+            self.converter.manual_cover_set = True
+            
+        self.selected_cover_label.configure(text=f"✅ Sélectionnée : {name}", text_color=PINK_COLOR)
+        self.log_message(f"📸 Couverture enregistrée et confirmée : {name}")
+        self.update_scrolling_text(f"Pochette validée : {name}")
 
 class TranslationFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
     def __init__(self, master, app, **kwargs):
@@ -966,13 +1166,14 @@ class TranslationFrame(ctk.CTkFrame, TkinterDnD.DnDWrapper):
         self.cancel_btn.pack(side="right", padx=(20, 0))
 
     def update_texts(self):
-        self.drop_label.configure(text=self.app.t["drop_text"])
-        self.lang_label.configure(text=self.app.t["target_lang"])
-        self.start_btn.configure(text=self.app.t["translate"])
+        t = LANGUAGES[self.app.lang]
+        self.drop_label.configure(text=t["drop_text"])
+        self.lang_label.configure(text=t["target_lang"])
+        self.start_btn.configure(text=t["translate"])
         if not self.is_translating:
-             self.cancel_btn.configure(text=self.app.t["close"])
+             self.cancel_btn.configure(text=t["close"])
         if not self.is_translating and not self.file_path:
-            self.status_label.configure(text=self.app.t["ready"])
+            self.status_label.configure(text=t["ready"])
             
         # Update language list to reflect new interface language
         self.update_language_list()
@@ -1143,11 +1344,12 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self.is_full = (SCRIPT_DIR / "bin" / "ffmpeg.exe").exists()
             
         self.version_type = " (Full)" if self.is_full else " (Light)"
-        self.full_version = f"v0.7.0{self.version_type}"
+        self.full_version = f"v0.8.0{self.version_type}"
         
         self.title(f"AudioLivreur {self.full_version}")
-        self.geometry("800x700") 
-        self.resizable(False, False)
+        self.geometry("800x850") 
+        self.resizable(True, True)
+        self.minsize(800, 850)
         self.configure(fg_color=("#ffffff", "#1a1a1a"))
         
         # Set Icon
@@ -1174,7 +1376,8 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.grid_rowconfigure(0, weight=1)
         
         # Shared Variables
-        self.voice_var = tk.StringVar(value="en-US-AriaNeural")
+        self.voice_male_var = tk.StringVar(value="fr-FR-RemyMultilingualNeural")
+        self.voice_female_var = tk.StringVar(value="fr-FR-VivienneMultilingualNeural")
         self.rate_var = tk.IntVar(value=0)
         self.volume_var = tk.IntVar(value=0)
         self.parallel_var = tk.IntVar(value=3)
@@ -1309,10 +1512,6 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             ))
             
             def _update():
-                for v in self.available_voices:
-                    if "fr-FR-VivienneMultilingualNeural" in v['ShortName']:
-                        self.voice_var.set(v['ShortName'])
-                        break
                 self.voices_loaded = True
             
             self.after(0, _update)
@@ -1397,18 +1596,33 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             layout = ctk.CTkScrollableFrame(self.settings_window, fg_color="transparent")
             layout.pack(fill="both", expand=True, padx=20, pady=20)
             
-            # Voice Selection
-            ctk.CTkLabel(layout, text=self.t["voice"], font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold")).pack(anchor="w", pady=(0, 5))
+            # Voice Selection (Male & Female)
+            ctk.CTkLabel(layout, text=self.t.get("voice_male", "Voix Homme (Défaut)"), font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold")).pack(anchor="w", pady=(0, 5))
             
             if not self.voices_loaded:
-                voice_values = [self.t["loading_voices"]]
+                voice_m_values = [self.t["loading_voices"]]
+                voice_f_values = [self.t["loading_voices"]]
             elif self.available_voices:
-                voice_values = [v['ShortName'] for v in self.available_voices]
-            else:
-                voice_values = [self.t["no_voices"]]
+                lang_prefix = self.lang + "-"
+                male_voices = [v['ShortName'] for v in self.available_voices if v.get('Gender') == 'Male' and v['ShortName'].startswith(lang_prefix)]
+                female_voices = [v['ShortName'] for v in self.available_voices if v.get('Gender') == 'Female' and v['ShortName'].startswith(lang_prefix)]
                 
-            voice_combo = ctk.CTkComboBox(layout, values=voice_values, variable=self.voice_var, width=400)
-            voice_combo.pack(fill="x", pady=(0, 20))
+                # Fallback to all if empty
+                if not male_voices: male_voices = [v['ShortName'] for v in self.available_voices if v.get('Gender') == 'Male']
+                if not female_voices: female_voices = [v['ShortName'] for v in self.available_voices if v.get('Gender') == 'Female']
+                
+                voice_m_values = male_voices
+                voice_f_values = female_voices
+            else:
+                voice_m_values = [self.t["no_voices"]]
+                voice_f_values = [self.t["no_voices"]]
+                
+            voice_m_combo = ctk.CTkComboBox(layout, values=voice_m_values, variable=self.voice_male_var, width=400)
+            voice_m_combo.pack(fill="x", pady=(0, 10))
+
+            ctk.CTkLabel(layout, text=self.t.get("voice_female", "Voix Femme (Défaut)"), font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold")).pack(anchor="w", pady=(0, 5))
+            voice_f_combo = ctk.CTkComboBox(layout, values=voice_f_values, variable=self.voice_female_var, width=400)
+            voice_f_combo.pack(fill="x", pady=(0, 20))
             
             # Rate Stepper
             self.create_stepper(layout, self.t["rate"], self.rate_var, -50, 50, 10, format_str="{:+d}%")
@@ -1433,9 +1647,9 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             ffmpeg_link.bind("<Button-1>", lambda e: self.open_ffmpeg_download())
             
             # MP3 Settings
-            ctk.CTkCheckBox(layout, text=self.t["keep_mp3"], variable=self.app.keep_mp3s_var, fg_color=PINK_COLOR, hover_color="#c20068").pack(anchor="w", pady=5)
-            ctk.CTkCheckBox(layout, text=self.t["keep_global_mp3"], variable=self.app.keep_global_mp3_var, fg_color=PINK_COLOR, hover_color="#c20068").pack(anchor="w", pady=5)
-            ctk.CTkCheckBox(layout, text=self.t["embed_text"], variable=self.app.embed_text_var, fg_color=PINK_COLOR, hover_color="#c20068").pack(anchor="w", pady=(0, 20))
+            ctk.CTkCheckBox(layout, text=self.t["keep_mp3"], variable=self.keep_mp3s_var, fg_color=PINK_COLOR, hover_color="#c20068").pack(anchor="w", pady=5)
+            ctk.CTkCheckBox(layout, text=self.t["keep_global_mp3"], variable=self.keep_global_mp3_var, fg_color=PINK_COLOR, hover_color="#c20068").pack(anchor="w", pady=5)
+            ctk.CTkCheckBox(layout, text=self.t["embed_text"], variable=self.embed_text_var, fg_color=PINK_COLOR, hover_color="#c20068").pack(anchor="w", pady=(0, 20))
             
             # GitHub Link & Support
             github_label = ctk.CTkLabel(layout, text=self.t["visit_github"], text_color=PINK_COLOR, cursor="hand2", font=ctk.CTkFont(family=FONT_FAMILY, size=12, underline=True))
@@ -1443,7 +1657,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             github_label.bind("<Button-1>", lambda e: webbrowser.open(self.t["github_url"]))
             
             # Version info at bottom
-            tk.Label(layout, text=f"AudioLivreur {self.app.full_version}", bg="white", fg="gray", font=("Arial", 8)).pack(side="bottom", pady=(5, 0))
+            tk.Label(layout, text=f"AudioLivreur {self.full_version}", bg="white", fg="gray", font=("Arial", 8)).pack(side="bottom", pady=(5, 0))
 
             # Close Button
             tk.Button(layout, text=self.t["close"], bg=PINK_COLOR, fg="white", height=2, command=self.close_settings).pack(side="bottom", fill="x", pady=10)
@@ -1489,7 +1703,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
 
 # Setup logging
 def setup_logging():
-    log_file = "AudioLivreur.log"
+    log_file = "AudioLivreur-v0.8.0-Full.log"
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(message)s",

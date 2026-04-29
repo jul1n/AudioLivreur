@@ -64,16 +64,32 @@ Rendez-vous sur la page des [Releases GitHub](https://github.com/jul1n/AudioLivr
 
 Pour plus de détails, consultez le [Guide Utilisateur](GUIDE_UTILISATEUR.md).
 
+## ✍️ Édition & Chapitrage Manuel (Nouveau !)
+
+Vous pouvez désormais modifier le texte extrait ou créer vos propres chapitres (particulièrement utile pour les **PDF**) :
+1.  **Chargez votre fichier** dans AudioLivreur.
+2.  Cliquez sur le bouton **📝 Éditer** en bas de la fenêtre.
+3.  Le dossier temporaire s'ouvre : ouvrez le fichier `chapters.json` avec votre éditeur de texte préféré.
+4.  **Modifiez le contenu** :
+    *   Changez les titres des chapitres.
+    *   Corrigez ou nettoyez le texte extrait (suppression des bas de page PDF, etc.).
+    *   Divisez un gros bloc de texte en plusieurs chapitres en suivant la structure JSON.
+5.  **Enregistrez** le fichier et cliquez sur **Créer le Livre Audio** dans l'application. AudioLivreur utilisera vos modifications automatiquement.
+
+---
+
 ## 📝 Notes de Version
 
-### v0.5.0 (Nouveau)
-**L'AudioLivreur Polyglotte :**
-- 🌍 **75+ Langues** : Support complet de toutes les langues de Microsoft Edge TTS.
-- 🎛️ **Sélecteur de langue direct** : Changez la langue de la voix en un clic sans quitter l'onglet principal.
-- 💾 **Exports enrichis** : Option pour générer un fichier MP3 global fusionné avec pochette.
-- 📜 **Intégration du texte** : Inclusion automatique du texte des chapitres dans les métadonnées (Lyrics) et export d'un transcript `.txt`.
-- 🖼️ **Pochette robuste** : Amélioration de l'extraction des couvertures EPUB (compatibilité EPUB 2/3).
-- 🛠️ **Correctifs** : Correction du multiplexage FFmpeg pour une meilleure compatibilité
+### v0.8.0 (Actuel)
+**Optimisations & Contrôle Total :**
+- ⚡ **Optimisation PDF** : Extraction et découpage 20x plus rapides sur les gros documents.
+- ✍️ **Mode Édition** : Nouveau bouton **📝 Éditer** pour modifier le texte extrait ou créer ses propres chapitres manuellement via `chapters.json`.
+- 🖼️ **Pochette Personnalisée** : Bouton **➕ Ajouter** dans la galerie pour choisir n'importe quelle image de votre PC comme couverture.
+- 🎨 **Feedback Visuel** : Mise en évidence de la pochette sélectionnée et statut en temps réel.
+- 🛠️ **Traduction Robuste** : Correction des blocages sur les gros volumes de texte et parallélisation améliorée.
+- 🐞 **VLC Fix** : Amélioration du mapping des métadonnées pour une compatibilité parfaite de la pochette avec VLC.
+
+### v0.5.0
 
 ### v0.4.0
 **Nouveautés majeures :**

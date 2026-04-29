@@ -88,7 +88,7 @@ class Translator:
             self.emit_log(traceback.format_exc())
             self.emit_finished(False, str(e))
 
-    def translate_chunk(self, translator, chunk, lang_code):
+    def translate_chunk(self, chunk, lang_code):
         if not chunk.strip(): return ""
         
         # Check Cache
@@ -96,6 +96,9 @@ class Translator:
         if cached:
             return cached
             
+        # Create a local translator for this thread
+        translator = GoogleTranslator(source='auto', target=lang_code)
+        
         # Translate with retry
         for attempt in range(3):
             try:
@@ -141,21 +144,25 @@ class Translator:
         self.emit_log(f"Total chunks to process: {total_chunks}")
 
         # 3. Parallel Translation
+        from concurrent.futures import as_completed
         processed_count = 0
-        with ThreadPoolExecutor(max_workers=3) as executor: # Keep workers low for free API
-            futures = []
-            
+        with ThreadPoolExecutor(max_workers=3) as executor: 
             # Submit all chunks
+            future_to_chunk = {}
             for ch_idx, chapter in enumerate(all_chunks):
                 for chunk_idx, chunk in enumerate(chapter['chunks']):
-                    future = executor.submit(self.translate_chunk, translator, chunk, lang_code)
-                    futures.append((future, ch_idx, chunk_idx))
+                    future = executor.submit(self.translate_chunk, chunk, lang_code)
+                    future_to_chunk[future] = (ch_idx, chunk_idx)
 
-            for future, ch_idx, chunk_idx in futures:
+            for future in as_completed(future_to_chunk):
                 if self.cancel_requested: break
                 
-                result = future.result()
-                all_chunks[ch_idx]['translated_chunks'][chunk_idx] = result
+                ch_idx, chunk_idx = future_to_chunk[future]
+                try:
+                    result = future.result()
+                    all_chunks[ch_idx]['translated_chunks'][chunk_idx] = result
+                except Exception as e:
+                    self.emit_log(f"Error in chunk {ch_idx}-{chunk_idx}: {e}")
                 
                 processed_count += 1
                 percent = int((processed_count / total_chunks) * 90)
@@ -167,9 +174,10 @@ class Translator:
 
         # 4. Reconstruct Chapters
         translated_chapters = []
+        # Title translation can also be cached, but for simplicity we do it here
+        # It's better to do it in parallel too if there are many chapters
         for chapter in all_chunks:
-            # Also translate the title
-            trans_title = self.translate_chunk(translator, chapter['title'], lang_code)
+            trans_title = self.translate_chunk(chapter['title'], lang_code)
             trans_text = "\n".join([c for c in chapter['translated_chunks'] if c])
             translated_chapters.append((trans_title, trans_text))
 
