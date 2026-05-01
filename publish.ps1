@@ -1,7 +1,7 @@
 # Script de publication pour AudioLivreur
 # Nécessite GitHub CLI (gh) installé : https://cli.github.com/
 
-$VERSION = "0.8.3"
+$VERSION = "0.8.4"
 $REPO = "jul1n/AudioLivreur"
 
 Write-Host "🚀 Préparation de la publication de la version v$VERSION..." -ForegroundColor Cyan
