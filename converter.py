@@ -665,15 +665,15 @@ class Converter:
             
             # Global Metadata Tags
             if self.meta_title:
-                f.write(f"title={self.meta_title.replace('=', r'\=')}\n")
+                f.write("title={}\n".format(self.meta_title.replace('=', r'\=')))
             if self.meta_artist:
-                f.write(f"artist={self.meta_artist.replace('=', r'\=')}\n")
-                f.write(f"author={self.meta_artist.replace('=', r'\=')}\n")
-                f.write(f"composer={self.meta_artist.replace('=', r'\=')}\n")
+                f.write("artist={}\n".format(self.meta_artist.replace('=', r'\=')))
+                f.write("author={}\n".format(self.meta_artist.replace('=', r'\=')))
+                f.write("composer={}\n".format(self.meta_artist.replace('=', r'\=')))
             if self.meta_album:
-                f.write(f"album={self.meta_album.replace('=', r'\=')}\n")
+                f.write("album={}\n".format(self.meta_album.replace('=', r'\=')))
             else:
-                f.write(f"album={self.meta_title.replace('=', r'\=')}\n")
+                f.write("album={}\n".format(self.meta_title.replace('=', r'\=')))
             
             f.write(f"genre=Audiobook\n")
             f.write(f"date=2026\n")
