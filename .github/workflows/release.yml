@@ -63,15 +63,15 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           Write-Host "Starting Build Light..."
-          python -m PyInstaller build_light.spec
+          python -m PyInstaller --clean --noconfirm build_light.spec
           Write-Host "Starting Build Full..."
-          python -m PyInstaller build_full.spec
+          python -m PyInstaller --clean --noconfirm build_full.spec
         shell: pwsh
 
       - name: Build macOS (Light)
         if: startsWith(matrix.os, 'macos')
         run: |
-          python -m PyInstaller build_light.spec
+          python -m PyInstaller --clean --noconfirm build_light.spec
           cd dist
           zip -r AudioLivreur_mac.zip AudioLivreur.app
         shell: bash

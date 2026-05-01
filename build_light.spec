@@ -9,6 +9,12 @@ block_cipher = None
 datas = []
 binaries = []
 hiddenimports = ['customtkinter', 'tkinterdnd2', 'PIL', 'edge_tts', 'ebooklib', 'bs4', 'deep_translator', 'mobi', 'fitz', 'docx', 'pypdf']
+excludes = [
+    'matplotlib', 'numpy', 'pandas', 'scipy', 'IPython', 'notebook', 
+    'pygments', 'test', 'unittest', 'pydoc', 'tkinter.test', 
+    'distutils', 'setuptools', 'PyQt5', 'PyQt6', 'PySide2', 'PySide6',
+    'cv2', 'lib2to3', 'adodbapi', 'win32com.gen_py'
+]
 
 for pkg in ['customtkinter', 'tkinterdnd2', 'edge_tts']:
     tmp_ret = collect_all(pkg)
@@ -24,14 +30,14 @@ else:
 
 a = Analysis(
     ['main.py', 'gui.py', 'converter.py'],
-    pathex=['.'],
+    pathex=[],
     binaries=binaries,
     datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=excludes,
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,

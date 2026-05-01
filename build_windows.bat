@@ -45,7 +45,7 @@ goto end
 :build_full
 echo.
 echo [BUILDING FULL VERSION...]
-pyinstaller build_full.spec
+pyinstaller --clean --noconfirm build_full.spec
 echo.
 echo Done. Check dist/AudioLivreur-v%VERSION%-Full.exe
 goto end
@@ -53,7 +53,7 @@ goto end
 :build_light
 echo.
 echo [BUILDING LIGHT VERSION...]
-pyinstaller build_light.spec
+pyinstaller --clean --noconfirm build_light.spec
 echo.
 echo Done. Check dist/AudioLivreur-v%VERSION%-Light.exe
 goto end
@@ -61,10 +61,10 @@ goto end
 :build_both
 echo.
 echo [BUILDING FULL VERSION...]
-pyinstaller build_full.spec
+pyinstaller --clean --noconfirm build_full.spec
 echo.
 echo [BUILDING LIGHT VERSION...]
-pyinstaller build_light.spec
+pyinstaller --clean --noconfirm build_light.spec
 echo.
 echo Both versions are ready in dist/
 goto end
