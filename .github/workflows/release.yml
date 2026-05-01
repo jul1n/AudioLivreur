@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*' # Se déclenche lors d'un tag comme v0.8.0
+      - 'v*'
 
 permissions:
   contents: write
@@ -12,6 +12,8 @@ jobs:
   build:
     name: Build for ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     strategy:
       fail-fast: false
       matrix:
@@ -36,29 +38,33 @@ jobs:
       - name: Install FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v3
 
-      - name: Debug - List Files
+      - name: Debug - Env Info
         run: |
-          ls -R assets/
+          python --version
           which ffmpeg
           ffmpeg -version
+          ls -R assets/
         shell: bash
 
       - name: Prepare Binaries (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          mkdir -p bin
-          # Use shell expansion to find ffmpeg path
-          FFMPEG_PATH=$(which ffmpeg)
-          FFPROBE_PATH=$(which ffprobe)
-          cp "$FFMPEG_PATH" bin/ffmpeg.exe
-          cp "$FFPROBE_PATH" bin/ffprobe.exe
-          ls -l bin/
-        shell: bash
+          if (Test-Path bin) { Remove-Item -Recurse -Force bin }
+          New-Item -ItemType Directory -Force -Path bin
+          $ffmpegPath = (Get-Command ffmpeg).Source
+          $ffprobePath = (Get-Command ffprobe).Source
+          Write-Host "Found FFmpeg at: $ffmpegPath"
+          Copy-Item $ffmpegPath bin\ffmpeg.exe
+          Copy-Item $ffprobePath bin\ffprobe.exe
+          Get-ChildItem bin\
+        shell: pwsh
 
       - name: Build Windows (Full & Light)
         if: matrix.os == 'windows-latest'
         run: |
+          Write-Host "Starting Build Light..."
           python -m PyInstaller build_light.spec
+          Write-Host "Starting Build Full..."
           python -m PyInstaller build_full.spec
         shell: pwsh
 
@@ -66,7 +72,6 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: |
           python -m PyInstaller build_light.spec
-          # Sur Mac, PyInstaller crée un dossier .app dans dist, on va le zipper
           cd dist
           zip -r AudioLivreur_mac.zip AudioLivreur.app
         shell: bash
