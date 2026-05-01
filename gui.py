@@ -1344,7 +1344,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self.is_full = (SCRIPT_DIR / "bin" / "ffmpeg.exe").exists()
             
         self.version_type = " (Full)" if self.is_full else " (Light)"
-        self.full_version = f"v0.8.1{self.version_type}"
+        self.full_version = f"v0.8.2{self.version_type}"
         
         self.title(f"AudioLivreur {self.full_version}")
         self.geometry("800x850") 
@@ -1703,7 +1703,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
 
 # Setup logging
 def setup_logging():
-    log_file = "AudioLivreur-v0.8.1-Full.log"
+    log_file = "AudioLivreur-v0.8.2-Full.log"
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(message)s",

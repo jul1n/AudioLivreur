@@ -43,7 +43,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='AudioLivreur-v0.8.1-Light',
+    name='AudioLivreur-v0.8.2-Light',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
