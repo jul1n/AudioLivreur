@@ -17,7 +17,10 @@ for pkg in ['customtkinter', 'tkinterdnd2', 'edge_tts']:
 # Add custom assets (WITHOUT the bin folder)
 datas += [('assets', 'assets'), ('docs', 'docs')]
 
-icon_file = 'assets/app_icon.png' if os.path.exists('assets/app_icon.png') else None
+if sys.platform == 'win32':
+    icon_file = 'assets/app_icon.ico' if os.path.exists('assets/app_icon.ico') else 'assets/app_icon.png'
+else:
+    icon_file = 'assets/app_icon.png' if os.path.exists('assets/app_icon.png') else None
 
 a = Analysis(
     ['main.py', 'gui.py', 'converter.py'],
@@ -43,7 +46,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='AudioLivreur-v0.8.2-Light',
+    name='AudioLivreur-v0.8.3-Light',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
