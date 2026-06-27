@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>audiolivreur.ai (v0.3.0) — Convertisseur Livre Audio Gratuit (EPUB, PDF en MP3 & M4B)</title>
+    <title>audiolivreur.ai (v0.3.1) — Convertisseur Livre Audio Gratuit (EPUB, PDF en MP3 & M4B)</title>
     <meta name="description" content="Convertissez vos livres EPUB, PDF, DOCX et TXT en livres audio MP3 & M4B de haute qualité avec les voix neuronales Microsoft. 100% Gratuit, Privé et dans votre navigateur.">
     <meta name="keywords" content="livre audio, audiobook, convertisseur epub en mp3, pdf en mp3, synthése vocale, edge tts, text to speech, m4b generator, julien">
     <meta name="author" content="Julien">
@@ -40,7 +40,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Stylesheet Neubrutalist -->
-    <link rel="stylesheet" href="css/style.css?v=0.3.0">
+    <link rel="stylesheet" href="css/style.css?v=0.3.1">
 
     <!-- External Parsing Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -79,7 +79,7 @@
             </div>
             <div class="brand-text">
                 <h1>audiolivreur.ai</h1>
-                <span class="version">V 0.3.0 · CLIENT IP</span>
+                <span class="version">V 0.3.1 · CLIENT IP</span>
             </div>
         </div>
 
@@ -112,15 +112,23 @@
             <aside class="card-box settings-panel">
                 <h3 class="panel-title"><i class="fa-solid fa-sliders"></i> Réglages de Synthèse</h3>
                 
-                <!-- Format Toggle MP3 vs M4B -->
+                <!-- Format Toggle MP3 vs M4B Redesign Sleek -->
                 <div class="form-group">
                     <label>Format de Sortie</label>
                     <div class="toggle-switch-group">
                         <button class="toggle-btn active" id="toggleMp3">
-                            🎵 MP3 <span class="badge-mini">Rapide & Léger</span>
+                            <i class="fa-solid fa-compact-disc toggle-icon"></i>
+                            <div class="toggle-text-stack">
+                                <span class="toggle-title">MP3</span>
+                                <span class="toggle-subtitle">Rapide & Léger</span>
+                            </div>
                         </button>
                         <button class="toggle-btn" id="toggleM4b">
-                            📚 M4B <span class="badge-mini">Fichier Unique</span>
+                            <i class="fa-solid fa-book-bookmark toggle-icon"></i>
+                            <div class="toggle-text-stack">
+                                <span class="toggle-title">M4B</span>
+                                <span class="toggle-subtitle">Fichier Unique</span>
+                            </div>
                         </button>
                     </div>
                     <div class="format-hint" id="formatHint">
@@ -304,7 +312,7 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
-            <p>© 2026 <strong>audiolivreur.ai</strong> · Créé avec ❤️ par <strong>Julien</strong> (v0.3.0 Client-Side)</p>
+            <p>© 2026 <strong>audiolivreur.ai</strong> · Créé avec ❤️ par <strong>Julien</strong> (v0.3.1 Client-Side)</p>
             <div class="footer-links">
                 <button class="footer-link-btn" id="btnOpenModalHow">Comment ça marche ?</button>
                 <button class="footer-link-btn" id="btnOpenModalLegal">Confidentialité</button>
@@ -327,9 +335,9 @@
         </div>
     </div>
 
-    <!-- Application Scripts avec Cache Busting v0.3.0 -->
-    <script src="js/tts/edgeTts.js?v=0.3.0"></script>
-    <script src="js/parsers/fileParser.js?v=0.3.0"></script>
-    <script src="js/app.js?v=0.3.0"></script>
+    <!-- Application Scripts avec Cache Busting v0.3.1 -->
+    <script src="js/tts/edgeTts.js?v=0.3.1"></script>
+    <script src="js/parsers/fileParser.js?v=0.3.1"></script>
+    <script src="js/app.js?v=0.3.1"></script>
 </body>
 </html>

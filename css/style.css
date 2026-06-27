@@ -254,46 +254,83 @@ body {
     cursor: pointer;
 }
 
-/* Toggle Switch Group (Format Export MP3 / M4B) */
+/* Toggle Switch Group (Format Export MP3 / M4B - Redesign Ultra Classe) */
 .toggle-switch-group {
     display: flex;
-    background: var(--bg-main);
+    background: #f1efe7;
     border: var(--border-width) solid var(--border-black);
-    border-radius: var(--radius-btn);
-    padding: 4px;
-    gap: 4px;
+    border-radius: 12px;
+    padding: 6px;
+    gap: 8px;
+    box-shadow: inset 2px 2px 0px rgba(0,0,0,0.06);
 }
 
 .toggle-btn {
     flex: 1;
     background: transparent;
-    border: none;
-    padding: 0.6rem 0.7rem;
-    border-radius: 8px;
+    border: 2px solid transparent;
+    padding: 0.6rem 0.8rem;
+    border-radius: 10px;
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: var(--text-main);
+    color: var(--text-muted);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.3rem;
-    transition: var(--transition);
+    gap: 0.7rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.toggle-btn.active {
-    background: var(--accent-mint);
-    border: 1.5px solid var(--border-black);
-    box-shadow: var(--shadow-hard-sm);
+.toggle-btn:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--text-main);
 }
 
-.badge-mini {
+.toggle-icon {
+    font-size: 1.25rem;
+    transition: transform 0.2s ease;
+}
+
+.toggle-text-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.1;
+}
+
+.toggle-title {
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.toggle-subtitle {
     font-size: 0.68rem;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 800;
-    opacity: 0.85;
+    font-weight: 700;
+    opacity: 0.8;
 }
+
+.toggle-btn#toggleMp3.active {
+    background: var(--accent-mint);
+    color: var(--text-main);
+    border: var(--border-width) solid var(--border-black);
+    box-shadow: var(--shadow-hard-sm);
+    transform: translate(-1px, -1px);
+}
+
+.toggle-btn#toggleM4b.active {
+    background: var(--accent-yellow);
+    color: var(--text-main);
+    border: var(--border-width) solid var(--border-black);
+    box-shadow: var(--shadow-hard-sm);
+    transform: translate(-1px, -1px);
+}
+
+.toggle-btn.active .toggle-icon {
+    transform: scale(1.15);
+}
+
 
 .format-hint {
     font-size: 0.82rem;
