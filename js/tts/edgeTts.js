@@ -1,14 +1,13 @@
 /**
  * Client Edge TTS WebSocket en pure JavaScript (Client-Side)
- * Communique directement avec le service Microsoft Edge Read Aloud
+ * Implémente le protocole exact de Microsoft Edge Read Aloud
  */
 
 class EdgeTtsClient {
     constructor() {
         this.trustedToken = "6A5AA1D4EA5F4009A6C6230462002A54";
-        this.wsUrl = `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${this.trustedToken}`;
         
-        // Liste des voix neuronales haute qualité de référence par langue
+        // Liste des voix neuronales haute qualité par langue
         this.voicesDatabase = [
             // Français
             { ShortName: "fr-FR-RemyMultilingualNeural", LocalName: "Rémy (Multilingue)", Gender: "Male", Locale: "fr-FR" },
@@ -39,47 +38,53 @@ class EdgeTtsClient {
         ];
     }
 
-    /**
-     * Retourne la liste des voix filtrées par langue
-     */
     getVoices(locale = "fr-FR") {
         return this.voicesDatabase.filter(v => v.Locale === locale || (locale.startsWith("en") && v.Locale.startsWith("en")));
     }
 
     /**
-     * Génère un UUID v4 simple pour la requête
+     * Identifiant de requête 32 caractères hexadécimaux sans tirets
      */
     generateRequestId() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
             var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
     }
 
     /**
-     * Synthétise un extrait de texte en audio MP3
-     * @param {string} text Le texte à lire
-     * @param {object} options { voice, rate, pitch, volume }
-     * @param {function} onWordProgress Callback pour le nombre de mots traités
-     * @returns {Promise<Blob>} Le fichier audio au format Blob MP3
+     * Date au format ISO Bing TTS (ex: Wed Sep 15 2021 00:00:00 GMT+0000)
      */
-    async synthesize(text, options = {}, onWordProgress = null) {
+    getTimestamp() {
+        return new Date().toString();
+    }
+
+    /**
+     * Synthétise un extrait de texte en audio MP3
+     */
+    async synthesize(text, options = {}) {
         return new Promise((resolve, reject) => {
             const voice = options.voice || "fr-FR-RemyMultilingualNeural";
             const rate = options.rate !== undefined ? (options.rate >= 0 ? `+${options.rate}%` : `${options.rate}%`) : "+0%";
             const pitch = options.pitch !== undefined ? (options.pitch >= 0 ? `+${options.pitch}Hz` : `${options.pitch}Hz`) : "+0Hz";
             const volume = "+0%";
+            const langLocale = voice.split("-").slice(0, 2).join("-");
 
-            const ws = new WebSocket(this.wsUrl);
+            const requestId = this.generateRequestId();
+            const wsUrl = `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${this.trustedToken}&ConnectionId=${requestId}`;
+
+            const ws = new WebSocket(wsUrl);
             ws.binaryType = "arraybuffer";
 
             const audioChunks = [];
-            const requestId = this.generateRequestId();
             let isCompleted = false;
+            let errorMessage = null;
 
             ws.onopen = () => {
-                // 1. Envoyer la configuration de la session
-                const configHeader = "Path: speech.config\r\nContent-Type: application/json; charset=utf-8\r\n\r\n";
+                const timestamp = this.getTimestamp();
+
+                // 1. Configuration de session
+                const configHeader = `Path: speech.config\r\nX-Timestamp: ${timestamp}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n`;
                 const configData = JSON.stringify({
                     context: {
                         synthesis: {
@@ -88,64 +93,61 @@ class EdgeTtsClient {
                                 dataversion: "1"
                             },
                             language: {
-                                name: voice.split("-").slice(0, 2).join("-")
+                                name: langLocale
                             }
                         }
                     }
                 });
                 ws.send(configHeader + configData);
 
-                // 2. Échapper le texte pour le format SSML XML
+                // 2. Échapper le texte pour SSML
                 const escapedText = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                
-                // 3. Envoyer le message SSML
-                const ssmlHeader = `Path: ssml\r\nX-RequestId: ${requestId}\r\nContent-Type: application/ssml+xml\r\n\r\n`;
-                const ssmlData = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='${voice}'><prosody pitch='${pitch}' rate='${rate}' volume='${volume}'>${escapedText}</prosody></voice></speak>`;
-                
+
+                // 3. Demande SSML
+                const ssmlHeader = `Path: ssml\r\nX-RequestId: ${requestId}\r\nX-Timestamp: ${timestamp}\r\nContent-Type: application/ssml+xml\r\n\r\n`;
+                const ssmlData = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='${langLocale}'><voice name='${voice}'><prosody pitch='${pitch}' rate='${rate}' volume='${volume}'>${escapedText}</prosody></voice></speak>`;
+
                 ws.send(ssmlHeader + ssmlData);
             };
 
             ws.onmessage = (event) => {
                 if (typeof event.data === "string") {
-                    // Message texte (généralement statut ou métadonnées)
                     if (event.data.includes("Path: turn.end")) {
                         isCompleted = true;
                         ws.close();
                     }
                 } else if (event.data instanceof ArrayBuffer) {
-                    // Message binaire contenant l'audio MP3
                     const dataView = new DataView(event.data);
                     const headerLength = dataView.getUint16(0);
-                    
+
                     const headerBytes = new Uint8Array(event.data, 2, headerLength);
                     const headerStr = new TextDecoder("utf-8").decode(headerBytes);
 
                     if (headerStr.includes("Path: audio")) {
                         const audioData = event.data.slice(2 + headerLength);
-                        audioChunks.push(audioData);
-                        if (onWordProgress) {
-                            onWordProgress(50); // Simulation/mise à jour du progrès
+                        if (audioData.byteLength > 0) {
+                            audioChunks.push(audioData);
                         }
                     }
                 }
             };
 
             ws.onerror = (err) => {
-                console.error("[EdgeTTS WS Error]", err);
-                reject(new Error("Erreur de connexion au service vocal Edge-TTS"));
+                console.error("[EdgeTTS WebSocket Error]", err);
+                errorMessage = "Échec de connexion WebSocket avec le service Bing TTS.";
             };
 
-            ws.onclose = () => {
+            ws.onclose = (evt) => {
                 if (audioChunks.length > 0) {
                     const audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
                     resolve(audioBlob);
-                } else if (!isCompleted) {
-                    reject(new Error("Connexion fermée avant la fin de la synthèse"));
+                } else {
+                    const reason = errorMessage || `Connexion fermée (Code: ${evt.code}). Vérifiez votre connexion internet.`;
+                    reject(new Error(reason));
                 }
             };
         });
     }
 }
 
-// Export global pour utilisation navigateur
 window.EdgeTtsClient = EdgeTtsClient;
