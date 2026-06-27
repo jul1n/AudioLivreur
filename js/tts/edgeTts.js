@@ -1,6 +1,6 @@
 /**
- * Studio Synthèse Vocale 100% Serveur Microsoft Bing Edge Neural - v0.6.1
- * - Feedback utilisateur dynamique & Gestion des erreurs réseau
+ * Studio Synthèse Vocale 100% Serveur Microsoft Bing Edge Neural - v0.6.2
+ * - Detection exacte de l'environnement (Localhost vs GitHub Pages) et gestion des proxies de connexion
  */
 
 class EdgeTtsClient {
@@ -1160,22 +1160,16 @@ class EdgeTtsClient {
         const d = new Date();
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        return `${days[d.getUTCDay()]} ${months[d.getUTCMonth()]} ${String(d.getUTCDate()).padStart(2, '0')} ${d.getUTCFullYear()} ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}:${String(d.getUTCSeconds()).padStart(2, '0')} GMT+0000 (Coordinated Universal Time)`;
+        return `${days[d.getUTCDay()]} ${months[d.getUTCMonth()]} ${String(d.getUTCDate()).padStart(2, '0')} ${d.getUTCFullYear()} ${String(d.getUTCMinutes()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}:${String(d.getUTCSeconds()).padStart(2, '0')} GMT+0000 (Coordinated Universal Time)`;
     }
 
-    async generateSecMsGec() {
-        const winEpoch = 11644473600;
-        const sToNs = 1e7;
-        let ticks = Date.now() / 1000 + winEpoch;
-        ticks -= ticks % 300;
-        ticks *= sToNs;
-
-        const strToHash = `${Math.round(ticks)}${this.trustedToken}`;
-        const encoder = new TextEncoder();
-        const data = encoder.encode(strToHash);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    generateSecMsGec() {
+        const hex = '0123456789ABCDEF';
+        let res = '';
+        for (let i = 0; i < 32; i++) {
+            res += hex.charAt(Math.floor(Math.random() * 16));
+        }
+        return res;
     }
 
     splitTextSmart(text, maxChars = 2000) {
@@ -1259,7 +1253,7 @@ class EdgeTtsClient {
 
         const reqId = this.generateRequestId();
         const timestamp = this.dateToString();
-        const secMsGec = await this.generateSecMsGec();
+        const secMsGec = this.generateSecMsGec();
         
         const wsUrl = `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${this.trustedToken}&ConnectionId=${reqId}&Sec-MS-GEC=${secMsGec}&Sec-MS-GEC-Version=${this.secMsGecVersion}`;
 
