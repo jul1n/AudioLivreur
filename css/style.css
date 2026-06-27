@@ -93,6 +93,24 @@ body {
     gap: 0.8rem;
 }
 
+/* Static Status Indicators (NON-CLICKABLE) */
+.status-pill-static {
+    background: #ffffff;
+    border: 1.5px solid var(--border-black);
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: none; /* Pas d'ombre dure pour ne pas ressembler à un bouton */
+    cursor: default;
+    user-select: none;
+}
+
+/* Clickable Action Buttons */
 .pill-btn {
     background: var(--bg-card);
     border: var(--border-width) solid var(--border-black);
@@ -114,8 +132,6 @@ body {
     box-shadow: 3.5px 3.5px 0px #0f0f0f;
 }
 
-.pill-btn.accent-mint { background: var(--accent-mint); }
-
 /* Main Container Layout */
 .app-container {
     max-width: 1150px;
@@ -131,16 +147,21 @@ body {
     margin-bottom: 0.5rem;
 }
 
-.badge-tag {
+/* Static Informative Tag (NON-CLICKABLE) */
+.info-badge {
     display: inline-flex;
     align-items: center;
+    gap: 0.4rem;
     background: var(--accent-yellow);
-    border: var(--border-width) solid var(--border-black);
-    padding: 0.3rem 0.8rem;
-    border-radius: var(--radius-pill);
+    border: 1.5px solid var(--border-black);
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px; /* Coins légèrement carrés pour se distinguer des boutons pilules */
     font-size: 0.75rem;
     font-weight: 800;
-    box-shadow: var(--shadow-hard-sm);
+    color: var(--text-main);
+    box-shadow: none; /* Pas d'ombre d'interaction */
+    cursor: default;
+    user-select: none;
     margin-bottom: 0.8rem;
 }
 
