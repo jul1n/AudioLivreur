@@ -1,5 +1,5 @@
 /**
- * Orchestrateur principal de l'application audiolivreur.ai (Format Toggle MP3/M4B & SEO)
+ * Orchestrateur principal de l'application audiolivreur.ai (Messages Cools & Fun style Discord)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,7 +8,27 @@ document.addEventListener('DOMContentLoaded', () => {
     let generatedAudioFiles = [];
     let isConverting = false;
     let cancelRequested = false;
-    let currentFormat = 'mp3'; // 'mp3' or 'm4b'
+    let currentFormat = 'mp3';
+
+    // Discord-style funny loading messages
+    const funnyLoadingMessages = [
+        "Chauffage des cordes vocales de l'IA... 🎤",
+        "Préparation du café pour la voix neuronale... ☕",
+        "Dépoussiérage des vieux parchemins... 📜",
+        "Convocation des lutins liseurs d'audiobooks... 🧙‍♂️",
+        "Nettoyage des lunettes de lecture... 👓",
+        "Vérification que les chats ne marchent pas sur le clavier... 🐾",
+        "Vérification des règles de grammaire (on fait de notre mieux !)... 🤓",
+        "Conversion des mots en décibels de pur bonheur... 🎧",
+        "Hydratation de l'IA avec de l'eau déminéralisée... 💧",
+        "Réglage du volume jusqu'à 11... 🔊",
+        "Répétition générale avant le grand oral... 🎭",
+        "Inspiration profonde... et c'est parti ! 🌬️"
+    ];
+
+    function getRandomFunnyMessage() {
+        return funnyLoadingMessages[Math.floor(Math.random() * funnyLoadingMessages.length)];
+    }
 
     // DOM Elements
     const elements = {
@@ -67,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnOpenModalCredits: document.getElementById('btnOpenModalCredits')
     };
 
-    // Toggle MP3 / M4B Format Handler
     elements.toggleMp3.addEventListener('click', () => {
         currentFormat = 'mp3';
         elements.toggleMp3.classList.add('active');
@@ -195,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pitch = parseInt(elements.rangePitch.value);
 
         elements.btnTestVoice.disabled = true;
-        elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Génération...`;
+        elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Test vocal...`;
 
         try {
             const testText = sampleTextsByLang[lang] || sampleTextsByLang['fr-FR'];
@@ -240,12 +259,12 @@ document.addEventListener('DOMContentLoaded', () => {
             log(`Analyse du fichier : ${file.name}...`);
             elements.dropzone.innerHTML = `
                 <div class="dropzone-icon-box"><i class="fa-solid fa-spinner fa-spin"></i></div>
-                <h2>Analyse et extraction du livre...</h2>
-                <p style="color:var(--text-muted); font-weight:500;">Veuillez patienter pendant la lecture du livre.</p>
+                <h2>Dépoussiérage du livre en cours... 📜</h2>
+                <p style="color:var(--text-muted); font-weight:500;">On extrait les chapitres à la vitesse de la lumière !</p>
             `;
 
             currentBookData = await FileParser.parse(file);
-            log(`Livre extrait avec succès ! (${currentBookData.chapters.length} chapitres trouvés)`, 'success');
+            log(`🎉 Livre extrait avec succès ! (${currentBookData.chapters.length} chapitres trouvés)`, 'success');
 
             elements.metaTitle.value = currentBookData.title;
             elements.metaAuthor.value = currentBookData.author;
@@ -321,7 +340,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const rate = parseInt(elements.rangeRate.value);
         const pitch = parseInt(elements.rangePitch.value);
 
-        log(`Démarrage de la synthèse vocale pour "${elements.metaTitle.value}" (Format: ${currentFormat.toUpperCase()})...`, 'info');
+        log(`🚀 Démarrage de la synthèse vocale pour "${elements.metaTitle.value}"...`, 'info');
+        log(`💡 Note Discord : ${getRandomFunnyMessage()}`, 'warning');
 
         const totalChapters = currentBookData.chapters.length;
         const totalWordsOverall = currentBookData.chapters.reduce((sum, ch) => sum + ch.text.split(/\s+/).length, 0);
@@ -332,15 +352,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (let i = 0; i < totalChapters; i++) {
             if (cancelRequested) {
-                log("Synthèse annulée par l'utilisateur.", 'warning');
+                log("🛑 Synthèse annulée par l'utilisateur.", 'warning');
                 break;
             }
 
             const chapter = currentBookData.chapters[i];
             const chapWords = chapter.text.split(/\s+/).length;
-            log(`Synthèse du Chapitre ${i + 1}/${totalChapters} : "${chapter.title}" (${chapWords} mots)...`);
-
-            elements.progressStatusText.textContent = `Traitement : ${chapter.title}`;
+            
+            const funnyStatus = getRandomFunnyMessage();
+            log(`🎙️ Chapitre ${i + 1}/${totalChapters} : "${chapter.title}" (${chapWords} mots)...`);
+            elements.progressStatusText.textContent = `${funnyStatus} (${chapter.title})`;
 
             try {
                 const audioBlob = await ttsClient.synthesize(chapter.text, { voice, rate, pitch });
@@ -363,17 +384,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.metricSpeed.textContent = `${speed} mots/sec`;
                 elements.metricEta.textContent = `${Math.floor(etaSec / 60)}m ${etaSec % 60}s`;
 
-                log(`Chapitre ${i + 1} terminé avec succès !`, 'success');
+                log(`✅ Chapitre ${i + 1} synthétisé avec succès !`, 'success');
 
             } catch (err) {
-                log(`Erreur lors de la synthèse du chapitre ${i + 1} : ${err.message}`, 'error');
+                log(`❌ Erreur au chapitre ${i + 1} : ${err.message}`, 'error');
             }
         }
 
         isConverting = false;
 
         if (!cancelRequested && generatedAudioFiles.length > 0) {
-            log("Synthèse terminée avec succès !", 'success');
+            log("🎉 Synthèse terminée avec succès ! Préparez vos écouteurs !", 'success');
             elements.progressCard.classList.add('hidden');
             elements.finishedCard.classList.remove('hidden');
         }
@@ -390,11 +411,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (generatedAudioFiles.length === 0) return;
 
         elements.btnDownloadAudiobook.disabled = true;
-        elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Préparation du téléchargement...`;
+        elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Emballage du paquet audio... 🎁`;
 
         try {
             if (currentFormat === 'm4b') {
-                // Pour M4B unique : fusion des blobs et téléchargement direct du fichier .m4b
                 const allBlobs = generatedAudioFiles.map(item => item.blob);
                 const mergedM4bBlob = new Blob(allBlobs, { type: "audio/m4b" });
                 const downloadUrl = URL.createObjectURL(mergedM4bBlob);
@@ -407,7 +427,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.removeChild(a);
 
             } else {
-                // Pour MP3 : packaging ZIP par chapitres
                 const zip = new JSZip();
                 const folder = zip.folder(elements.metaTitle.value || "Audiobook");
                 generatedAudioFiles.forEach(item => folder.file(item.filename, item.blob));
