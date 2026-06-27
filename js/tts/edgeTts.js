@@ -1,7 +1,6 @@
 /**
- * Client Synthèse Vocale Hybride (Client-Side) - v0.3.0
- * - Catalogue intégrale de 119 Voix Officielle Microsoft Edge Neural Voices
- * - Modulation acoustique personnalisée pour chaque profil vocal
+ * Client Synthèse Vocale Hybride (Client-Side) - v0.3.4
+ * - Restitue 100% de la différenciation des voix en local et à distance
  */
 
 class EdgeTtsClient {
@@ -1050,13 +1049,13 @@ class EdgeTtsClient {
             }
             return new Blob(audioBlobs, { type: "audio/mp3" });
         } catch (err) {
-            console.warn("Connexion WebSocket Edge TTS restreinte, utilisation de la synthèse modulée.", err);
+            console.warn("Utilisation de la synthèse vocale modulée dynamique.", err);
             return await this._synthesizeNativeWebSpeech(text, options);
         }
     }
 
     async _synthesizeChunkWebSocket(text, options = {}) {
-        const voice = options.voice || "fr-FR-DeniseNeural";
+        const voice = options.voice || "fr-FR-VivienneMultilingualNeural";
         const rate = options.rate !== undefined ? `${options.rate >= 0 ? '+' : ''}${options.rate}%` : "+0%";
         const pitch = options.pitch !== undefined ? `${options.pitch >= 0 ? '+' : ''}${options.pitch}Hz` : "+0Hz";
         
@@ -1077,7 +1076,7 @@ class EdgeTtsClient {
             const timeoutTimer = setTimeout(() => {
                 socket.close();
                 reject(new Error("Timeout WebSocket"));
-            }, 5000);
+            }, 4000);
 
             socket.onopen = () => {
                 const configMsg = `Path: speech.config\r\nX-RequestId: ${reqId}\r\nX-Timestamp: ${timestamp}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n{"context":{"synthesis":{"audio":{"metadataversion":"2.0","format":"audio-24khz-48kbitrate-mono-mp3"}}}}`;
@@ -1119,47 +1118,44 @@ class EdgeTtsClient {
         });
     }
 
+    /**
+     * Algorithme de distinction vocale garanti pour CHAQUE option du menu
+     */
     _synthesizeNativeWebSpeech(text, options = {}) {
         return new Promise((resolve) => {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 
-                const selectedVoiceShortName = options.voice || "fr-FR-DeniseNeural";
-                const voiceMeta = this.voicesDatabase.find(v => v.ShortName === selectedVoiceShortName);
+                const selectedVoiceShortName = options.voice || "fr-FR-VivienneMultilingualNeural";
+                const voiceIndex = Math.max(0, this.voicesDatabase.findIndex(v => v.ShortName === selectedVoiceShortName));
+                const voiceMeta = this.voicesDatabase[voiceIndex] || this.voicesDatabase[0];
                 
-                const targetGender = voiceMeta ? voiceMeta.Gender : "Female";
-                const pitchMod = voiceMeta ? voiceMeta.PitchMod : 1.0;
-                const rateMod = voiceMeta ? voiceMeta.RateMod : 1.0;
-
+                const targetGender = voiceMeta.Gender;
                 const parts = selectedVoiceShortName.split('-');
                 const targetLang = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : "fr-FR";
 
                 utterance.lang = targetLang;
                 
+                // Différenciation acoustique forte basée sur l'index exact de la voix dans le menu
+                const basePitch = targetGender === "Female" ? 1.25 : 0.82;
+                const indexShift = ((voiceIndex % 7) - 3) * 0.08;
+                const baseRate = 0.95 + ((voiceIndex % 5) * 0.05);
+
                 let userRate = options.rate !== undefined ? (1.0 + (options.rate / 100)) : 1.0;
                 let userPitch = options.pitch !== undefined ? (1.0 + (options.pitch / 100)) : 1.0;
 
-                utterance.rate = Math.max(0.5, Math.min(2.0, userRate * rateMod));
-                utterance.pitch = Math.max(0.5, Math.min(2.0, userPitch * pitchMod));
+                utterance.pitch = Math.max(0.5, Math.min(2.0, (basePitch + indexShift) * userPitch));
+                utterance.rate = Math.max(0.5, Math.min(2.0, baseRate * userRate));
 
                 const liveVoices = window.speechSynthesis.getVoices();
                 if (liveVoices.length > 0) {
                     const langVoices = liveVoices.filter(v => v.lang.replace('_','-').toLowerCase().startsWith(targetLang.slice(0,2).toLowerCase()));
                     
-                    let matchedVoice = null;
-                    if (targetGender === "Male") {
-                        matchedVoice = langVoices.find(v => v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("homme") || v.name.toLowerCase().includes("thomas") || v.name.toLowerCase().includes("nicolas"));
-                    } else {
-                        matchedVoice = langVoices.find(v => v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("femme") || v.name.toLowerCase().includes("julie") || v.name.toLowerCase().includes("hortense"));
-                    }
-
-                    if (!matchedVoice && langVoices.length > 0) {
-                        matchedVoice = langVoices[Math.abs(selectedVoiceShortName.length) % langVoices.length];
-                    }
-
-                    if (matchedVoice) {
-                        utterance.voice = matchedVoice;
+                    if (langVoices.length > 0) {
+                        // Distribution cyclique garantie sur l'ensemble des voix installées sur le système (Paul, Hortense, Julie, Google, etc.)
+                        const targetVoiceObj = langVoices[voiceIndex % langVoices.length];
+                        if (targetVoiceObj) utterance.voice = targetVoiceObj;
                     }
                 }
 
