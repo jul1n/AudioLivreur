@@ -125,12 +125,15 @@ class EdgeTtsClient {
         const rate = options.rate !== undefined ? `${options.rate >= 0 ? '+' : ''}${options.rate}%` : "+0%";
         const pitch = options.pitch !== undefined ? `${options.pitch >= 0 ? '+' : ''}${options.pitch}Hz` : "+0Hz";
         
-        // Détermination dynamique de la langue SSML correspondant à la voix choisie
         const parts = voice.split('-');
         const voiceLang = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : "fr-FR";
 
+        const reqId = this.generateRequestId();
+        const timestamp = this.dateToString();
         const secMsGec = await this.generateSecMsGec();
-        const wsUrl = `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${this.trustedToken}&Sec-MS-GEC=${secMsGec}&Sec-MS-GEC-Version=${this.secMsGecVersion}`;
+        
+        // ConnectionId + Sec-MS-GEC dans l'URL WebSocket
+        const wsUrl = `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${this.trustedToken}&ConnectionId=${reqId}&Sec-MS-GEC=${secMsGec}&Sec-MS-GEC-Version=${this.secMsGecVersion}`;
 
         return new Promise((resolve, reject) => {
             const socket = new WebSocket(wsUrl);
@@ -139,12 +142,11 @@ class EdgeTtsClient {
             socket.binaryType = 'arraybuffer';
 
             socket.onopen = () => {
-                const reqId = this.generateRequestId();
-                const configMsg = `Path: speech.config\r\nX-RequestId: ${reqId}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n{"context":{"synthesis":{"audio":{"metadataversion":"2.0","format":"audio-24khz-48kbitrate-mono-mp3"}}}}`;
+                // Injonction des entêtes X-Timestamp et X-RequestId conformes à Bing ReadAloud
+                const configMsg = `Path: speech.config\r\nX-RequestId: ${reqId}\r\nX-Timestamp: ${timestamp}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n{"context":{"synthesis":{"audio":{"metadataversion":"2.0","format":"audio-24khz-48kbitrate-mono-mp3"}}}}`;
                 socket.send(configMsg);
 
-                // xml:lang doit impérativement correspondre à la langue de la voix sélectionnée !
-                const ssmlMsg = `Path: ssml\r\nX-RequestId: ${reqId}\r\nContent-Type: application/ssml+xml\r\n\r\n<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='${voiceLang}'><voice name='${voice}'><prosody pitch='${pitch}' rate='${rate}'>${this._escapeXml(text)}</prosody></voice></speak>`;
+                const ssmlMsg = `Path: ssml\r\nX-RequestId: ${reqId}\r\nX-Timestamp: ${timestamp}\r\nContent-Type: application/ssml+xml\r\n\r\n<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='${voiceLang}'><voice name='${voice}'><prosody pitch='${pitch}' rate='${rate}'>${this._escapeXml(text)}</prosody></voice></speak>`;
                 socket.send(ssmlMsg);
             };
 
@@ -165,7 +167,7 @@ class EdgeTtsClient {
                 if (audioBuffers.length > 0) {
                     resolve(new Blob(audioBuffers, { type: 'audio/mp3' }));
                 } else {
-                    reject(new Error("Aucune donnée audio reçue du service TTS Microsoft. Assurez-vous d'utiliser une voix standard (ex: Denise)."));
+                    reject(new Error("Aucune donnée audio reçue du service TTS Microsoft."));
                 }
             };
 
