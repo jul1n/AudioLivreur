@@ -1,0 +1,557 @@
+/* AudioLivreur Web — Neubrutalist Design System (Propre & Épuré) */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+
+:root {
+    --bg-main: #f8f6f0;
+    --bg-card: #ffffff;
+    --border-black: #0f0f0f;
+    --border-width: 2.5px;
+    
+    --shadow-hard: 4px 4px 0px #0f0f0f;
+    --shadow-hard-sm: 2.5px 2.5px 0px #0f0f0f;
+    --shadow-hard-lg: 6px 6px 0px #0f0f0f;
+    
+    --accent-mint: #a7f3d0;
+    --accent-mint-dark: #34d399;
+    --accent-purple: #ddd6fe;
+    --accent-yellow: #fef08a;
+    --accent-pink: #fbcfe8;
+    --accent-blue: #bae6fd;
+    
+    --text-main: #0f0f0f;
+    --text-muted: #525252;
+    
+    --radius-pill: 50px;
+    --radius-card: 16px;
+    --radius-btn: 10px;
+    
+    --transition: all 0.15s ease-in-out;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Header Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 3rem;
+    background: var(--bg-main);
+    border-bottom: var(--border-width) solid var(--border-black);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.brand-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    background: var(--accent-mint);
+    border: var(--border-width) solid var(--border-black);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-hard-sm);
+}
+
+.brand-text h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.brand-text .version {
+    font-size: 0.75rem;
+    font-family: monospace;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+/* Static Status Indicators (NON-CADRÉ & NON-CLICKABLE) */
+.status-pill-static {
+    background: transparent;
+    border: none; /* Aucun cadre */
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: none;
+    cursor: default;
+    user-select: none;
+}
+
+/* Clickable Action Buttons */
+.pill-btn {
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-black);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-hard-sm);
+    transition: var(--transition);
+}
+
+.pill-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3.5px 3.5px 0px #0f0f0f;
+}
+
+/* Main Container Layout */
+.app-container {
+    max-width: 1150px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+    flex: 1;
+    width: 100%;
+}
+
+.hero-header-clean {
+    text-align: left;
+    margin-bottom: 0.5rem;
+}
+
+/* Static Informative Tag (NON-CADRÉ) */
+.info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--accent-yellow);
+    border: none; /* Aucun cadre */
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--text-main);
+    box-shadow: none;
+    cursor: default;
+    user-select: none;
+    margin-bottom: 0.8rem;
+}
+
+.hero-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2.6rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
+}
+
+.hero-subtitle {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Workspace Grid 2 Columns */
+.workspace-grid {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 1.8rem;
+    align-items: start;
+}
+
+@media (max-width: 850px) {
+    .workspace-grid { grid-template-columns: 1fr; }
+    .navbar { padding: 1rem 1.5rem; }
+}
+
+/* Neubrutalist Cards */
+.card-box {
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-black);
+    border-radius: var(--radius-card);
+    padding: 1.8rem;
+    box-shadow: var(--shadow-hard-lg);
+}
+
+.panel-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid var(--border-black);
+}
+
+/* Form Controls Neubrutalist */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.input-neubrutal {
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-black);
+    border-radius: var(--radius-btn);
+    padding: 0.7rem 0.9rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-main);
+    outline: none;
+    box-shadow: var(--shadow-hard-sm);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.input-neubrutal:focus {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px #0f0f0f;
+    background: #ffffff;
+}
+
+.range-neubrutal {
+    accent-color: var(--border-black);
+    cursor: pointer;
+}
+
+/* Buttons Neubrutalist */
+.btn-main {
+    background: var(--accent-mint);
+    border: var(--border-width) solid var(--border-black);
+    border-radius: var(--radius-btn);
+    padding: 0.9rem 1.5rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    box-shadow: var(--shadow-hard);
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-main:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hard-lg);
+    background: var(--accent-mint-dark);
+}
+
+.btn-main:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0px #0f0f0f;
+}
+
+.btn-main.pink { background: var(--accent-pink); }
+.btn-main.yellow { background: var(--accent-yellow); }
+.btn-main.purple { background: var(--accent-purple); }
+
+.flex-1 { flex: 1; }
+.hidden { display: none !important; }
+
+/* Dropzone */
+.dropzone-neubrutal {
+    border: var(--border-width) dashed var(--border-black);
+    background: var(--bg-main);
+    border-radius: var(--radius-card);
+    padding: 3rem 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    transition: var(--transition);
+}
+
+.dropzone-neubrutal.dragover {
+    background: var(--accent-yellow);
+    transform: scale(1.01);
+}
+
+.dropzone-icon-box {
+    width: 64px;
+    height: 64px;
+    background: var(--accent-blue);
+    border: var(--border-width) solid var(--border-black);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: var(--shadow-hard-sm);
+}
+
+/* Preview Grid & Badges */
+.book-preview-grid {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1.5rem;
+}
+
+.cover-box {
+    width: 140px;
+    height: 190px;
+    background: var(--accent-yellow);
+    border: var(--border-width) solid var(--border-black);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-hard-sm);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+}
+
+.cover-box img { width: 100%; height: 100%; object-fit: cover; }
+
+.pill-badge {
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-black);
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.8rem;
+    font-weight: 700;
+    box-shadow: var(--shadow-hard-sm);
+}
+.pill-badge.accent-mint { background: var(--accent-mint); }
+.pill-badge.accent-blue { background: var(--accent-blue); }
+.pill-badge.accent-yellow { background: var(--accent-yellow); }
+
+.section-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+    display: block;
+}
+
+.chapters-box {
+    background: var(--bg-main);
+    border: var(--border-width) solid var(--border-black);
+    border-radius: var(--radius-card);
+    padding: 1rem;
+    max-height: 220px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.chapter-row {
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-black);
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--radius-btn);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    box-shadow: var(--shadow-hard-sm);
+}
+
+.metric-card {
+    background: var(--bg-main);
+    border: var(--border-width) solid var(--border-black);
+    padding: 0.9rem;
+    border-radius: var(--radius-btn);
+    box-shadow: var(--shadow-hard-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.metric-label { font-size: 0.7rem; font-weight: 800; color: var(--text-muted); }
+.metric-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; }
+
+.console-neubrutal {
+    background: #0f0f0f;
+    color: #ffffff;
+    border: var(--border-width) solid var(--border-black);
+    border-radius: var(--radius-card);
+    padding: 0.9rem;
+    font-family: monospace;
+    font-size: 0.8rem;
+    height: 140px;
+    overflow-y: auto;
+    box-shadow: var(--shadow-hard-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.log-entry.info { color: var(--accent-blue); }
+.log-entry.success { color: var(--accent-mint); }
+.log-entry.warning { color: var(--accent-yellow); }
+.log-entry.error { color: var(--accent-pink); }
+
+/* Footer & Modals Neubrutalist */
+.footer {
+    border-top: var(--border-width) solid var(--border-black);
+    background: var(--bg-main);
+    padding: 1.5rem 3rem;
+    margin-top: auto;
+}
+
+.footer-content {
+    max-width: 1150px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.footer-links {
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+}
+
+.footer-link-btn {
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    text-decoration: underline;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.footer-link-btn:hover {
+    color: var(--accent-mint-dark);
+}
+
+/* Modals Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 15, 15, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.modal-card {
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-black);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-hard-lg);
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalSlideIn {
+    from { transform: translateY(20px) scale(0.95); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 2px solid var(--border-black);
+    background: var(--accent-yellow);
+}
+
+.modal-header h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.modal-close-btn {
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-black);
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 700;
+    box-shadow: var(--shadow-hard-sm);
+    transition: var(--transition);
+}
+
+.modal-close-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px #0f0f0f;
+}
+
+.modal-body {
+    padding: 1.8rem 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
