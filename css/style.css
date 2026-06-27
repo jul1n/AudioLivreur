@@ -40,7 +40,8 @@ body {
     background-color: var(--bg-main);
     color: var(--text-main);
     min-height: 100vh;
-    padding-bottom: 3rem;
+    display: flex;
+    flex-direction: column;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -105,7 +106,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    box-shadow: none; /* Pas d'ombre dure pour ne pas ressembler à un bouton */
+    box-shadow: none;
     cursor: default;
     user-select: none;
 }
@@ -140,6 +141,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1.8rem;
+    flex: 1;
+    width: 100%;
 }
 
 .hero-header-clean {
@@ -147,7 +150,6 @@ body {
     margin-bottom: 0.5rem;
 }
 
-/* Static Informative Tag (NON-CLICKABLE) */
 .info-badge {
     display: inline-flex;
     align-items: center;
@@ -155,11 +157,11 @@ body {
     background: var(--accent-yellow);
     border: 1.5px solid var(--border-black);
     padding: 0.25rem 0.75rem;
-    border-radius: 6px; /* Coins légèrement carrés pour se distinguer des boutons pilules */
+    border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 800;
     color: var(--text-main);
-    box-shadow: none; /* Pas d'ombre d'interaction */
+    box-shadow: none;
     cursor: default;
     user-select: none;
     margin-bottom: 0.8rem;
@@ -431,3 +433,125 @@ body {
 .log-entry.success { color: var(--accent-mint); }
 .log-entry.warning { color: var(--accent-yellow); }
 .log-entry.error { color: var(--accent-pink); }
+
+/* Footer & Modals Neubrutalist */
+.footer {
+    border-top: var(--border-width) solid var(--border-black);
+    background: var(--bg-main);
+    padding: 1.5rem 3rem;
+    margin-top: auto;
+}
+
+.footer-content {
+    max-width: 1150px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.footer-links {
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+}
+
+.footer-link-btn {
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    text-decoration: underline;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.footer-link-btn:hover {
+    color: var(--accent-mint-dark);
+}
+
+/* Modals Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 15, 15, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.modal-card {
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-black);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-hard-lg);
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalSlideIn {
+    from { transform: translateY(20px) scale(0.95); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 2px solid var(--border-black);
+    background: var(--accent-yellow);
+}
+
+.modal-header h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.modal-close-btn {
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-black);
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 700;
+    box-shadow: var(--shadow-hard-sm);
+    transition: var(--transition);
+}
+
+.modal-close-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px #0f0f0f;
+}
+
+.modal-body {
+    padding: 1.8rem 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}

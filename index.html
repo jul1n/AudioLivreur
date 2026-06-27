@@ -236,6 +236,31 @@
         </section>
     </main>
 
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>© 2026 <strong>audiolivreur.ai</strong> · Studio 100% Client-Side</p>
+            <div class="footer-links">
+                <button class="footer-link-btn" id="btnOpenModalHow">Comment ça marche ?</button>
+                <button class="footer-link-btn" id="btnOpenModalLegal">Confidentialité & CGU</button>
+                <button class="footer-link-btn" id="btnOpenModalCredits">Crédits</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Neubrutalist Modals Overlay -->
+    <div class="modal-overlay hidden" id="modalOverlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modalTitle">Titre de la fenêtre</h3>
+                <button class="modal-close-btn" id="btnCloseModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic Modal Content -->
+            </div>
+        </div>
+    </div>
+
     <!-- Application Scripts -->
     <script src="js/tts/edgeTts.js"></script>
     <script src="js/parsers/fileParser.js"></script>

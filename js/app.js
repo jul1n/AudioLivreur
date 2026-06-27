@@ -1,5 +1,5 @@
 /**
- * Orchestrateur principal de l'application audiolivreur.ai (100% Fonctionnel & Épuré)
+ * Orchestrateur principal de l'application audiolivreur.ai (100% Fonctionnel & Modales)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // DOM Elements
     const elements = {
-        // Form & Inputs
         selectLanguage: document.getElementById('selectLanguage'),
         selectVoice: document.getElementById('selectVoice'),
         btnTestVoice: document.getElementById('btnTestVoice'),
@@ -20,13 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
         rangePitch: document.getElementById('rangePitch'),
         valPitch: document.getElementById('valPitch'),
 
-        // Step 1: Dropzone
         dropzoneCard: document.getElementById('dropzoneCard'),
         dropzone: document.getElementById('dropzone'),
         fileInput: document.getElementById('fileInput'),
         btnBrowse: document.getElementById('btnBrowse'),
 
-        // Step 2: Book Details
         bookDetailsCard: document.getElementById('bookDetailsCard'),
         coverPreview: document.getElementById('coverPreview'),
         coverPlaceholderIcon: document.getElementById('coverPlaceholderIcon'),
@@ -39,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnStartConversion: document.getElementById('btnStartConversion'),
         btnReset: document.getElementById('btnReset'),
 
-        // Step 3: Progress Dashboard
         progressCard: document.getElementById('progressCard'),
         progressStatusText: document.getElementById('progressStatusText'),
         progressPercentText: document.getElementById('progressPercentText'),
@@ -50,12 +46,74 @@ document.addEventListener('DOMContentLoaded', () => {
         consoleLogs: document.getElementById('consoleLogs'),
         btnCancelConversion: document.getElementById('btnCancelConversion'),
 
-        // Step 4: Finished View
         finishedCard: document.getElementById('finishedCard'),
         btnDownloadAudiobook: document.getElementById('btnDownloadAudiobook'),
         btnDownloadTranscript: document.getElementById('btnDownloadTranscript'),
-        btnNewConversion: document.getElementById('btnNewConversion')
+        btnNewConversion: document.getElementById('btnNewConversion'),
+
+        // Modals Elements
+        modalOverlay: document.getElementById('modalOverlay'),
+        modalTitle: document.getElementById('modalTitle'),
+        modalBody: document.getElementById('modalBody'),
+        btnCloseModal: document.getElementById('btnCloseModal'),
+        btnOpenModalHow: document.getElementById('btnOpenModalHow'),
+        btnOpenModalLegal: document.getElementById('btnOpenModalLegal'),
+        btnOpenModalCredits: document.getElementById('btnOpenModalCredits')
     };
+
+    // Modal Controller
+    function openModal(title, htmlContent) {
+        elements.modalTitle.textContent = title;
+        elements.modalBody.innerHTML = htmlContent;
+        elements.modalOverlay.classList.remove('hidden');
+    }
+
+    function closeModal() {
+        elements.modalOverlay.classList.add('hidden');
+    }
+
+    elements.btnCloseModal.addEventListener('click', closeModal);
+    elements.modalOverlay.addEventListener('click', (e) => {
+        if (e.target === elements.modalOverlay) closeModal();
+    });
+
+    // Pop-up 1: Comment ça marche ?
+    elements.btnOpenModalHow.addEventListener('click', () => {
+        openModal("📖 Comment ça marche ?", `
+            <p><strong>audiolivreur.ai</strong> transforme vos livres numériques en audiobooks haute définition en 3 étapes simples :</p>
+            <ol style="margin-left: 1.2rem; display: flex; flex-direction: column; gap: 0.6rem;">
+                <li><strong>Glissez-déposez votre livre :</strong> Compatible avec les formats EPUB, PDF, DOCX, TXT et MOBI.</li>
+                <li><strong>Choisissez la voix :</strong> Sélectionnez la voix neuronale et ajustez le rythme de lecture selon vos préférences.</li>
+                <li><strong>Téléchargez votre Audiobook :</strong> La synthèse s'effectue en direct. Récupérez vos fichiers MP3 prêts à l'écoute !</li>
+            </ol>
+        `);
+    });
+
+    // Pop-up 2: Confidentialité & CGU
+    elements.btnOpenModalLegal.addEventListener('click', () => {
+        openModal("🔒 Confidentialité & Traitement des Données", `
+            <p><strong>Respect total de votre vie privée :</strong></p>
+            <ul style="margin-left: 1.2rem; display: flex; flex-direction: column; gap: 0.6rem;">
+                <li><strong>Traitement 100% Local :</strong> La lecture et le découpage de vos livres s'exécutent intégralement dans la mémoire de votre navigateur. Aucun fichier n'est téléversé vers un serveur tiers.</li>
+                <li><strong>IP Cliente Directe :</strong> Les requêtes vocales sont émises directement depuis votre connexion internet vers les services de synthèse vocal public.</li>
+                <li><strong>Aucun Traçage :</strong> Aucun cookie publicitaire ni suivi de données personnelles n'est utilisé.</li>
+            </ul>
+        `);
+    });
+
+    // Pop-up 3: Crédits
+    elements.btnOpenModalCredits.addEventListener('click', () => {
+        openModal("✨ Crédits & Bibliothèques Open-Source", `
+            <p>Ce projet utilise d'excellentes bibliothèques open-source :</p>
+            <ul style="margin-left: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                <li><strong>Microsoft Edge TTS API</strong> - Moteur de synthèse vocale neuronale.</li>
+                <li><strong>JSZip</strong> - Gestion des archives EPUB et création des fichiers ZIP.</li>
+                <li><strong>PDF.js</strong> (Mozilla) - Extraction du texte des fichiers PDF.</li>
+                <li><strong>Mammoth.js</strong> - Convertisseur de documents Word (.docx).</li>
+                <li><strong>FontAwesome</strong> - Icônes vectorielles.</li>
+            </ul>
+        `);
+    });
 
     // Populate Voice Select Dropdown based on Language Select
     function updateVoiceSelect() {
@@ -74,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateVoiceSelect();
     elements.selectLanguage.addEventListener('change', updateVoiceSelect);
 
-    // Sync Range Slider Values Text
     elements.rangeRate.addEventListener('input', (e) => {
         elements.valRate.textContent = `${e.target.value >= 0 ? '+' : ''}${e.target.value}%`;
     });
@@ -82,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.valPitch.textContent = `${e.target.value >= 0 ? '+' : ''}${e.target.value}Hz`;
     });
 
-    // Logging Utility
     function log(msg, type = 'info') {
         const entry = document.createElement('div');
         entry.className = `log-entry ${type}`;
@@ -92,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.consoleLogs.scrollTop = elements.consoleLogs.scrollHeight;
     }
 
-    // Test Voice Sample Button Action
     elements.btnTestVoice.addEventListener('click', async () => {
         const voice = elements.selectVoice.value;
         const rate = parseInt(elements.rangeRate.value);
@@ -115,7 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // File Dropzone Actions
     elements.btnBrowse.addEventListener('click', () => elements.fileInput.click());
 
     elements.fileInput.addEventListener('change', (e) => {
@@ -140,7 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.dataTransfer.files.length > 0) handleFileSelect(e.dataTransfer.files[0]);
     });
 
-    // Parse Selected File
     async function handleFileSelect(file) {
         try {
             log(`Analyse du fichier : ${file.name}...`);
@@ -170,7 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.coverPlaceholderIcon.classList.remove('hidden');
             }
 
-            // Render Chapters list
             elements.chaptersList.innerHTML = '';
             currentBookData.chapters.forEach((ch, idx) => {
                 const item = document.createElement('div');
@@ -214,7 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.btnReset.addEventListener('click', resetToDropzone);
     elements.btnNewConversion.addEventListener('click', resetToDropzone);
 
-    // Start Conversion Process
     elements.btnStartConversion.addEventListener('click', async () => {
         if (!currentBookData || currentBookData.chapters.length === 0) return;
 
@@ -294,7 +345,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Download MP3 Zip Action
     elements.btnDownloadAudiobook.addEventListener('click', async () => {
         if (generatedAudioFiles.length === 0) return;
 
@@ -324,7 +374,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Download Text Transcript Action
     elements.btnDownloadTranscript.addEventListener('click', () => {
         if (!currentBookData) return;
         let fullTranscript = `=== ${elements.metaTitle.value} ===\nAuteur: ${elements.metaAuthor.value}\n\n`;
