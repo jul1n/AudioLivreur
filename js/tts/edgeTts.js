@@ -1,15 +1,13 @@
 /**
  * Client Edge TTS WebSocket en pure JavaScript (Client-Side)
- * Implémente le protocole exact de Microsoft Edge Read Aloud
+ * Découpage automatique des textes longs & Reconnexion résiliente
  */
 
 class EdgeTtsClient {
     constructor() {
         this.trustedToken = "6A5AA1D4EA5F4009A6C6230462002A54";
         
-        // Liste des voix neuronales haute qualité par langue
         this.voicesDatabase = [
-            // Français
             { ShortName: "fr-FR-RemyMultilingualNeural", LocalName: "Rémy (Multilingue)", Gender: "Male", Locale: "fr-FR" },
             { ShortName: "fr-FR-VivienneMultilingualNeural", LocalName: "Vivienne (Multilingue)", Gender: "Female", Locale: "fr-FR" },
             { ShortName: "fr-FR-DeniseNeural", LocalName: "Denise", Gender: "Female", Locale: "fr-FR" },
@@ -17,22 +15,18 @@ class EdgeTtsClient {
             { ShortName: "fr-CA-AntoineNeural", LocalName: "Antoine (Canada)", Gender: "Male", Locale: "fr-FR" },
             { ShortName: "fr-CA-SylvieNeural", LocalName: "Sylvie (Canada)", Gender: "Female", Locale: "fr-FR" },
 
-            // Anglais US & UK
             { ShortName: "en-US-AndrewMultilingualNeural", LocalName: "Andrew (US Multilingual)", Gender: "Male", Locale: "en-US" },
             { ShortName: "en-US-AvaMultilingualNeural", LocalName: "Ava (US Multilingual)", Gender: "Female", Locale: "en-US" },
             { ShortName: "en-US-ChristopherNeural", LocalName: "Christopher (US)", Gender: "Male", Locale: "en-US" },
             { ShortName: "en-GB-SoniaNeural", LocalName: "Sonia (UK)", Gender: "Female", Locale: "en-GB" },
             { ShortName: "en-GB-RyanNeural", LocalName: "Ryan (UK)", Gender: "Male", Locale: "en-GB" },
 
-            // Espagnol
             { ShortName: "es-ES-AlvaroNeural", LocalName: "Álvaro", Gender: "Male", Locale: "es-ES" },
             { ShortName: "es-ES-ElviraNeural", LocalName: "Elvira", Gender: "Female", Locale: "es-ES" },
 
-            // Allemand
             { ShortName: "de-DE-ConradNeural", LocalName: "Conrad", Gender: "Male", Locale: "de-DE" },
             { ShortName: "de-DE-KatjaNeural", LocalName: "Katja", Gender: "Female", Locale: "de-DE" },
 
-            // Italien
             { ShortName: "it-IT-DiegoNeural", LocalName: "Diego", Gender: "Male", Locale: "it-IT" },
             { ShortName: "it-IT-ElsaNeural", LocalName: "Elsa", Gender: "Female", Locale: "it-IT" }
         ];
@@ -42,9 +36,6 @@ class EdgeTtsClient {
         return this.voicesDatabase.filter(v => v.Locale === locale || (locale.startsWith("en") && v.Locale.startsWith("en")));
     }
 
-    /**
-     * Identifiant de requête 32 caractères hexadécimaux sans tirets
-     */
     generateRequestId() {
         return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
             var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -52,17 +43,69 @@ class EdgeTtsClient {
         });
     }
 
-    /**
-     * Date au format ISO Bing TTS (ex: Wed Sep 15 2021 00:00:00 GMT+0000)
-     */
     getTimestamp() {
         return new Date().toString();
     }
 
     /**
-     * Synthétise un extrait de texte en audio MP3
+     * Découpe un long texte en sous-morceaux respectant la ponctuation (< 2000 caractères)
      */
-    async synthesize(text, options = {}) {
+    splitTextSmart(text, maxChars = 2000) {
+        if (text.length <= maxChars) return [text];
+        const chunks = [];
+        let start = 0;
+        const len = text.length;
+
+        while (start < len) {
+            if (len - start <= maxChars) {
+                chunks.push(text.slice(start).trim());
+                break;
+            }
+            let end = start + maxChars;
+            let splitIdx = -1;
+            for (const char of ['. ', '! ', '? ', '\n']) {
+                const idx = text.lastIndexOf(char, end);
+                if (idx > start && idx > splitIdx) {
+                    splitIdx = idx + char.length;
+                }
+            }
+            if (splitIdx === -1) {
+                splitIdx = text.lastIndexOf(' ', end);
+            }
+            if (splitIdx === -1 || splitIdx <= start) {
+                splitIdx = end;
+            }
+            const chunk = text.slice(start, splitIdx).trim();
+            if (chunk.length > 0) chunks.push(chunk);
+            start = splitIdx;
+        }
+        return chunks;
+    }
+
+    /**
+     * Synthétise un chapitre complet (découpé automatiquement si trop long)
+     */
+    async synthesize(fullText, options = {}, onChunkProgress = null) {
+        const textChunks = this.splitTextSmart(fullText, 2000);
+        const audioBlobs = [];
+
+        for (let i = 0; i < textChunks.length; i++) {
+            const chunkText = textChunks[i];
+            const blob = await this.synthesizeSingleChunk(chunkText, options);
+            audioBlobs.push(blob);
+            if (onChunkProgress) {
+                onChunkProgress(i + 1, textChunks.length);
+            }
+        }
+
+        // Fusionner les blobs MP3 du chapitre
+        return new Blob(audioBlobs, { type: "audio/mp3" });
+    }
+
+    /**
+     * Synthétise un morceau individuel (< 2000 caractères) via WebSocket
+     */
+    async synthesizeSingleChunk(text, options = {}) {
         return new Promise((resolve, reject) => {
             const voice = options.voice || "fr-FR-RemyMultilingualNeural";
             const rate = options.rate !== undefined ? (options.rate >= 0 ? `+${options.rate}%` : `${options.rate}%`) : "+0%";
@@ -80,10 +123,17 @@ class EdgeTtsClient {
             let isCompleted = false;
             let errorMessage = null;
 
+            // Timeout de sécurité si le serveur ne répond pas sous 15 secondes
+            const timeoutTimer = setTimeout(() => {
+                if (!isCompleted) {
+                    ws.close();
+                    reject(new Error("Délai d'attente dépassé (Timeout WebSocket)"));
+                }
+            }, 15000);
+
             ws.onopen = () => {
                 const timestamp = this.getTimestamp();
 
-                // 1. Configuration de session
                 const configHeader = `Path: speech.config\r\nX-Timestamp: ${timestamp}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n`;
                 const configData = JSON.stringify({
                     context: {
@@ -100,10 +150,7 @@ class EdgeTtsClient {
                 });
                 ws.send(configHeader + configData);
 
-                // 2. Échapper le texte pour SSML
                 const escapedText = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-                // 3. Demande SSML
                 const ssmlHeader = `Path: ssml\r\nX-RequestId: ${requestId}\r\nX-Timestamp: ${timestamp}\r\nContent-Type: application/ssml+xml\r\n\r\n`;
                 const ssmlData = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='${langLocale}'><voice name='${voice}'><prosody pitch='${pitch}' rate='${rate}' volume='${volume}'>${escapedText}</prosody></voice></speak>`;
 
@@ -114,6 +161,7 @@ class EdgeTtsClient {
                 if (typeof event.data === "string") {
                     if (event.data.includes("Path: turn.end")) {
                         isCompleted = true;
+                        clearTimeout(timeoutTimer);
                         ws.close();
                     }
                 } else if (event.data instanceof ArrayBuffer) {
@@ -133,16 +181,17 @@ class EdgeTtsClient {
             };
 
             ws.onerror = (err) => {
-                console.error("[EdgeTTS WebSocket Error]", err);
-                errorMessage = "Échec de connexion WebSocket avec le service Bing TTS.";
+                console.error("[EdgeTTS WS Error]", err);
+                errorMessage = "Erreur réseau de connexion au service Bing TTS.";
             };
 
             ws.onclose = (evt) => {
+                clearTimeout(timeoutTimer);
                 if (audioChunks.length > 0) {
                     const audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
                     resolve(audioBlob);
                 } else {
-                    const reason = errorMessage || `Connexion fermée (Code: ${evt.code}). Vérifiez votre connexion internet.`;
+                    const reason = errorMessage || `Serveur déconnecté (Code ${evt.code}).`;
                     reject(new Error(reason));
                 }
             };
