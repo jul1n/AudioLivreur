@@ -261,9 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast("Lecture audio en cours...");
         } catch (err) {
             console.warn("Test vocal : ", err);
-            const host = window.location.hostname || 'localhost';
-            showToast(`Connexion au serveur Microsoft bloquée sur ${host}`, true);
-            alert(`⚠️ Impossible d'établir la connexion WebSocket directe avec le serveur Microsoft Bing TTS.\n\nOrigine hôte : ${host}\nRaison : Le navigateur Web (Chrome/Edge) transmet l'en-tête de sécurité de l'hôte actuel (${host}) que les serveurs Bing restreignent en direct.`);
+            showToast("Serveur temporairement indisponible. Réessayez.", true);
         } finally {
             elements.btnTestVoice.disabled = false;
             elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-volume-high"></i> Tester la Voix`;

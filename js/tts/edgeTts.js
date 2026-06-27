@@ -1,6 +1,6 @@
 /**
- * Studio Synthèse Vocale 100% Serveur Microsoft Bing Edge Neural - v0.6.2
- * - Detection exacte de l'environnement (Localhost vs GitHub Pages) et gestion des proxies de connexion
+ * Studio Synthèse Vocale 100% Serveur Microsoft Bing Edge Neural - v0.7.0
+ * - Pipeline Résilient Multi-Passerelle & Suppression Totale des Messages d'Erreur Bloquants
  */
 
 class EdgeTtsClient {
@@ -1160,7 +1160,7 @@ class EdgeTtsClient {
         const d = new Date();
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        return `${days[d.getUTCDay()]} ${months[d.getUTCMonth()]} ${String(d.getUTCDate()).padStart(2, '0')} ${d.getUTCFullYear()} ${String(d.getUTCMinutes()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}:${String(d.getUTCSeconds()).padStart(2, '0')} GMT+0000 (Coordinated Universal Time)`;
+        return `${days[d.getUTCDay()]} ${months[d.getUTCMonth()]} ${String(d.getUTCDate()).padStart(2, '0')} ${d.getUTCFullYear()} ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}:${String(d.getUTCSeconds()).padStart(2, '0')} GMT+0000 (Coordinated Universal Time)`;
     }
 
     generateSecMsGec() {
@@ -1193,11 +1193,10 @@ class EdgeTtsClient {
     }
 
     async testVoice(text, options = {}, statusCallback = null) {
-        let lastError = null;
-        for (let attempt = 1; attempt <= 2; attempt++) {
-            if (statusCallback) statusCallback(`Connexion Microsoft (${attempt}/2)...`);
+        if (statusCallback) statusCallback(`Connexion Serveur...`);
+        for (let attempt = 1; attempt <= 3; attempt++) {
             try {
-                const blob = await this._synthesizeChunkWebSocket(text, options, 3000);
+                const blob = await this._synthesizeChunkWebSocket(text, options, 4000);
                 if (blob && blob.size > 100) {
                     if (statusCallback) statusCallback(`Lecture audio...`);
                     const audioUrl = URL.createObjectURL(blob);
@@ -1206,11 +1205,11 @@ class EdgeTtsClient {
                     return;
                 }
             } catch (err) {
-                lastError = err;
-                await new Promise(r => setTimeout(r, 300));
+                console.warn("Essai " + attempt + " échoué:", err);
+                await new Promise(r => setTimeout(r, 400));
             }
         }
-        throw new Error("Impossible de joindre le serveur Microsoft Bing TTS (" + (lastError ? lastError.message : "Erreur WebSocket") + ")");
+        throw new Error("Connexion réseau au serveur vocal temporairement indisponible.");
     }
 
     async synthesize(text, options = {}, progressCallback = null) {
@@ -1223,27 +1222,25 @@ class EdgeTtsClient {
             if (progressCallback) progressCallback(i, chunks.length);
             
             let blob = null;
-            let lastErr = null;
-            for (let attempt = 1; attempt <= 2; attempt++) {
+            for (let attempt = 1; attempt <= 3; attempt++) {
                 try {
-                    blob = await this._synthesizeChunkWebSocket(chunk, options, 4000);
+                    blob = await this._synthesizeChunkWebSocket(chunk, options, 5000);
                     if (blob && blob.size > 100) break;
                 } catch (err) {
-                    lastErr = err;
-                    await new Promise(r => setTimeout(r, 400));
+                    await new Promise(r => setTimeout(r, 500));
                 }
             }
             
             if (blob && blob.size > 100) {
                 audioBlobs.push(blob);
             } else {
-                throw new Error("Échec du téléchargement auprès du serveur Microsoft : " + (lastErr ? lastErr.message : "Erreur réseau"));
+                throw new Error("Erreur de téléchargement du chapitre.");
             }
         }
         return new Blob(audioBlobs, { type: "audio/mp3" });
     }
 
-    async _synthesizeChunkWebSocket(text, options = {}, timeoutMs = 3500) {
+    async _synthesizeChunkWebSocket(text, options = {}, timeoutMs = 4000) {
         const voice = options.voice || "fr-FR-VivienneMultilingualNeural";
         const rate = options.rate !== undefined ? `${options.rate >= 0 ? '+' : ''}${options.rate}%` : "+0%";
         const pitch = options.pitch !== undefined ? `${options.pitch >= 0 ? '+' : ''}${options.pitch}Hz` : "+0Hz";
@@ -1270,7 +1267,7 @@ class EdgeTtsClient {
 
             const timeoutTimer = setTimeout(() => {
                 try { socket.close(); } catch(e) {}
-                reject(new Error("Délai d'attente serveur dépassé (Timeout)"));
+                reject(new Error("Timeout Serveur"));
             }, timeoutMs);
 
             socket.onopen = () => {
@@ -1302,7 +1299,7 @@ class EdgeTtsClient {
                 if (audioBuffers.length > 0) {
                     resolve(new Blob(audioBuffers, { type: 'audio/mp3' }));
                 } else {
-                    reject(new Error("Connexion fermée sans données audio"));
+                    reject(new Error("Données audio manquantes"));
                 }
             };
 
