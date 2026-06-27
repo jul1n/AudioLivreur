@@ -8,28 +8,29 @@ class EdgeTtsClient {
         this.trustedToken = "6A5AA1D4EAFF4E9FB37E23D68491D6F4";
         this.secMsGecVersion = "1-143.0.3650.75";
         
+        // Les voix de production haute stabilité en premier
         this.voicesDatabase = [
+            { ShortName: "fr-FR-DeniseNeural", LocalName: "Denise (Standard)", Gender: "Female", Locale: "fr-FR" },
+            { ShortName: "fr-FR-HenriNeural", LocalName: "Henri (Standard)", Gender: "Male", Locale: "fr-FR" },
             { ShortName: "fr-FR-RemyMultilingualNeural", LocalName: "Rémy (Multilingue)", Gender: "Male", Locale: "fr-FR" },
             { ShortName: "fr-FR-VivienneMultilingualNeural", LocalName: "Vivienne (Multilingue)", Gender: "Female", Locale: "fr-FR" },
-            { ShortName: "fr-FR-DeniseNeural", LocalName: "Denise", Gender: "Female", Locale: "fr-FR" },
-            { ShortName: "fr-FR-HenriNeural", LocalName: "Henri", Gender: "Male", Locale: "fr-FR" },
             { ShortName: "fr-CA-AntoineNeural", LocalName: "Antoine (Canada)", Gender: "Male", Locale: "fr-FR" },
             { ShortName: "fr-CA-SylvieNeural", LocalName: "Sylvie (Canada)", Gender: "Female", Locale: "fr-FR" },
 
+            { ShortName: "en-US-JennyNeural", LocalName: "Jenny (US)", Gender: "Female", Locale: "en-US" },
+            { ShortName: "en-US-GuyNeural", LocalName: "Guy (US)", Gender: "Male", Locale: "en-US" },
             { ShortName: "en-US-AndrewMultilingualNeural", LocalName: "Andrew (US Multilingual)", Gender: "Male", Locale: "en-US" },
-            { ShortName: "en-US-AvaMultilingualNeural", LocalName: "Ava (US Multilingual)", Gender: "Female", Locale: "en-US" },
-            { ShortName: "en-US-ChristopherNeural", LocalName: "Christopher (US)", Gender: "Male", Locale: "en-US" },
             { ShortName: "en-GB-SoniaNeural", LocalName: "Sonia (UK)", Gender: "Female", Locale: "en-GB" },
             { ShortName: "en-GB-RyanNeural", LocalName: "Ryan (UK)", Gender: "Male", Locale: "en-GB" },
 
-            { ShortName: "es-ES-AlvaroNeural", LocalName: "Álvaro", Gender: "Male", Locale: "es-ES" },
             { ShortName: "es-ES-ElviraNeural", LocalName: "Elvira", Gender: "Female", Locale: "es-ES" },
+            { ShortName: "es-ES-AlvaroNeural", LocalName: "Álvaro", Gender: "Male", Locale: "es-ES" },
 
-            { ShortName: "de-DE-ConradNeural", LocalName: "Conrad", Gender: "Male", Locale: "de-DE" },
             { ShortName: "de-DE-KatjaNeural", LocalName: "Katja", Gender: "Female", Locale: "de-DE" },
+            { ShortName: "de-DE-ConradNeural", LocalName: "Conrad", Gender: "Male", Locale: "de-DE" },
 
-            { ShortName: "it-IT-DiegoNeural", LocalName: "Diego", Gender: "Male", Locale: "it-IT" },
-            { ShortName: "it-IT-ElsaNeural", LocalName: "Elsa", Gender: "Female", Locale: "it-IT" }
+            { ShortName: "it-IT-ElsaNeural", LocalName: "Elsa", Gender: "Female", Locale: "it-IT" },
+            { ShortName: "it-IT-DiegoNeural", LocalName: "Diego", Gender: "Male", Locale: "it-IT" }
         ];
     }
 
@@ -120,10 +121,14 @@ class EdgeTtsClient {
     }
 
     async _synthesizeChunk(text, options = {}) {
-        const voice = options.voice || "fr-FR-RemyMultilingualNeural";
+        const voice = options.voice || "fr-FR-DeniseNeural";
         const rate = options.rate !== undefined ? `${options.rate >= 0 ? '+' : ''}${options.rate}%` : "+0%";
         const pitch = options.pitch !== undefined ? `${options.pitch >= 0 ? '+' : ''}${options.pitch}Hz` : "+0Hz";
         
+        // Détermination dynamique de la langue SSML correspondant à la voix choisie
+        const parts = voice.split('-');
+        const voiceLang = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : "fr-FR";
+
         const secMsGec = await this.generateSecMsGec();
         const wsUrl = `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${this.trustedToken}&Sec-MS-GEC=${secMsGec}&Sec-MS-GEC-Version=${this.secMsGecVersion}`;
 
@@ -138,7 +143,8 @@ class EdgeTtsClient {
                 const configMsg = `Path: speech.config\r\nX-RequestId: ${reqId}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n{"context":{"synthesis":{"audio":{"metadataversion":"2.0","format":"audio-24khz-48kbitrate-mono-mp3"}}}}`;
                 socket.send(configMsg);
 
-                const ssmlMsg = `Path: ssml\r\nX-RequestId: ${reqId}\r\nContent-Type: application/ssml+xml\r\n\r\n<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='${voice}'><prosody pitch='${pitch}' rate='${rate}'>${this._escapeXml(text)}</prosody></voice></speak>`;
+                // xml:lang doit impérativement correspondre à la langue de la voix sélectionnée !
+                const ssmlMsg = `Path: ssml\r\nX-RequestId: ${reqId}\r\nContent-Type: application/ssml+xml\r\n\r\n<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='${voiceLang}'><voice name='${voice}'><prosody pitch='${pitch}' rate='${rate}'>${this._escapeXml(text)}</prosody></voice></speak>`;
                 socket.send(ssmlMsg);
             };
 
@@ -159,7 +165,7 @@ class EdgeTtsClient {
                 if (audioBuffers.length > 0) {
                     resolve(new Blob(audioBuffers, { type: 'audio/mp3' }));
                 } else {
-                    reject(new Error("Aucune donnée audio reçue du service TTS Microsoft."));
+                    reject(new Error("Aucune donnée audio reçue du service TTS Microsoft. Assurez-vous d'utiliser une voix standard (ex: Denise)."));
                 }
             };
 
