@@ -87,11 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
         btnOpenModalCredits: document.getElementById('btnOpenModalCredits')
     };
 
+    // Toggle MP3 / M4B Format Handler avec textes super funs
     elements.toggleMp3.addEventListener('click', () => {
         currentFormat = 'mp3';
         elements.toggleMp3.classList.add('active');
         elements.toggleM4b.classList.remove('active');
-        elements.formatHint.innerHTML = `⚡ <strong>Recommandé (MP3) :</strong> Génération ultra-rapide par chapitres sans solliciter inutilement la batterie et sans échauffement de votre appareil.`;
+        elements.formatHint.innerHTML = `⚡ <strong>Le Choix des Boss (MP3) :</strong> Rapide comme l'éclair ! Ton PC/Mac/Phone reste au frais et ta batterie te dira merci. 🚀`;
         if (elements.lblDownloadFormat) elements.lblDownloadFormat.textContent = `.zip MP3`;
     });
 
@@ -99,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentFormat = 'm4b';
         elements.toggleM4b.classList.add('active');
         elements.toggleMp3.classList.remove('active');
-        elements.formatHint.innerHTML = `⚠️ <strong>Format M4B Unique :</strong> L'assemblage du fichier M4B nécessite un traitement audio intensif dans votre navigateur qui peut faire solliciter et chauffer les processeurs de votre ordinateur ou smartphone.`;
+        elements.formatHint.innerHTML = `🔥 <strong>Mode M4B Unique (Attention les cuisses !) :</strong> Ton navigateur va faire de la musculation intensive pour tout fusionner. Risque de faire chauffer ton PC ou ton smartphone en mode radiateur d'appoint ! 🏋️‍♂️🔥`;
         if (elements.lblDownloadFormat) elements.lblDownloadFormat.textContent = `.m4b Unique`;
     });
 
