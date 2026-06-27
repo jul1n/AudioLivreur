@@ -156,9 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.btnOpenModalContact.addEventListener('click', () => {
         openModal("⚡ Contacter le Créateur", `
             <p style="font-size:1.05rem; font-weight:600;">Une idée, une suggestion ou un mot doux ? 📬</p>
-            <p>Cette application a été imaginée et développée par <strong>Julien HOUSSIN</strong> pour rendre la création d'audiobooks accessible à tous, gratuitement et sans contraintes.</p>
+            <p>Cette application a été imaginée et développée par <strong>Julien</strong> pour rendre la création d'audiobooks accessible à tous, gratuitement et sans contraintes.</p>
             <div style="background:var(--accent-yellow); border:2px solid var(--border-black); padding:1rem; border-radius:10px; margin-top:0.5rem;">
-                <p><strong>👤 Créateur :</strong> Julien HOUSSIN</p>
+                <p><strong>👤 Créateur :</strong> Julien</p>
                 <p><strong>🌐 Code Source :</strong> Disponible sur <a href="https://github.com/jul1n/AudioLivreur" target="_blank" style="color:var(--text-main); font-weight:700;">GitHub</a></p>
             </div>
         `);
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     elements.btnOpenModalCredits.addEventListener('click', () => {
         openModal("✨ Crédits & Open-Source", `
-            <p>Imaginé avec ❤️ par <strong>Julien HOUSSIN</strong> et propulsé par la formidable communauté Open-Source :</p>
+            <p>Imaginé avec ❤️ par <strong>Julien</strong> et propulsé par la formidable communauté Open-Source :</p>
             <ul style="margin-left: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;">
                 <li><strong>Microsoft Edge TTS API</strong> - Moteur de synthèse vocale neuronale haute définition.</li>
                 <li><strong>JSZip</strong> - Gestion des archives et création des fichiers ZIP MP3.</li>
