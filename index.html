@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>audiolivreur.ai — Studio de Synthèse Vocale 100% Client</title>
-    <meta name="description" content="Convertissez vos livres EPUB, PDF, DOCX en audiobooks de haute qualité directement depuis votre navigateur. Gratuit et privé.">
+    <title>audiolivreur.ai — Studio de Synthèse Vocale Client-Side</title>
+    <meta name="description" content="Convertissez vos livres EPUB, PDF, DOCX en audiobooks de haute qualité directement depuis votre navigateur.">
     
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
@@ -37,11 +37,8 @@
         </div>
 
         <div class="nav-actions">
-            <button id="btnTestVoiceNav" class="pill-btn accent-yellow">
-                <i class="fa-solid fa-volume-high"></i> Tester la Voix
-            </button>
-            <span class="pill-btn accent-mint">
-                ⚡ EDGE-TTS NEURAL
+            <span class="pill-btn accent-mint" style="cursor:default;">
+                🟢 100% Dans votre navigateur
             </span>
             <button id="btnPwaInstall" class="pill-btn hidden">
                 <i class="fa-solid fa-download"></i> Installer App
@@ -52,214 +49,190 @@
     <!-- Main Content Container -->
     <main class="app-container">
 
-        <!-- Hero Section -->
-        <section class="hero-section">
-            <div class="hero-text-side">
-                <div class="badge-tag">
-                    ✨ NOUVEAU · TRAITEMENT 100% NAVIGATEUR
-                </div>
-                <h1 class="hero-title">
-                    Convertissez vos livres en audiobooks. Sans limites.
-                </h1>
-                <p class="hero-subtitle">
-                    Transformez vos fichiers EPUB, PDF et DOCX en écoutes immersives directement dans votre navigateur. Les requêtes utilisent votre propre connexion pour une vitesse maximale.
-                </p>
-                <div class="hero-counter-card">
-                    <div class="counter-icon">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <div class="counter-text">
-                        <div class="count" id="statCounter">100% PRIVÉ</div>
-                        <div class="label">AUCUN FICHIER N'EST ENVOYÉ SUR UN SERVEUR</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Hero Illustration Card -->
-            <div class="hero-illustration-card">
-                <div class="illustration-icon">
-                    <i class="fa-solid fa-book-open-reader"></i>
-                </div>
-                <div class="illustration-caption">
-                    🎧 Synthesize Anywhere. Listen Everywhere.
-                </div>
-            </div>
+        <!-- Hero Header -->
+        <section class="hero-header-clean">
+            <div class="badge-tag">⚡ SYNTHÈSE VOCALE SANS SERVEUR INTERMÉDIAIRE</div>
+            <h1 class="hero-title">Convertissez vos livres en audiobooks.</h1>
+            <p class="hero-subtitle">Transformez vos fichiers EPUB, PDF et DOCX en fichiers audio MP3 avec les voix neuronales Microsoft.</p>
         </section>
 
-        <!-- Mode Selector Cards (Rephrase / Reply style) -->
-        <section class="action-cards-grid">
-            <div class="mode-card active" id="cardModeConverter">
-                <div class="mode-icon">
-                    <i class="fa-solid fa-file-audio"></i>
+        <!-- Main Workspace Neubrutalist Grid -->
+        <section class="workspace-grid">
+            
+            <!-- Left Panel: Settings with Dropdowns -->
+            <aside class="card-box settings-panel">
+                <h3 class="panel-title"><i class="fa-solid fa-sliders"></i> Réglages de Synthèse</h3>
+                
+                <!-- Language Dropdown -->
+                <div class="form-group">
+                    <label for="selectLanguage">Langue du Livre</label>
+                    <select id="selectLanguage" class="input-neubrutal">
+                        <option value="fr-FR" selected>🇫🇷 Français</option>
+                        <option value="en-US">🇺🇸 Anglais (US)</option>
+                        <option value="en-GB">🇬🇧 Anglais (UK)</option>
+                        <option value="es-ES">🇪🇸 Espagnol</option>
+                        <option value="de-DE">🇩🇪 Allemand</option>
+                        <option value="it-IT">🇮🇹 Italien</option>
+                    </select>
                 </div>
-                <div class="mode-info">
-                    <h3>1. Convertisseur & Synthèse</h3>
-                    <p>Importez votre document → générez l'audiobook MP3</p>
+
+                <!-- Voice Dropdown -->
+                <div class="form-group">
+                    <label for="selectVoice">Voix Neuronale</label>
+                    <select id="selectVoice" class="input-neubrutal">
+                        <!-- Dynamically filled -->
+                    </select>
                 </div>
-            </div>
 
-            <div class="mode-card" id="cardModeSettings">
-                <div class="mode-icon">
-                    <i class="fa-solid fa-sliders"></i>
-                </div>
-                <div class="mode-info">
-                    <h3>2. Réglages Vocaux & Langues</h3>
-                    <p>Sélectionnez la voix neuronale et ajustez le rythme</p>
-                </div>
-            </div>
-        </section>
+                <!-- Test Voice Button -->
+                <button id="btnTestVoice" class="btn-main yellow" style="padding:0.7rem 1rem; font-size:0.95rem;">
+                    <i class="fa-solid fa-volume-high"></i> Tester la Voix
+                </button>
 
-        <!-- Voice Selector Pills Row (Pick Your Tone style) -->
-        <section class="voices-selection-section">
-            <div class="section-label">CHOISISSEZ LA VOIX NEURONALE</div>
-            <div class="tone-pills-row" id="voicePillsRow">
-                <!-- Dynamically populated voice pills -->
-            </div>
-        </section>
+                <hr style="border:none; border-top:2px solid var(--border-black); margin:0.5rem 0;">
 
-        <!-- Main Workspace Neubrutalist Cards -->
-        <section class="workspace-section">
-
-            <!-- Step 1: Dropzone & Import -->
-            <div class="card-box" id="dropzoneCard">
-                <div class="dropzone-neubrutal" id="dropzone">
-                    <div class="dropzone-icon-box">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                <!-- Rate / Speed Range -->
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label for="rangeRate">Vitesse de Lecture</label>
+                        <span id="valRate" style="font-weight:700; font-family:monospace;">0%</span>
                     </div>
-                    <h2>Glissez-déposez votre livre ici</h2>
-                    <p class="hero-subtitle" style="margin-bottom:0.5rem; font-size:0.95rem;">Formats pris en charge : <strong>EPUB, PDF, DOCX, TXT, MOBI</strong></p>
-                    <button class="btn-main" id="btnBrowse">
-                        <i class="fa-solid fa-folder-open"></i> Parcourir les fichiers
-                    </button>
-                    <input type="file" id="fileInput" accept=".epub,.pdf,.docx,.txt,.md,.mobi" hidden>
+                    <input type="range" id="rangeRate" min="-50" max="100" value="0" class="range-neubrutal">
                 </div>
-            </div>
 
-            <!-- Step 2: Book Details & Chapter Inspection -->
-            <div class="card-box hidden" id="bookDetailsCard">
-                <div class="book-preview-grid">
-                    <div class="cover-box" id="coverContainer">
-                        <i class="fa-solid fa-book"></i>
-                        <img id="coverPreview" src="" alt="Couverture" class="hidden">
+                <!-- Pitch Range -->
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label for="rangePitch">Hauteur (Pitch)</label>
+                        <span id="valPitch" style="font-weight:700; font-family:monospace;">0Hz</span>
                     </div>
-                    <div style="display:flex; flex-direction:column; gap:1rem;">
-                        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
-                            <div class="form-group" style="flex:1;">
-                                <label for="metaTitle">Titre du Livre</label>
+                    <input type="range" id="rangePitch" min="-50" max="50" value="0" class="range-neubrutal">
+                </div>
+            </aside>
+
+            <!-- Right Panel: Main Workflow Steps -->
+            <section class="card-box workflow-panel">
+                
+                <!-- Step 1: Dropzone -->
+                <div id="dropzoneCard">
+                    <div class="dropzone-neubrutal" id="dropzone">
+                        <div class="dropzone-icon-box">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <h2>Glissez-déposez votre livre ici</h2>
+                        <p style="color:var(--text-muted); font-weight:500;">Formats acceptés : <strong>EPUB, PDF, DOCX, TXT, MOBI</strong></p>
+                        <button class="btn-main" id="btnBrowse">
+                            <i class="fa-solid fa-folder-open"></i> Parcourir les fichiers
+                        </button>
+                        <input type="file" id="fileInput" accept=".epub,.pdf,.docx,.txt,.md,.mobi" hidden>
+                    </div>
+                </div>
+
+                <!-- Step 2: Book Details & Chapters -->
+                <div id="bookDetailsCard" class="hidden" style="display:flex; flex-direction:column; gap:1.5rem;">
+                    <div class="book-preview-grid">
+                        <div class="cover-box" id="coverContainer">
+                            <i class="fa-solid fa-book" id="coverPlaceholderIcon"></i>
+                            <img id="coverPreview" src="" alt="Couverture" class="hidden">
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:1rem;">
+                            <div class="form-group">
+                                <label for="metaTitle">Titre de l'Audiobook</label>
                                 <input type="text" id="metaTitle" class="input-neubrutal" placeholder="Titre du livre">
                             </div>
-                            <div class="form-group" style="flex:1;">
-                                <label for="metaAuthor">Auteur</label>
+                            <div class="form-group">
+                                <label for="metaAuthor">Auteur / Artiste</label>
                                 <input type="text" id="metaAuthor" class="input-neubrutal" placeholder="Nom de l'auteur">
                             </div>
-                        </div>
-
-                        <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
-                            <span class="tone-pill selected"><i class="fa-solid fa-list-ol"></i> <strong id="statChapters">0</strong> chapitres</span>
-                            <span class="tone-pill"><i class="fa-solid fa-font"></i> <strong id="statWords">0</strong> mots</span>
-                            <span class="tone-pill accent-yellow"><i class="fa-solid fa-clock"></i> ~<strong id="statEstTime">0</strong> min d'audio</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display:flex; gap:1rem;">
-                    <button id="btnStartConversion" class="btn-main flex-1">
-                        <i class="fa-solid fa-play"></i> Lancer la Synthèse Vocale
-                    </button>
-                    <button id="btnReset" class="btn-main pink">
-                        <i class="fa-solid fa-trash"></i> Recommencer
-                    </button>
-                </div>
-
-                <div>
-                    <div class="section-label">SOMMAIRE DES CHAPITRES DÉTECTÉS</div>
-                    <div class="chapters-box" id="chaptersList">
-                        <!-- Chapters rendered here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 3: Live Synthesis Progress Dashboard -->
-            <div class="card-box hidden" id="progressCard">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem;">
-                        ⚡ Synthèse Vocale en Cours...
-                    </h2>
-                    <button id="btnCancelConversion" class="btn-main pink" style="padding:0.5rem 1rem; font-size:0.9rem;">
-                        <i class="fa-solid fa-xmark"></i> Annuler
-                    </button>
-                </div>
-
-                <div>
-                    <div style="display:flex; justify-content:space-between; font-weight:700; margin-bottom:0.4rem;">
-                        <span id="progressStatusText">Initialisation...</span>
-                        <span id="progressPercentText">0%</span>
-                    </div>
-                    <div style="height:16px; background:var(--bg-main); border:var(--border-width) solid var(--border-black); border-radius:10px; overflow:hidden;">
-                        <div id="progressBarFill" style="width:0%; height:100%; background:var(--accent-mint); transition:width 0.2s;"></div>
-                    </div>
-                </div>
-
-                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem;">
-                    <div class="mode-card" style="cursor:default;">
-                        <div>
-                            <div class="section-label" style="margin:0;">MOTS TRAITÉS</div>
-                            <div style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:700;" id="metricWords">0 / 0</div>
+                            <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+                                <span class="pill-badge accent-mint"><i class="fa-solid fa-list-ol"></i> <strong id="statChapters">0</strong> chapitres</span>
+                                <span class="pill-badge accent-blue"><i class="fa-solid fa-font"></i> <strong id="statWords">0</strong> mots</span>
+                                <span class="pill-badge accent-yellow"><i class="fa-solid fa-clock"></i> ~<strong id="statEstTime">0</strong> min</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="mode-card" style="cursor:default;">
-                        <div>
-                            <div class="section-label" style="margin:0;">VITESSE</div>
-                            <div style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:700;" id="metricSpeed">0 mots/sec</div>
-                        </div>
+
+                    <div style="display:flex; gap:1rem;">
+                        <button id="btnStartConversion" class="btn-main flex-1" style="font-size:1.1rem;">
+                            <i class="fa-solid fa-play"></i> Lancer la Synthèse Vocale
+                        </button>
+                        <button id="btnReset" class="btn-main pink">
+                            <i class="fa-solid fa-rotate-left"></i> Changer de livre
+                        </button>
                     </div>
-                    <div class="mode-card" style="cursor:default;">
-                        <div>
-                            <div class="section-label" style="margin:0;">TEMPS RESTANT</div>
-                            <div style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:700;" id="metricEta">--:--</div>
+
+                    <div>
+                        <label class="section-label">SOMMAIRE ET CHAPITRES DÉTECTÉS</label>
+                        <div class="chapters-box" id="chaptersList">
+                            <!-- Rendered chapters -->
                         </div>
                     </div>
                 </div>
 
-                <div class="console-neubrutal" id="consoleLogs">
-                    <div class="log-entry info">[INFO] Moteur Edge-TTS prêt sur votre IP.</div>
-                </div>
-            </div>
+                <!-- Step 3: Progress Dashboard -->
+                <div id="progressCard" class="hidden" style="display:flex; flex-direction:column; gap:1.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem;">
+                            ⚡ Synthèse Vocale en cours...
+                        </h2>
+                        <button id="btnCancelConversion" class="btn-main pink" style="padding:0.5rem 1rem; font-size:0.9rem;">
+                            <i class="fa-solid fa-xmark"></i> Annuler
+                        </button>
+                    </div>
 
-            <!-- Step 4: Download & Finished View -->
-            <div class="card-box hidden" id="finishedCard" style="text-align:center; align-items:center;">
-                <div style="font-size:4rem; color:var(--border-black); margin-bottom:0.5rem;">
-                    🎉
-                </div>
-                <h2 style="font-family:'Space Grotesk',sans-serif; font-size:2rem;">Livre Audio Synthétisé avec Succès !</h2>
-                <p class="hero-subtitle">Tous les chapitres ont été générés 100% dans votre navigateur.</p>
+                    <div>
+                        <div style="display:flex; justify-content:space-between; font-weight:700; margin-bottom:0.4rem;">
+                            <span id="progressStatusText">Initialisation...</span>
+                            <span id="progressPercentText">0%</span>
+                        </div>
+                        <div style="height:16px; background:var(--bg-main); border:var(--border-width) solid var(--border-black); border-radius:10px; overflow:hidden;">
+                            <div id="progressBarFill" style="width:0%; height:100%; background:var(--accent-mint); transition:width 0.2s;"></div>
+                        </div>
+                    </div>
 
-                <div style="display:flex; gap:1rem; width:100%; max-width:600px; flex-wrap:wrap;">
-                    <button id="btnDownloadAudiobook" class="btn-main yellow flex-1">
-                        <i class="fa-solid fa-file-audio"></i> Télécharger les Fichiers MP3 (.zip)
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem;">
+                        <div class="metric-card">
+                            <span class="metric-label">MOTS TRAITÉS</span>
+                            <span class="metric-val" id="metricWords">0 / 0</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">VITESSE</span>
+                            <span class="metric-val" id="metricSpeed">0 mots/sec</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">TEMPS RESTANT</span>
+                            <span class="metric-val" id="metricEta">--:--</span>
+                        </div>
+                    </div>
+
+                    <div class="console-neubrutal" id="consoleLogs">
+                        <div class="log-entry info">[INFO] Prêt pour la génération locale.</div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Finished View -->
+                <div id="finishedCard" class="hidden" style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:1.2rem; padding:2rem 1rem;">
+                    <div style="font-size:4rem;">🎉</div>
+                    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:2rem;">Audiobook Synthétisé avec Succès !</h2>
+                    <p style="color:var(--text-muted); font-weight:500;">Tous les chapitres ont été générés directement sur votre navigateur.</p>
+
+                    <div style="display:flex; gap:1rem; width:100%; max-width:500px; flex-wrap:wrap; margin-top:0.5rem;">
+                        <button id="btnDownloadAudiobook" class="btn-main yellow flex-1">
+                            <i class="fa-solid fa-file-audio"></i> Télécharger les MP3 (.zip)
+                        </button>
+                        <button id="btnDownloadTranscript" class="btn-main purple flex-1">
+                            <i class="fa-solid fa-file-lines"></i> Télécharger Texte (.txt)
+                        </button>
+                    </div>
+
+                    <button id="btnNewConversion" class="pill-btn" style="margin-top:1rem;">
+                        <i class="fa-solid fa-rotate-left"></i> Convertir un autre livre
                     </button>
-                    <button id="btnDownloadTranscript" class="btn-main purple flex-1">
-                        <i class="fa-solid fa-file-lines"></i> Télécharger le Texte (.txt)
-                    </button>
                 </div>
 
-                <button id="btnNewConversion" class="pill-btn" style="margin-top:1rem;">
-                    <i class="fa-solid fa-rotate-left"></i> Convertir un autre livre
-                </button>
-            </div>
-
+            </section>
         </section>
-
     </main>
-
-    <!-- Hidden Language & Parameters controls for logic sync -->
-    <select id="selectLanguage" hidden><option value="fr-FR" selected>fr-FR</option></select>
-    <select id="selectVoice" hidden></select>
-    <input type="range" id="rangeRate" min="-50" max="100" value="0" hidden>
-    <input type="range" id="rangePitch" min="-50" max="50" value="0" hidden>
-    <input type="range" id="rangeParallel" min="1" max="5" value="3" hidden>
-    <input type="checkbox" id="chkKeepMp3" checked hidden>
-    <input type="checkbox" id="chkEmbedTranscript" checked hidden>
 
     <!-- Application Scripts -->
     <script src="js/tts/edgeTts.js"></script>

@@ -1,5 +1,5 @@
 /**
- * Orchestrateur principal de l'application audiolivreur.ai (Style Neubrutalist)
+ * Orchestrateur principal de l'application audiolivreur.ai (100% Fonctionnel & Épuré)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,14 +11,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // DOM Elements
     const elements = {
+        // Form & Inputs
+        selectLanguage: document.getElementById('selectLanguage'),
+        selectVoice: document.getElementById('selectVoice'),
+        btnTestVoice: document.getElementById('btnTestVoice'),
+        rangeRate: document.getElementById('rangeRate'),
+        valRate: document.getElementById('valRate'),
+        rangePitch: document.getElementById('rangePitch'),
+        valPitch: document.getElementById('valPitch'),
+
+        // Step 1: Dropzone
         dropzoneCard: document.getElementById('dropzoneCard'),
         dropzone: document.getElementById('dropzone'),
         fileInput: document.getElementById('fileInput'),
         btnBrowse: document.getElementById('btnBrowse'),
 
+        // Step 2: Book Details
         bookDetailsCard: document.getElementById('bookDetailsCard'),
         coverPreview: document.getElementById('coverPreview'),
-        coverContainer: document.getElementById('coverContainer'),
+        coverPlaceholderIcon: document.getElementById('coverPlaceholderIcon'),
         metaTitle: document.getElementById('metaTitle'),
         metaAuthor: document.getElementById('metaAuthor'),
         statChapters: document.getElementById('statChapters'),
@@ -28,14 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnStartConversion: document.getElementById('btnStartConversion'),
         btnReset: document.getElementById('btnReset'),
 
-        selectLanguage: document.getElementById('selectLanguage'),
-        selectVoice: document.getElementById('selectVoice'),
-        voicePillsRow: document.getElementById('voicePillsRow'),
-        btnTestVoiceNav: document.getElementById('btnTestVoiceNav'),
-        rangeRate: document.getElementById('rangeRate'),
-        rangePitch: document.getElementById('rangePitch'),
-        chkEmbedTranscript: document.getElementById('chkEmbedTranscript'),
-
+        // Step 3: Progress Dashboard
         progressCard: document.getElementById('progressCard'),
         progressStatusText: document.getElementById('progressStatusText'),
         progressPercentText: document.getElementById('progressPercentText'),
@@ -46,42 +50,37 @@ document.addEventListener('DOMContentLoaded', () => {
         consoleLogs: document.getElementById('consoleLogs'),
         btnCancelConversion: document.getElementById('btnCancelConversion'),
 
+        // Step 4: Finished View
         finishedCard: document.getElementById('finishedCard'),
         btnDownloadAudiobook: document.getElementById('btnDownloadAudiobook'),
         btnDownloadTranscript: document.getElementById('btnDownloadTranscript'),
         btnNewConversion: document.getElementById('btnNewConversion')
     };
 
-    // Populate Neubrutalist Voice Pills
-    function renderVoicePills() {
+    // Populate Voice Select Dropdown based on Language Select
+    function updateVoiceSelect() {
         const lang = elements.selectLanguage.value;
         const voices = ttsClient.getVoices(lang);
-        elements.voicePillsRow.innerHTML = '';
         elements.selectVoice.innerHTML = '';
 
-        voices.forEach((v, idx) => {
-            // Hidden select sync
+        voices.forEach(v => {
             const opt = document.createElement('option');
             opt.value = v.ShortName;
-            opt.textContent = v.LocalName;
+            opt.textContent = `${v.LocalName} (${v.Gender === 'Male' ? 'Homme' : 'Femme'})`;
             elements.selectVoice.appendChild(opt);
-
-            // Neubrutalist Pill Button
-            const pill = document.createElement('button');
-            pill.className = `tone-pill ${idx === 0 ? 'selected' : ''}`;
-            pill.innerHTML = `🎙️ ${v.LocalName} (${v.Gender === 'Male' ? 'Homme' : 'Femme'})`;
-            
-            pill.addEventListener('click', () => {
-                document.querySelectorAll('.tone-pill').forEach(p => p.classList.remove('selected'));
-                pill.classList.add('selected');
-                elements.selectVoice.value = v.ShortName;
-            });
-
-            elements.voicePillsRow.appendChild(pill);
         });
     }
 
-    renderVoicePills();
+    updateVoiceSelect();
+    elements.selectLanguage.addEventListener('change', updateVoiceSelect);
+
+    // Sync Range Slider Values Text
+    elements.rangeRate.addEventListener('input', (e) => {
+        elements.valRate.textContent = `${e.target.value >= 0 ? '+' : ''}${e.target.value}%`;
+    });
+    elements.rangePitch.addEventListener('input', (e) => {
+        elements.valPitch.textContent = `${e.target.value >= 0 ? '+' : ''}${e.target.value}Hz`;
+    });
 
     // Logging Utility
     function log(msg, type = 'info') {
@@ -93,29 +92,32 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.consoleLogs.scrollTop = elements.consoleLogs.scrollHeight;
     }
 
-    // Test Voice Sample
-    elements.btnTestVoiceNav.addEventListener('click', async () => {
+    // Test Voice Sample Button Action
+    elements.btnTestVoice.addEventListener('click', async () => {
         const voice = elements.selectVoice.value;
-        elements.btnTestVoiceNav.disabled = true;
-        elements.btnTestVoiceNav.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Génération...`;
+        const rate = parseInt(elements.rangeRate.value);
+        const pitch = parseInt(elements.rangePitch.value);
+
+        elements.btnTestVoice.disabled = true;
+        elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Génération...`;
 
         try {
             const testText = "Bonjour ! Ceci est un extrait de test de la voix sélectionnée pour votre livre audio.";
-            const audioBlob = await ttsClient.synthesize(testText, { voice });
+            const audioBlob = await ttsClient.synthesize(testText, { voice, rate, pitch });
             const audioUrl = URL.createObjectURL(audioBlob);
             const audio = new Audio(audioUrl);
             audio.play();
         } catch (err) {
             alert(`Erreur lors du test vocal : ${err.message}`);
         } finally {
-            elements.btnTestVoiceNav.disabled = false;
-            elements.btnTestVoiceNav.innerHTML = `<i class="fa-solid fa-volume-high"></i> Tester la Voix`;
+            elements.btnTestVoice.disabled = false;
+            elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-volume-high"></i> Tester la Voix`;
         }
     });
 
-    // Dropzone Listeners
+    // File Dropzone Actions
     elements.btnBrowse.addEventListener('click', () => elements.fileInput.click());
-    
+
     elements.fileInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) handleFileSelect(e.target.files[0]);
     });
@@ -138,14 +140,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.dataTransfer.files.length > 0) handleFileSelect(e.dataTransfer.files[0]);
     });
 
-    // Handle File Parse
+    // Parse Selected File
     async function handleFileSelect(file) {
         try {
             log(`Analyse du fichier : ${file.name}...`);
             elements.dropzone.innerHTML = `
                 <div class="dropzone-icon-box"><i class="fa-solid fa-spinner fa-spin"></i></div>
                 <h2>Analyse et extraction du livre...</h2>
-                <p class="hero-subtitle">Veuillez patienter pendant la lecture de la structure.</p>
+                <p style="color:var(--text-muted); font-weight:500;">Veuillez patienter pendant la lecture du livre.</p>
             `;
 
             currentBookData = await FileParser.parse(file);
@@ -162,11 +164,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentBookData.coverUrl) {
                 elements.coverPreview.src = currentBookData.coverUrl;
                 elements.coverPreview.classList.remove('hidden');
+                elements.coverPlaceholderIcon.classList.add('hidden');
             } else {
                 elements.coverPreview.classList.add('hidden');
+                elements.coverPlaceholderIcon.classList.remove('hidden');
             }
 
-            // Render Chapters
+            // Render Chapters list
             elements.chaptersList.innerHTML = '';
             currentBookData.chapters.forEach((ch, idx) => {
                 const item = document.createElement('div');
@@ -174,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const wordCount = ch.text.split(/\s+/).length;
                 item.innerHTML = `
                     <span><strong>${idx + 1}.</strong> ${ch.title}</span>
-                    <span class="tone-pill" style="font-size:0.75rem; padding:0.2rem 0.6rem;">${wordCount.toLocaleString()} mots</span>
+                    <span class="pill-badge" style="font-size:0.75rem;">${wordCount.toLocaleString()} mots</span>
                 `;
                 elements.chaptersList.appendChild(item);
             });
@@ -199,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.dropzone.innerHTML = `
             <div class="dropzone-icon-box"><i class="fa-solid fa-cloud-arrow-up"></i></div>
             <h2>Glissez-déposez votre livre ici</h2>
-            <p class="hero-subtitle" style="margin-bottom:0.5rem; font-size:0.95rem;">Formats pris en charge : <strong>EPUB, PDF, DOCX, TXT, MOBI</strong></p>
+            <p style="color:var(--text-muted); font-weight:500;">Formats acceptés : <strong>EPUB, PDF, DOCX, TXT, MOBI</strong></p>
             <button class="btn-main" id="btnBrowseReload">
                 <i class="fa-solid fa-folder-open"></i> Parcourir les fichiers
             </button>
@@ -210,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.btnReset.addEventListener('click', resetToDropzone);
     elements.btnNewConversion.addEventListener('click', resetToDropzone);
 
-    // Start Conversion
+    // Start Conversion Process
     elements.btnStartConversion.addEventListener('click', async () => {
         if (!currentBookData || currentBookData.chapters.length === 0) return;
 
@@ -222,7 +226,10 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.progressCard.classList.remove('hidden');
 
         const voice = elements.selectVoice.value;
-        log(`Démarrage de la synthèse vocale pour "${elements.metaTitle.value}" avec la voix ${voice}...`, 'info');
+        const rate = parseInt(elements.rangeRate.value);
+        const pitch = parseInt(elements.rangePitch.value);
+
+        log(`Démarrage de la synthèse vocale pour "${elements.metaTitle.value}"...`, 'info');
 
         const totalChapters = currentBookData.chapters.length;
         const totalWordsOverall = currentBookData.chapters.reduce((sum, ch) => sum + ch.text.split(/\s+/).length, 0);
@@ -244,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.progressStatusText.textContent = `Traitement : ${chapter.title}`;
 
             try {
-                const audioBlob = await ttsClient.synthesize(chapter.text, { voice });
+                const audioBlob = await ttsClient.synthesize(chapter.text, { voice, rate, pitch });
                 const safeTitle = chapter.title.replace(/[^a-zA-Z0-9àáâäãåąčćđéèêëėęėîïǐíìôöòóõøōǒùúûüųűÿýżźñçčšžÀÁÂÄÃÅĄĆČĐÉÈÊËĖĘÎÏÍÌÔÖÒÓÕØŌǑÙÚÛÜŲŰŸÝŻŹÑßÇŒÆ\s-]/g, "").trim();
                 const filename = `${(i + 1).toString().padStart(3, '0')}_${safeTitle || 'Chapitre'}.mp3`;
 
@@ -287,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Download Zip
+    // Download MP3 Zip Action
     elements.btnDownloadAudiobook.addEventListener('click', async () => {
         if (generatedAudioFiles.length === 0) return;
 
@@ -313,11 +320,11 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Erreur ZIP : ${err.message}`);
         } finally {
             elements.btnDownloadAudiobook.disabled = false;
-            elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> Télécharger les Fichiers MP3 (.zip)`;
+            elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> Télécharger les MP3 (.zip)`;
         }
     });
 
-    // Download Transcript
+    // Download Text Transcript Action
     elements.btnDownloadTranscript.addEventListener('click', () => {
         if (!currentBookData) return;
         let fullTranscript = `=== ${elements.metaTitle.value} ===\nAuteur: ${elements.metaAuthor.value}\n\n`;

@@ -1,4 +1,4 @@
-/* AudioLivreur Web — Neubrutalist Design System (Inspiré par cordialement.ai) */
+/* AudioLivreur Web — Neubrutalist Design System (Propre & Épuré) */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
 
@@ -23,8 +23,8 @@
     --text-muted: #525252;
     
     --radius-pill: 50px;
-    --radius-card: 20px;
-    --radius-btn: 12px;
+    --radius-card: 16px;
+    --radius-btn: 10px;
     
     --transition: all 0.15s ease-in-out;
 }
@@ -49,20 +49,20 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.2rem 3rem;
+    padding: 1rem 3rem;
     background: var(--bg-main);
     border-bottom: var(--border-width) solid var(--border-black);
 }
 
 .brand {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.8rem;
 }
 
 .brand-icon-wrapper {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     background: var(--accent-mint);
     border: var(--border-width) solid var(--border-black);
     border-radius: 10px;
@@ -78,7 +78,6 @@ body {
     font-size: 1.4rem;
     font-weight: 700;
     line-height: 1.1;
-    letter-spacing: -0.5px;
 }
 
 .brand-text .version {
@@ -94,12 +93,11 @@ body {
     gap: 0.8rem;
 }
 
-/* Outlined Pill Buttons (Header) */
 .pill-btn {
     background: var(--bg-card);
     border: var(--border-width) solid var(--border-black);
     padding: 0.5rem 1rem;
-    border-radius: var(--radius-btn);
+    border-radius: var(--radius-pill);
     font-size: 0.85rem;
     font-weight: 700;
     color: var(--text-main);
@@ -109,307 +107,98 @@ body {
     gap: 0.5rem;
     box-shadow: var(--shadow-hard-sm);
     transition: var(--transition);
-    text-decoration: none;
 }
 
 .pill-btn:hover {
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px #0f0f0f;
-}
-
-.pill-btn:active {
-    transform: translate(1px, 1px);
-    box-shadow: 1px 1px 0px #0f0f0f;
+    box-shadow: 3.5px 3.5px 0px #0f0f0f;
 }
 
 .pill-btn.accent-mint { background: var(--accent-mint); }
-.pill-btn.accent-yellow { background: var(--accent-yellow); }
 
 /* Main Container Layout */
 .app-container {
-    max-width: 1200px;
+    max-width: 1150px;
     margin: 0 auto;
-    padding: 2.5rem 2rem;
+    padding: 2rem 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.8rem;
 }
 
-/* Hero Section */
-.hero-section {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 2.5rem;
-    align-items: center;
-}
-
-@media (max-width: 900px) {
-    .hero-section { grid-template-columns: 1fr; }
-    .navbar { padding: 1rem 1.5rem; }
+.hero-header-clean {
+    text-align: left;
+    margin-bottom: 0.5rem;
 }
 
 .badge-tag {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    background: var(--bg-card);
+    background: var(--accent-yellow);
     border: var(--border-width) solid var(--border-black);
-    padding: 0.35rem 0.9rem;
+    padding: 0.3rem 0.8rem;
     border-radius: var(--radius-pill);
     font-size: 0.75rem;
     font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
     box-shadow: var(--shadow-hard-sm);
-    margin-bottom: 1.2rem;
+    margin-bottom: 0.8rem;
 }
 
 .hero-title {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 3.2rem;
+    font-size: 2.6rem;
     font-weight: 700;
-    line-height: 1.08;
-    letter-spacing: -1.5px;
-    margin-bottom: 1.2rem;
+    line-height: 1.15;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
 }
 
 .hero-subtitle {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     color: var(--text-muted);
-    line-height: 1.5;
-    margin-bottom: 1.8rem;
     font-weight: 500;
 }
 
-.hero-counter-card {
-    display: inline-flex;
-    align-items: center;
-    gap: 1rem;
-    background: var(--bg-card);
-    border: var(--border-width) solid var(--border-black);
-    padding: 0.8rem 1.4rem;
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-hard);
-}
-
-.counter-icon {
-    width: 36px;
-    height: 36px;
-    background: var(--accent-mint);
-    border: var(--border-width) solid var(--border-black);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-}
-
-.counter-text .count {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.counter-text .label {
-    font-size: 0.7rem;
-    font-weight: 800;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* Hero Illustration Frame */
-.hero-illustration-card {
-    background: var(--accent-mint);
-    border: var(--border-width) solid var(--border-black);
-    border-radius: var(--radius-card);
-    padding: 2.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--shadow-hard-lg);
-    text-align: center;
-    min-height: 320px;
-    position: relative;
-    overflow: hidden;
-}
-
-.illustration-icon {
-    font-size: 6rem;
-    color: var(--border-black);
-    margin-bottom: 1rem;
-    filter: drop-shadow(3px 3px 0px rgba(255,255,255,0.8));
-}
-
-.illustration-caption {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700;
-    font-size: 1.1rem;
-    background: var(--bg-card);
-    border: var(--border-width) solid var(--border-black);
-    padding: 0.4rem 1rem;
-    border-radius: var(--radius-pill);
-    box-shadow: var(--shadow-hard-sm);
-}
-
-/* Action Mode Cards (Rephrase / Reply style) */
-.action-cards-grid {
+/* Workspace Grid 2 Columns */
+.workspace-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    grid-template-columns: 340px 1fr;
+    gap: 1.8rem;
+    align-items: start;
 }
 
-@media (max-width: 768px) {
-    .action-cards-grid { grid-template-columns: 1fr; }
+@media (max-width: 850px) {
+    .workspace-grid { grid-template-columns: 1fr; }
+    .navbar { padding: 1rem 1.5rem; }
 }
 
-.mode-card {
-    background: var(--bg-card);
-    border: var(--border-width) solid var(--border-black);
-    border-radius: var(--radius-card);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-hard);
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: flex-start;
-    gap: 1.2rem;
-}
-
-.mode-card.active {
-    background: var(--accent-mint);
-}
-
-.mode-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: var(--shadow-hard-lg);
-}
-
-.mode-icon {
-    width: 44px;
-    height: 44px;
-    background: var(--bg-card);
-    border: var(--border-width) solid var(--border-black);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3rem;
-    box-shadow: var(--shadow-hard-sm);
-    flex-shrink: 0;
-}
-
-.mode-info h3 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 0.2rem;
-}
-
-.mode-info p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    font-weight: 500;
-}
-
-/* Tone / Voice Selector Pills Section */
-.section-label {
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text-muted);
-    margin-bottom: 0.8rem;
-}
-
-.tone-pills-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-    margin-bottom: 1rem;
-}
-
-.tone-pill {
-    background: var(--bg-card);
-    border: var(--border-width) solid var(--border-black);
-    padding: 0.5rem 1.2rem;
-    border-radius: var(--radius-pill);
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: var(--shadow-hard-sm);
-    transition: var(--transition);
-}
-
-.tone-pill:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0px #0f0f0f;
-}
-
-.tone-pill.selected {
-    background: var(--accent-purple);
-}
-
-/* Main Workspace Neubrutalist Cards */
+/* Neubrutalist Cards */
 .card-box {
     background: var(--bg-card);
     border: var(--border-width) solid var(--border-black);
     border-radius: var(--radius-card);
-    padding: 2rem;
+    padding: 1.8rem;
     box-shadow: var(--shadow-hard-lg);
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
 }
 
-.hidden { display: none !important; }
-
-/* Dropzone */
-.dropzone-neubrutal {
-    border: var(--border-width) dashed var(--border-black);
-    background: var(--bg-main);
-    border-radius: var(--radius-card);
-    padding: 3.5rem 2rem;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1.2rem;
-    transition: var(--transition);
-}
-
-.dropzone-neubrutal.dragover {
-    background: var(--accent-yellow);
-    transform: scale(1.01);
-}
-
-.dropzone-icon-box {
-    width: 70px;
-    height: 70px;
-    background: var(--accent-blue);
-    border: var(--border-width) solid var(--border-black);
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.2rem;
-    box-shadow: var(--shadow-hard-sm);
-}
-
-.dropzone-neubrutal h2 {
+.panel-title {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid var(--border-black);
 }
 
 /* Form Controls Neubrutalist */
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
 }
 
 .form-group label {
@@ -423,7 +212,7 @@ body {
     background: var(--bg-card);
     border: var(--border-width) solid var(--border-black);
     border-radius: var(--radius-btn);
-    padding: 0.8rem 1rem;
+    padding: 0.7rem 0.9rem;
     font-family: inherit;
     font-size: 0.95rem;
     font-weight: 600;
@@ -431,6 +220,7 @@ body {
     outline: none;
     box-shadow: var(--shadow-hard-sm);
     transition: var(--transition);
+    cursor: pointer;
 }
 
 .input-neubrutal:focus {
@@ -442,24 +232,23 @@ body {
 .range-neubrutal {
     accent-color: var(--border-black);
     cursor: pointer;
-    height: 8px;
 }
 
-/* Buttons Big Neubrutalist */
+/* Buttons Neubrutalist */
 .btn-main {
     background: var(--accent-mint);
     border: var(--border-width) solid var(--border-black);
     border-radius: var(--radius-btn);
-    padding: 1rem 2rem;
+    padding: 0.9rem 1.5rem;
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--text-main);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.8rem;
+    gap: 0.6rem;
     box-shadow: var(--shadow-hard);
     transition: var(--transition);
     text-decoration: none;
@@ -480,73 +269,141 @@ body {
 .btn-main.yellow { background: var(--accent-yellow); }
 .btn-main.purple { background: var(--accent-purple); }
 
-/* Book Preview Grid */
-.book-preview-grid {
-    display: grid;
-    grid-template-columns: 160px 1fr;
-    gap: 2rem;
+.flex-1 { flex: 1; }
+.hidden { display: none !important; }
+
+/* Dropzone */
+.dropzone-neubrutal {
+    border: var(--border-width) dashed var(--border-black);
+    background: var(--bg-main);
+    border-radius: var(--radius-card);
+    padding: 3rem 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    transition: var(--transition);
 }
 
-@media (max-width: 600px) {
-    .book-preview-grid { grid-template-columns: 1fr; }
+.dropzone-neubrutal.dragover {
+    background: var(--accent-yellow);
+    transform: scale(1.01);
+}
+
+.dropzone-icon-box {
+    width: 64px;
+    height: 64px;
+    background: var(--accent-blue);
+    border: var(--border-width) solid var(--border-black);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: var(--shadow-hard-sm);
+}
+
+/* Preview Grid & Badges */
+.book-preview-grid {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1.5rem;
 }
 
 .cover-box {
-    width: 160px;
-    height: 220px;
+    width: 140px;
+    height: 190px;
     background: var(--accent-yellow);
     border: var(--border-width) solid var(--border-black);
     border-radius: var(--radius-card);
-    box-shadow: var(--shadow-hard);
+    box-shadow: var(--shadow-hard-sm);
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3rem;
+    font-size: 2.5rem;
 }
 
 .cover-box img { width: 100%; height: 100%; object-fit: cover; }
+
+.pill-badge {
+    background: var(--bg-card);
+    border: var(--border-width) solid var(--border-black);
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.8rem;
+    font-weight: 700;
+    box-shadow: var(--shadow-hard-sm);
+}
+.pill-badge.accent-mint { background: var(--accent-mint); }
+.pill-badge.accent-blue { background: var(--accent-blue); }
+.pill-badge.accent-yellow { background: var(--accent-yellow); }
+
+.section-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+    display: block;
+}
 
 .chapters-box {
     background: var(--bg-main);
     border: var(--border-width) solid var(--border-black);
     border-radius: var(--radius-card);
-    padding: 1.2rem;
-    max-height: 260px;
+    padding: 1rem;
+    max-height: 220px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.5rem;
 }
 
 .chapter-row {
     background: var(--bg-card);
     border: var(--border-width) solid var(--border-black);
-    padding: 0.7rem 1rem;
+    padding: 0.6rem 0.9rem;
     border-radius: var(--radius-btn);
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     box-shadow: var(--shadow-hard-sm);
 }
 
-/* Console Logs */
+.metric-card {
+    background: var(--bg-main);
+    border: var(--border-width) solid var(--border-black);
+    padding: 0.9rem;
+    border-radius: var(--radius-btn);
+    box-shadow: var(--shadow-hard-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.metric-label { font-size: 0.7rem; font-weight: 800; color: var(--text-muted); }
+.metric-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; }
+
 .console-neubrutal {
     background: #0f0f0f;
     color: #ffffff;
     border: var(--border-width) solid var(--border-black);
     border-radius: var(--radius-card);
-    padding: 1rem;
+    padding: 0.9rem;
     font-family: monospace;
-    font-size: 0.85rem;
-    height: 160px;
+    font-size: 0.8rem;
+    height: 140px;
     overflow-y: auto;
-    box-shadow: var(--shadow-hard);
+    box-shadow: var(--shadow-hard-sm);
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.3rem;
 }
 
 .log-entry.info { color: var(--accent-blue); }
