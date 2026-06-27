@@ -1,148 +1,53 @@
-# AudioLivreur - Convertisseur Ebook vers Audiobook
+# 🎧 audiolivreur.ai — Studio de Synthèse Vocale d'Audiobooks (v0.1 Web)
 
-# AudioLivreur 🎧
-> Convertisseur Ebook vers Audiobook
+[![GitHub Pages](https://img.shields.io/badge/Deploy-GitHub%20Pages-brightgreen)](https://jul1n.github.io/AudioLivreur/)
+[![Version](https://img.shields.io/badge/Version-v0.1-blue)](https://github.com/jul1n/AudioLivreur)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-[![Télécharger la dernière version](https://img.shields.io/badge/Télécharger-Windows_(.exe)-blue?style=for-the-badge&logo=windows)](https://github.com/jul1n/AudioLivreur/releases/latest/download/AudioLivreur.exe)
-
-[Voir les instructions d'installation](#-installation-rapide)
-<img width="791" height="721" alt="image" src="https://github.com/user-attachments/assets/9e6cc9c1-4025-4ab3-8abe-6ec325cee48a" />
-
-Convertissez vos ebooks (EPUB, PDF, DOCX, etc.) en audiobooks M4B avec chapitres, utilisant la synthèse vocale Microsoft Edge TTS.
-
-## ✨ Fonctionnalités
-
-- 📚 **Multi-formats** : EPUB, PDF, DOCX, TXT, MD, MOBI, AZW3
-- 🌍 **Support Global** : Plus de 75 langues supportées nativement
-- 🎙️ **Synthèse vocale** : Voix Neural & Multilingual de haute qualité
-- 📖 **Chapitrage & Pochette** : Extraction automatique et robuste
-- 📦 **Standalone** : FFmpeg intégré, aucune installation requise
-- ⏯️ **Pause / Reprise** : Gérez votre progression en temps réel
-- 🧺 **Traitement par lot** : Glissez plusieurs fichiers d'un coup
-- 💾 **Export Avancé** : MP3 Global, Chapitres séparés, Intégration des paroles (Lyrics) et Transcript texte
-- 🌍 **Interface Polyglotte** : Français, Anglais, Espagnol, Allemand, Italien, Portugais, Chinois, etc.
-
-## 🚀 Installation & Téléchargement
-
-### 1. Choisir votre version
-Rendez-vous sur la page des [Releases GitHub](https://github.com/jul1n/AudioLivreur/releases/latest) pour télécharger la dernière version :
-
-*   📦 **Version FULL (`AudioLivreur-Full.exe`)** : **Recommandé.** Tout est inclus (FFmpeg/FFprobe). Téléchargez, lancez, profitez ! (~210 Mo)
-*   🪶 **Version LIGHT (`AudioLivreur-Light.exe`)** : Pour les utilisateurs ayant déjà FFmpeg sur leur PC. Ultra-léger (~25 Mo).
+**audiolivreur.ai** est une Progressive Web App (PWA) **100% Client-Side** permettant de transformer vos livres numériques (EPUB, PDF, DOCX, TXT, MOBI) en livres audio MP3 de haute qualité, directement depuis votre navigateur web et en utilisant votre propre connexion internet.
 
 ---
 
-### 2. Guide d'installation étape par étape
+## ✨ Fonctionnalités Clés
 
-#### Pour la version FULL (Autonome) :
-1.  **Téléchargez** `AudioLivreur-Full.exe`.
-2.  **Double-cliquez** sur le fichier pour lancer l'application.
-3.  C'est tout ! L'application détectera automatiquement les outils internes.
-
-#### Pour la version LIGHT (Sans FFmpeg) :
-1.  **Téléchargez** `AudioLivreur-Light.exe`.
-2.  **Installez FFmpeg** (si pas déjà fait) :
-    *   Téléchargez les binaires sur [ffmpeg.org](https://ffmpeg.org/download.html#build-windows).
-    *   Extrayez-les (ex: dans `C:\ffmpeg`).
-3.  **Configurez l'application** :
-    *   Lancez `AudioLivreur-Light.exe`.
-    *   Allez dans les **Paramètres ⚙️**.
-    *   Si FFmpeg n'est pas détecté, cliquez sur l'icône dossier 📂 à côté de "Chemin FFmpeg" et sélectionnez votre fichier `ffmpeg.exe`.
+* 🟢 **100% Dans le Navigateur (Zero Server)** : La lecture du livre, l'extraction des chapitres et le packaging ZIP s'exécutent intégralement dans la mémoire de votre navigateur. Aucun fichier n'est téléversé sur un serveur externe.
+* ⚡ **Requêtes Vocales sur IP Cliente** : La synthèse vocale communique en WebSocket directement depuis votre connexion internet vers le service public Microsoft Edge Read Aloud. Aucun risque de blocage ou d'erreur 429 liée à un serveur centralisé.
+* 📖 **Support Multi-formats** : Extraction native des fichiers **EPUB**, **PDF**, **DOCX**, **TXT** et **MOBI**.
+* 🎙️ **Voix Neuronales Internationales** : Choix de voix haute définition en Français, Anglais, Espagnol, Allemand, Italien... avec ajustement de la vitesse de lecture et du pitch.
+* 🎨 **Design Neubrutaliste Épuré** : Interface moderne, intuitive et réactive avec fenêtres modales d'information.
+* 📱 **PWA Installable** : Fonctionne hors-ligne et peut être installée comme une application sur Windows, macOS, iOS et Android.
 
 ---
 
-### Version Source (Développeurs)
-1. **Python 3.12+**
-2. **Installation des dépendances** : `pip install -r requirements.txt`
-3. **Lancement** : `python main.py`
+## 🚀 Utilisation & Déploiement
 
-## 📖 Utilisation Rapide
-1. **Glissez-déposez** un ou plusieurs ebooks (EPUB, PDF, etc.).
-2. **Sélectionnez la langue** et écoutez un **aperçu** de la voix.
-3. **Lancez la conversion** et récupérez vos fichiers dans le dossier source.
+### 1. En Ligne via GitHub Pages
+L'application est directement accessible sans aucune installation sur :
+👉 **[https://jul1n.github.io/AudioLivreur/](https://jul1n.github.io/AudioLivreur/)**
 
-
-Pour plus de détails, consultez le [Guide Utilisateur](GUIDE_UTILISATEUR.md).
-
-## ✍️ Édition & Chapitrage Manuel (Nouveau !)
-
-Vous pouvez désormais modifier le texte extrait ou créer vos propres chapitres (particulièrement utile pour les **PDF**) :
-1.  **Chargez votre fichier** dans AudioLivreur.
-2.  Cliquez sur le bouton **📝 Éditer** en bas de la fenêtre.
-3.  Le dossier temporaire s'ouvre : ouvrez le fichier `chapters.json` avec votre éditeur de texte préféré.
-4.  **Modifiez le contenu** :
-    *   Changez les titres des chapitres.
-    *   Corrigez ou nettoyez le texte extrait (suppression des bas de page PDF, etc.).
-    *   Divisez un gros bloc de texte en plusieurs chapitres en suivant la structure JSON.
-5.  **Enregistrez** le fichier et cliquez sur **Créer le Livre Audio** dans l'application. AudioLivreur utilisera vos modifications automatiquement.
-
----
-
-## 📝 Notes de Version
-
-### v0.8.0 (Actuel)
-**Optimisations & Contrôle Total :**
-- ⚡ **Optimisation PDF** : Extraction et découpage 20x plus rapides sur les gros documents.
-- ✍️ **Mode Édition** : Nouveau bouton **📝 Éditer** pour modifier le texte extrait ou créer ses propres chapitres manuellement via `chapters.json`.
-- 🖼️ **Pochette Personnalisée** : Bouton **➕ Ajouter** dans la galerie pour choisir n'importe quelle image de votre PC comme couverture.
-- 🎨 **Feedback Visuel** : Mise en évidence de la pochette sélectionnée et statut en temps réel.
-- 🛠️ **Traduction Robuste** : Correction des blocages sur les gros volumes de texte et parallélisation améliorée.
-- 🐞 **VLC Fix** : Amélioration du mapping des métadonnées pour une compatibilité parfaite de la pochette avec VLC.
-
-### v0.5.0
-
-### v0.4.0
-**Nouveautés majeures :**
-- 🚀 **App Standalone** : FFmpeg et FFprobe sont maintenant intégrés dans l'exécutable.
-- 🖼️ **Métadonnées complètes** : Les fichiers M4B incluent désormais la **pochette** du livre et le **chapitrage** automatique.
-- ⏯️ **Pause & Reprise** : Possibilité de mettre en pause la conversion.
-- 🔊 **Aperçu Vocal** : Bouton pour écouter la voix avant de lancer le traitement.
-- 🧺 **Mode Batch** : Support du glisser-déposer de plusieurs fichiers simultanément.
-- ⏱️ **Estimation affinée** : Calcul en temps réel du temps restant.
-
-### v0.3.1 (2025-11-29)
-
-**Corrections de bugs :**
-- ✅ Correction de fuite de ressources (event loop)
-- ✅ Auto-détection de FFmpeg
-- ✅ Correction de la race condition de chargement des voix
-
-**Améliorations :**
-- ✅ Estimation du temps de conversion
-- ✅ Optimisation du comptage de mots (performance +30%)
-- ✅ Meilleurs messages d'erreur FFmpeg
-- ✅ Versions des dépendances épinglées
-
-## 🛠️ Compilation
-
-Pour créer un exécutable :
-
+### 2. Lancement en Local
+Pour lancer l'application localement sur votre ordinateur :
 ```bash
-pyinstaller build.spec
+# Clonez le dépôt
+git clone https://github.com/jul1n/AudioLivreur.git
+cd AudioLivreur
+
+# Lancez un petit serveur HTTP local (Python 3)
+python -m http.server 8000
 ```
-
-L'exécutable sera dans le dossier `dist/`.
-
-## 📚 Documentation
-
-- [Guide Utilisateur](GUIDE_UTILISATEUR.md) - Guide complet d'utilisation
-- [Code Review](../../.gemini/antigravity/brain/0f4a1ed2-63ea-4edc-b595-1232c12fd35e/code_review.md) - Analyse technique
-- [Walkthrough](../../.gemini/antigravity/brain/0f4a1ed2-63ea-4edc-b595-1232c12fd35e/walkthrough.md) - Détails des changements
-
-## 🤝 Contribution
-
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
-
-## 📄 Licence
-
-Usage personnel uniquement. Respectez les droits d'auteur des livres que vous convertissez.
-
-## 🙏 Remerciements
-
-- Microsoft Edge TTS pour la synthèse vocale gratuite
-- FFmpeg pour le traitement audio
-- CustomTkinter pour l'interface moderne
+Ouvrez ensuite **`http://localhost:8000`** dans votre navigateur.
 
 ---
 
-**AudioLivreur** - Transformez vos ebooks en audiobooks ! 🎧📚
+## 🏛️ Ancienne Version Desktop (Python)
+
+Si vous cherchez la version initiale autonome pour Windows/macOS développée en Python (PyInstaller + CustomTkinter), elle a été archivée en toute sécurité sur la branche dédiée :
+👉 **[Branche desktop-version](https://github.com/jul1n/AudioLivreur/tree/desktop-version)**
+
+---
+
+## 🛠️ Stack Technique Web (v0.1)
+
+* **UI & Style** : HTML5, Vanilla CSS (Neubrutalism Design System), Google Fonts (*Space Grotesk* & *Plus Jakarta Sans*), FontAwesome.
+* **Moteur TTS** : JavaScript WebSocket natif avec chiffrement DRM `Sec-MS-GEC` (Web Crypto API SHA-256).
+* **Extracteurs de Documents** : `JSZip` (EPUB), `pdf.js` (PDF), `mammoth.browser.js` (DOCX).
