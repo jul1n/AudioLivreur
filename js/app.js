@@ -227,12 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const testText = sampleTextsByLang[lang] || sampleTextsByLang['fr-FR'];
-            const audioBlob = await ttsClient.synthesize(testText, { voice, rate, pitch });
-            if (audioBlob && audioBlob.size > 20) {
-                const audioUrl = URL.createObjectURL(audioBlob);
-                const audio = new Audio(audioUrl);
-                await audio.play().catch(e => console.log("Autoplay restriction"));
-            }
+            await ttsClient.testVoice(testText, { voice, rate, pitch });
         } catch (err) {
             console.warn("Test vocal : ", err);
         } finally {

@@ -1,16 +1,12 @@
 /**
- * Client Synthèse Vocale Hybride (Client-Side) - v0.3.4
- * - Restitue 100% de la différenciation des voix en local et à distance
+ * Studio Synthèse Vocale Hybride HD (Client-Side) - v0.4.0
+ * - Audit complet & Correction ultime de la sélection vocale et du fallback
  */
 
 class EdgeTtsClient {
     constructor() {
         this.trustedToken = "6A5AA1D4EAFF4E9FB37E23D68491D6F4";
         this.secMsGecVersion = "1-143.0.3650.75";
-        
-        this.systemVoices = [];
-        this.initSystemVoices();
-
         this.voicesDatabase = [
             {
                         "ShortName": "fr-FR-VivienneMultilingualNeural",
@@ -967,18 +963,6 @@ class EdgeTtsClient {
 ];
     }
 
-    initSystemVoices() {
-        if ('speechSynthesis' in window) {
-            const load = () => {
-                this.systemVoices = window.speechSynthesis.getVoices();
-            };
-            load();
-            if (window.speechSynthesis.onvoiceschanged !== undefined) {
-                window.speechSynthesis.onvoiceschanged = load;
-            }
-        }
-    }
-
     getVoices(locale = "fr-FR") {
         if (!locale) locale = "fr-FR";
         const baseLang = locale.split('-')[0].toLowerCase();
@@ -1038,6 +1022,26 @@ class EdgeTtsClient {
         return chunks;
     }
 
+    /**
+     * Méthode dédiée au test vocal instantané sans conflit d'élément audio
+     */
+    async testVoice(text, options = {}) {
+        try {
+            const blob = await this._synthesizeChunkWebSocket(text, options);
+            if (blob && blob.size > 100) {
+                const audioUrl = URL.createObjectURL(blob);
+                const audio = new Audio(audioUrl);
+                await audio.play();
+                return;
+            }
+        } catch (err) {
+            console.log("WebSocket Edge TTS non disponible, utilisation de SpeechSynthesis pour le test vocal.", err);
+        }
+
+        // Fallback WebSpeech propre et direct pour le test
+        this._speakWebSpeechDirect(text, options);
+    }
+
     async synthesize(text, options = {}) {
         try {
             const chunks = this.splitTextSmart(text, 2000);
@@ -1049,7 +1053,7 @@ class EdgeTtsClient {
             }
             return new Blob(audioBlobs, { type: "audio/mp3" });
         } catch (err) {
-            console.warn("Utilisation de la synthèse vocale modulée dynamique.", err);
+            console.warn("Connexion WebSocket Edge TTS restreinte, génération de secours.", err);
             return await this._synthesizeNativeWebSpeech(text, options);
         }
     }
@@ -1076,7 +1080,7 @@ class EdgeTtsClient {
             const timeoutTimer = setTimeout(() => {
                 socket.close();
                 reject(new Error("Timeout WebSocket"));
-            }, 4000);
+            }, 3500);
 
             socket.onopen = () => {
                 const configMsg = `Path: speech.config\r\nX-RequestId: ${reqId}\r\nX-Timestamp: ${timestamp}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n{"context":{"synthesis":{"audio":{"metadataversion":"2.0","format":"audio-24khz-48kbitrate-mono-mp3"}}}}`;
@@ -1119,53 +1123,60 @@ class EdgeTtsClient {
     }
 
     /**
-     * Algorithme de distinction vocale garanti pour CHAQUE option du menu
+     * Prononciation directe pour le bouton de test vocal
      */
+    _speakWebSpeechDirect(text, options = {}) {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        const selectedVoiceShortName = options.voice || "fr-FR-VivienneMultilingualNeural";
+        const voiceMeta = this.voicesDatabase.find(v => v.ShortName === selectedVoiceShortName);
+        
+        const targetGender = voiceMeta ? voiceMeta.Gender : "Female";
+        const parts = selectedVoiceShortName.split('-');
+        const targetLang = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : "fr-FR";
+
+        utterance.lang = targetLang;
+
+        let userRate = options.rate !== undefined ? (1.0 + (options.rate / 100)) : 1.0;
+        let userPitch = options.pitch !== undefined ? (1.0 + (options.pitch / 100)) : 1.0;
+        
+        const pitchMod = voiceMeta ? voiceMeta.PitchMod : 1.0;
+        const rateMod = voiceMeta ? voiceMeta.RateMod : 1.0;
+
+        utterance.pitch = Math.max(0.5, Math.min(2.0, userPitch * pitchMod));
+        utterance.rate = Math.max(0.5, Math.min(2.0, userRate * rateMod));
+
+        const systemVoices = window.speechSynthesis.getVoices();
+        if (systemVoices.length > 0) {
+            const langVoices = systemVoices.filter(v => v.lang.replace('_','-').toLowerCase().startsWith(targetLang.slice(0,2).toLowerCase()));
+            
+            // 1. Recherche par correspondance du nom (ex: Denise, Vivienne, Henri, Antoine, Sylvie)
+            const firstName = selectedVoiceShortName.split('-').pop().replace('Neural','').replace('Multilingual','');
+            let matched = langVoices.find(v => v.name.toLowerCase().includes(firstName.toLowerCase()));
+
+            // 2. Recherche par genre
+            if (!matched && langVoices.length > 0) {
+                if (targetGender === "Male") {
+                    matched = langVoices.find(v => v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("homme") || v.name.toLowerCase().includes("paul") || v.name.toLowerCase().includes("thierry") || v.name.toLowerCase().includes("antoine"));
+                } else {
+                    matched = langVoices.find(v => v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("femme") || v.name.toLowerCase().includes("hortense") || v.name.toLowerCase().includes("julie") || v.name.toLowerCase().includes("sylvie"));
+                }
+            }
+
+            if (!matched && langVoices.length > 0) matched = langVoices[0];
+            if (matched) utterance.voice = matched;
+        }
+
+        window.speechSynthesis.speak(utterance);
+    }
+
     _synthesizeNativeWebSpeech(text, options = {}) {
         return new Promise((resolve) => {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                
-                const selectedVoiceShortName = options.voice || "fr-FR-VivienneMultilingualNeural";
-                const voiceIndex = Math.max(0, this.voicesDatabase.findIndex(v => v.ShortName === selectedVoiceShortName));
-                const voiceMeta = this.voicesDatabase[voiceIndex] || this.voicesDatabase[0];
-                
-                const targetGender = voiceMeta.Gender;
-                const parts = selectedVoiceShortName.split('-');
-                const targetLang = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : "fr-FR";
-
-                utterance.lang = targetLang;
-                
-                // Différenciation acoustique forte basée sur l'index exact de la voix dans le menu
-                const basePitch = targetGender === "Female" ? 1.25 : 0.82;
-                const indexShift = ((voiceIndex % 7) - 3) * 0.08;
-                const baseRate = 0.95 + ((voiceIndex % 5) * 0.05);
-
-                let userRate = options.rate !== undefined ? (1.0 + (options.rate / 100)) : 1.0;
-                let userPitch = options.pitch !== undefined ? (1.0 + (options.pitch / 100)) : 1.0;
-
-                utterance.pitch = Math.max(0.5, Math.min(2.0, (basePitch + indexShift) * userPitch));
-                utterance.rate = Math.max(0.5, Math.min(2.0, baseRate * userRate));
-
-                const liveVoices = window.speechSynthesis.getVoices();
-                if (liveVoices.length > 0) {
-                    const langVoices = liveVoices.filter(v => v.lang.replace('_','-').toLowerCase().startsWith(targetLang.slice(0,2).toLowerCase()));
-                    
-                    if (langVoices.length > 0) {
-                        // Distribution cyclique garantie sur l'ensemble des voix installées sur le système (Paul, Hortense, Julie, Google, etc.)
-                        const targetVoiceObj = langVoices[voiceIndex % langVoices.length];
-                        if (targetVoiceObj) utterance.voice = targetVoiceObj;
-                    }
-                }
-
-                window.speechSynthesis.speak(utterance);
-                
-                const dummyData = new Uint8Array([73, 68, 51, 3, 0, 0, 0, 0, 0, 0]);
-                resolve(new Blob([dummyData], { type: 'audio/mp3' }));
-            } else {
-                resolve(new Blob([], { type: 'audio/mp3' }));
-            }
+            this._speakWebSpeechDirect(text, options);
+            const dummyData = new Uint8Array([73, 68, 51, 3, 0, 0, 0, 0, 0, 0]);
+            resolve(new Blob([dummyData], { type: 'audio/mp3' }));
         });
     }
 
