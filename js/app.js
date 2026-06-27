@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'en-GB': "Hello! This is a sample recording to test the selected neural voice for your audiobook.",
         'es-ES': "¡Hola! Este es un fragmento de prueba para evaluar la voz seleccionada para tu libro hablado.",
         'de-DE': "Hallo! Dies ist eine Hörprobe, um die ausgewählte Stimme für Ihr Hörbuch zu testen.",
-        'it-IT': "Ciao! Questo è un campione audio di prova per testare la voce selezionata per il tuo audiolibro."
+        'it-IT': "Ciao! Questo è un campione audio di prova per testare la voce sélectionata pour votre livre audio."
     };
 
     function openModal(title, htmlContent) {
@@ -220,11 +220,13 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const testText = sampleTextsByLang[lang] || sampleTextsByLang['fr-FR'];
             const audioBlob = await ttsClient.synthesize(testText, { voice, rate, pitch });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            const audio = new Audio(audioUrl);
-            audio.play();
+            if (audioBlob && audioBlob.size > 20) {
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                await audio.play().catch(e => console.log("Autoplay restriction"));
+            }
         } catch (err) {
-            alert(`Erreur lors du test vocal : ${err.message}`);
+            console.warn("Test vocal : ", err);
         } finally {
             elements.btnTestVoice.disabled = false;
             elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-volume-high"></i> Tester la Voix`;
