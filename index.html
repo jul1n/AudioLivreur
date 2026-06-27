@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AudioLivreur Web — Studio de Synthèse d'Audiobooks</title>
+    <meta name="description" content="Convertissez vos livres EPUB, PDF, DOCX en audiobooks de haute qualité directement dans votre navigateur. 100% Gratuit et Privé.">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="icon" type="image/png" href="assets/app_icon.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- External Parsing Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header / Navigation Bar -->
+        <header class="navbar glass">
+            <div class="brand">
+                <img src="assets/app_icon.png" alt="AudioLivreur" class="brand-icon" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%236366f1\'><path d=\'M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z\'/></svg>'">
+                <div class="brand-text">
+                    <h1>AudioLivreur <span class="badge-web">Web 100% Client</span></h1>
+                    <p class="tagline">Studio de Synthèse Vocale d'Audiobooks</p>
+                </div>
+            </div>
+            <div class="nav-actions">
+                <span class="status-indicator" id="networkStatus">
+                    <span class="dot green"></span> Requêtes en Direct (IP Client)
+                </span>
+                <button id="btnPwaInstall" class="btn btn-secondary btn-sm hidden">
+                    <i class="fa-solid fa-download"></i> Installer l'App
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Layout -->
+        <main class="main-layout">
+            <!-- Sidebar: Settings & Voice Selection -->
+            <aside class="sidebar glass">
+                <div class="sidebar-section">
+                    <h3><i class="fa-solid fa-microphone-lines"></i> Voix & Langue</h3>
+                    
+                    <div class="form-group">
+                        <label for="selectLanguage">Langue du Livre</label>
+                        <select id="selectLanguage" class="form-control">
+                            <option value="fr-FR" selected>🇫🇷 Français</option>
+                            <option value="en-US">🇺🇸 Anglais (US)</option>
+                            <option value="en-GB">🇬🇧 Anglais (UK)</option>
+                            <option value="es-ES">🇪🇸 Espagnol</option>
+                            <option value="de-DE">🇩🇪 Allemand</option>
+                            <option value="it-IT">🇮🇹 Italien</option>
+                            <option value="pt-PT">🇵🇹 Portugais</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="selectVoice">Voix Neuronal Edge</label>
+                        <select id="selectVoice" class="form-control">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <button id="btnTestVoice" class="btn btn-secondary btn-block btn-sm">
+                        <i class="fa-solid fa-volume-high"></i> Tester la Voix
+                    </button>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fa-solid fa-sliders"></i> Ajustements Vocaux</h3>
+                    
+                    <div class="form-group">
+                        <div class="label-with-val">
+                            <label for="rangeRate">Vitesse de Lecture</label>
+                            <span id="valRate" class="range-val">0%</span>
+                        </div>
+                        <input type="range" id="rangeRate" min="-50" max="100" value="0" class="form-range">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-with-val">
+                            <label for="rangePitch">Hauteur (Pitch)</label>
+                            <span id="valPitch" class="range-val">0Hz</span>
+                        </div>
+                        <input type="range" id="rangePitch" min="-50" max="50" value="0" class="form-range">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-with-val">
+                            <label for="rangeParallel">Chapitres en Parallèle</label>
+                            <span id="valParallel" class="range-val">3</span>
+                        </div>
+                        <input type="range" id="rangeParallel" min="1" max="5" value="3" class="form-range">
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fa-solid fa-compact-disc"></i> Options d'Export</h3>
+                    
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="chkKeepMp3" checked>
+                        <span class="checkmark"></span>
+                        Conserver les MP3 par chapitre (.zip)
+                    </label>
+
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="chkEmbedTranscript" checked>
+                        <span class="checkmark"></span>
+                        Générer la transcription texte (.txt)
+                    </label>
+                </div>
+            </aside>
+
+            <!-- Main Panel: Workflow Area -->
+            <section class="workspace">
+                <!-- Step 1: Dropzone & Import -->
+                <div class="card glass-card" id="dropzoneCard">
+                    <div class="dropzone" id="dropzone">
+                        <div class="dropzone-icon">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <h2>Glissez-déposez votre livre ici</h2>
+                        <p>Formats pris en charge : <strong>EPUB, PDF, DOCX, TXT, MOBI</strong></p>
+                        <button class="btn btn-primary" id="btnBrowse">
+                            <i class="fa-solid fa-folder-open"></i> Parcourir les fichiers
+                        </button>
+                        <input type="file" id="fileInput" accept=".epub,.pdf,.docx,.txt,.md,.mobi" hidden>
+                    </div>
+                </div>
+
+                <!-- Step 2: Book Details & Chapter Inspection -->
+                <div class="card glass-card hidden" id="bookDetailsCard">
+                    <div class="book-header">
+                        <div class="cover-preview-wrapper">
+                            <img id="coverPreview" src="" alt="Couverture" class="cover-img hidden">
+                            <div id="coverPlaceholder" class="cover-placeholder">
+                                <i class="fa-solid fa-book-open"></i>
+                            </div>
+                        </div>
+                        <div class="book-meta-form">
+                            <div class="form-row">
+                                <div class="form-group flex-1">
+                                    <label for="metaTitle">Titre de l'Audiobook</label>
+                                    <input type="text" id="metaTitle" class="form-control" placeholder="Titre du livre">
+                                </div>
+                                <div class="form-group flex-1">
+                                    <label for="metaAuthor">Auteur / Artiste</label>
+                                    <input type="text" id="metaAuthor" class="form-control" placeholder="Nom de l'auteur">
+                                </div>
+                            </div>
+                            <div class="stats-pills">
+                                <span class="pill"><i class="fa-solid fa-list-ol"></i> <strong id="statChapters">0</strong> chapitres</span>
+                                <span class="pill"><i class="fa-solid fa-font"></i> <strong id="statWords">0</strong> mots</span>
+                                <span class="pill"><i class="fa-solid fa-clock"></i> Est. ~<strong id="statEstTime">0</strong> min d'audio</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-bar">
+                        <button id="btnStartConversion" class="btn btn-success btn-lg">
+                            <i class="fa-solid fa-play"></i> Lancer la Synthèse Vocale
+                        </button>
+                        <button id="btnReset" class="btn btn-danger btn-outline">
+                            <i class="fa-solid fa-trash"></i> Changer de livre
+                        </button>
+                    </div>
+
+                    <!-- Chapter List -->
+                    <div class="chapters-section">
+                        <h3>Sommaire & Chapitres Détectés</h3>
+                        <div class="chapters-list" id="chaptersList">
+                            <!-- Chapters rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Live Synthesis Progress Dashboard -->
+                <div class="card glass-card hidden" id="progressCard">
+                    <div class="dashboard-header">
+                        <h2><i class="fa-solid fa-bolt text-warning"></i> Synthèse en cours...</h2>
+                        <div class="dashboard-actions">
+                            <button id="btnPauseConversion" class="btn btn-warning btn-sm">
+                                <i class="fa-solid fa-pause"></i> Pause
+                            </button>
+                            <button id="btnCancelConversion" class="btn btn-danger btn-sm">
+                                <i class="fa-solid fa-xmark"></i> Annuler
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bars -->
+                    <div class="progress-box">
+                        <div class="progress-info">
+                            <span id="progressStatusText">Initialisation du moteur...</span>
+                            <span id="progressPercentText" class="font-bold">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="progressBarFill" class="progress-bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Realtime Metrics Grid -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <span class="metric-label">Mots Traités</span>
+                            <span class="metric-value" id="metricWords">0 / 0</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">Vitesse de Synthèse</span>
+                            <span class="metric-value" id="metricSpeed">0 mots/sec</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">Temps Restant estimé</span>
+                            <span class="metric-value" id="metricEta">--:--</span>
+                        </div>
+                    </div>
+
+                    <!-- Console Logs -->
+                    <div class="console-box">
+                        <div class="console-header">
+                            <span>Journal de synthèse (Logs)</span>
+                            <button id="btnClearLogs" class="btn-text">Effacer</button>
+                        </div>
+                        <div class="console-logs" id="consoleLogs">
+                            <div class="log-entry info">[INFO] Prêt pour la génération locale.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Download & Finished View -->
+                <div class="card glass-card hidden" id="finishedCard">
+                    <div class="finished-hero">
+                        <div class="hero-icon">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <h2>Félicitations ! Votre Livre Audio est Prêt</h2>
+                        <p>La synthèse vocale a été effectuée avec succès 100% dans votre navigateur.</p>
+
+                        <div class="download-grid">
+                            <button id="btnDownloadAudiobook" class="btn btn-success btn-lg flex-1">
+                                <i class="fa-solid fa-file-audio"></i> Télécharger les Fichiers Audio (.zip)
+                            </button>
+                            <button id="btnDownloadTranscript" class="btn btn-secondary btn-lg flex-1 hidden">
+                                <i class="fa-solid fa-file-lines"></i> Télécharger le Texte (.txt)
+                            </button>
+                        </div>
+
+                        <div class="mt-4">
+                            <button id="btnNewConversion" class="btn btn-primary btn-outline">
+                                <i class="fa-solid fa-rotate-left"></i> Convertir un autre livre
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Application Scripts -->
+    <script src="js/tts/edgeTts.js"></script>
+    <script src="js/parsers/fileParser.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

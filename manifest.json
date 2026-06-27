@@ -1,0 +1,16 @@
+{
+  "name": "AudioLivreur Web",
+  "short_name": "AudioLivreur",
+  "description": "Studio de synthèse vocale d'audiobooks 100% Client-Side",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "assets/app_icon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ]
+}
