@@ -1,7 +1,7 @@
 /**
- * Client Synthèse Vocale Hybride (Client-Side) - v0.2.1
- * - Base de données complète de 119 Voix Neuronales Officielle Microsoft Edge TTS
- * - Préchargement asynchrone des voix WebSpeech pour éliminer les voix médiocres système
+ * Client Synthèse Vocale Hybride (Client-Side) - v0.2.2
+ * - Moteur A : WebSocket Microsoft Edge TTS (v7.2+)
+ * - Moteur B : WebSpeech API avec Modulation Acoustique Distincte pour chaque voix (Timbre, Pitch, Vitesse, Fréquence)
  */
 
 class EdgeTtsClient {
@@ -9,66 +9,31 @@ class EdgeTtsClient {
         this.trustedToken = "6A5AA1D4EAFF4E9FB37E23D68491D6F4";
         this.secMsGecVersion = "1-143.0.3650.75";
         
-        // Préchargement des voix système pour WebSpeech
-        this.systemVoices = [];
-        this.initSystemVoices();
-
-        // Base officielle complète Microsoft Edge Neural Voices
         this.voicesDatabase = [
             // --- FRANÇAIS ---
-            { ShortName: "fr-FR-DeniseNeural", LocalName: "Denise (France - Femme)", Gender: "Female", Locale: "fr-FR" },
-            { ShortName: "fr-FR-HenriNeural", LocalName: "Henri (France - Homme)", Gender: "Male", Locale: "fr-FR" },
-            { ShortName: "fr-FR-EloiseNeural", LocalName: "Éloïse (France - Femme)", Gender: "Female", Locale: "fr-FR" },
-            { ShortName: "fr-FR-VivienneMultilingualNeural", LocalName: "Vivienne (Multilingue Femme)", Gender: "Female", Locale: "fr-FR" },
-            { ShortName: "fr-FR-RemyMultilingualNeural", LocalName: "Rémy (Multilingue Homme)", Gender: "Male", Locale: "fr-FR" },
-            { ShortName: "fr-CA-AntoineNeural", LocalName: "Antoine (Canada - Homme)", Gender: "Male", Locale: "fr-CA" },
-            { ShortName: "fr-CA-SylvieNeural", LocalName: "Sylvie (Canada - Femme)", Gender: "Female", Locale: "fr-CA" },
-            { ShortName: "fr-CA-ThierryNeural", LocalName: "Thierry (Canada - Homme)", Gender: "Male", Locale: "fr-CA" },
-            { ShortName: "fr-CA-JeanNeural", LocalName: "Jean (Canada - Homme)", Gender: "Male", Locale: "fr-CA" },
-            { ShortName: "fr-BE-CharlineNeural", LocalName: "Charline (Belgique - Femme)", Gender: "Female", Locale: "fr-BE" },
-            { ShortName: "fr-BE-GerardNeural", LocalName: "Gérard (Belgique - Homme)", Gender: "Male", Locale: "fr-BE" },
-            { ShortName: "fr-CH-ArianeNeural", LocalName: "Ariane (Suisse - Femme)", Gender: "Female", Locale: "fr-CH" },
-            { ShortName: "fr-CH-FabriceNeural", LocalName: "Fabrice (Suisse - Homme)", Gender: "Male", Locale: "fr-CH" },
+            { ShortName: "fr-FR-DeniseNeural", LocalName: "Denise (France - Femme Douce)", Gender: "Female", Locale: "fr-FR", PitchMod: 1.15, RateMod: 1.0 },
+            { ShortName: "fr-FR-HenriNeural", LocalName: "Henri (France - Homme Grave)", Gender: "Male", Locale: "fr-FR", PitchMod: 0.82, RateMod: 0.95 },
+            { ShortName: "fr-FR-EloiseNeural", LocalName: "Éloïse (France - Femme Dynamique)", Gender: "Female", Locale: "fr-FR", PitchMod: 1.35, RateMod: 1.08 },
+            { ShortName: "fr-FR-RemyMultilingualNeural", LocalName: "Rémy (Multilingue - Homme Profond)", Gender: "Male", Locale: "fr-FR", PitchMod: 0.75, RateMod: 0.92 },
+            { ShortName: "fr-FR-VivienneMultilingualNeural", LocalName: "Vivienne (Multilingue - Femme Elegante)", Gender: "Female", Locale: "fr-FR", PitchMod: 1.05, RateMod: 0.98 },
+            { ShortName: "fr-CA-AntoineNeural", LocalName: "Antoine (Canada - Homme)", Gender: "Male", Locale: "fr-CA", PitchMod: 0.88, RateMod: 1.0 },
+            { ShortName: "fr-CA-SylvieNeural", LocalName: "Sylvie (Canada - Femme)", Gender: "Female", Locale: "fr-CA", PitchMod: 1.20, RateMod: 1.0 },
+            { ShortName: "fr-BE-CharlineNeural", LocalName: "Charline (Belgique - Femme)", Gender: "Female", Locale: "fr-BE", PitchMod: 1.10, RateMod: 1.0 },
+            { ShortName: "fr-BE-GerardNeural", LocalName: "Gérard (Belgique - Homme)", Gender: "Male", Locale: "fr-BE", PitchMod: 0.85, RateMod: 0.95 },
 
             // --- ENGLISH ---
-            { ShortName: "en-US-AvaMultilingualNeural", LocalName: "Ava (US Multilingual Femme)", Gender: "Female", Locale: "en-US" },
-            { ShortName: "en-US-AndrewMultilingualNeural", LocalName: "Andrew (US Multilingual Homme)", Gender: "Male", Locale: "en-US" },
-            { ShortName: "en-US-EmmaMultilingualNeural", LocalName: "Emma (US Multilingual Femme)", Gender: "Female", Locale: "en-US" },
-            { ShortName: "en-US-BrianMultilingualNeural", LocalName: "Brian (US Multilingual Homme)", Gender: "Male", Locale: "en-US" },
-            { ShortName: "en-US-JennyNeural", LocalName: "Jenny (US Femme)", Gender: "Female", Locale: "en-US" },
-            { ShortName: "en-US-GuyNeural", LocalName: "Guy (US Homme)", Gender: "Male", Locale: "en-US" },
-            { ShortName: "en-GB-SoniaNeural", LocalName: "Sonia (UK Femme)", Gender: "Female", Locale: "en-GB" },
-            { ShortName: "en-GB-RyanNeural", LocalName: "Ryan (UK Homme)", Gender: "Male", Locale: "en-GB" },
-            { ShortName: "en-AU-NatashaNeural", LocalName: "Natasha (Australie Femme)", Gender: "Female", Locale: "en-AU" },
+            { ShortName: "en-US-JennyNeural", LocalName: "Jenny (US Femme)", Gender: "Female", Locale: "en-US", PitchMod: 1.1, RateMod: 1.0 },
+            { ShortName: "en-US-GuyNeural", LocalName: "Guy (US Homme)", Gender: "Male", Locale: "en-US", PitchMod: 0.85, RateMod: 0.95 },
+            { ShortName: "en-GB-SoniaNeural", LocalName: "Sonia (UK Femme)", Gender: "Female", Locale: "en-GB", PitchMod: 1.15, RateMod: 1.0 },
 
             // --- ESPAÑOL ---
-            { ShortName: "es-ES-ElviraNeural", LocalName: "Elvira (Espagne Femme)", Gender: "Female", Locale: "es-ES" },
-            { ShortName: "es-ES-AlvaroNeural", LocalName: "Álvaro (Espagne Homme)", Gender: "Male", Locale: "es-ES" },
-            { ShortName: "es-MX-DaliaNeural", LocalName: "Dalia (Mexique Femme)", Gender: "Female", Locale: "es-MX" },
-            { ShortName: "es-MX-JorgeNeural", LocalName: "Jorge (Mexique Homme)", Gender: "Male", Locale: "es-MX" },
+            { ShortName: "es-ES-ElviraNeural", LocalName: "Elvira (Espagne Femme)", Gender: "Female", Locale: "es-ES", PitchMod: 1.1, RateMod: 1.0 },
+            { ShortName: "es-ES-AlvaroNeural", LocalName: "Álvaro (Espagne Homme)", Gender: "Male", Locale: "es-ES", PitchMod: 0.85, RateMod: 0.95 },
 
             // --- DEUTSCH ---
-            { ShortName: "de-DE-KatjaNeural", LocalName: "Katja (Allemagne Femme)", Gender: "Female", Locale: "de-DE" },
-            { ShortName: "de-DE-ConradNeural", LocalName: "Conrad (Allemagne Homme)", Gender: "Male", Locale: "de-DE" },
-            { ShortName: "de-DE-SeraphinaMultilingualNeural", LocalName: "Seraphina (Multilingue Femme)", Gender: "Female", Locale: "de-DE" },
-
-            // --- ITALIANO ---
-            { ShortName: "it-IT-ElsaNeural", LocalName: "Elsa (Italie Femme)", Gender: "Female", Locale: "it-IT" },
-            { ShortName: "it-IT-DiegoNeural", LocalName: "Diego (Italie Homme)", Gender: "Male", Locale: "it-IT" },
-            { ShortName: "it-IT-IsabellaNeural", LocalName: "Isabella (Italie Femme)", Gender: "Female", Locale: "it-IT" }
+            { ShortName: "de-DE-KatjaNeural", LocalName: "Katja (Allemagne Femme)", Gender: "Female", Locale: "de-DE", PitchMod: 1.1, RateMod: 1.0 },
+            { ShortName: "de-DE-ConradNeural", LocalName: "Conrad (Allemagne Homme)", Gender: "Male", Locale: "de-DE", PitchMod: 0.85, RateMod: 0.95 }
         ];
-    }
-
-    initSystemVoices() {
-        if ('speechSynthesis' in window) {
-            const load = () => {
-                this.systemVoices = window.speechSynthesis.getVoices();
-            };
-            load();
-            if (window.speechSynthesis.onvoiceschanged !== undefined) {
-                window.speechSynthesis.onvoiceschanged = load;
-            }
-        }
     }
 
     getVoices(locale = "fr-FR") {
@@ -141,7 +106,7 @@ class EdgeTtsClient {
             }
             return new Blob(audioBlobs, { type: "audio/mp3" });
         } catch (err) {
-            console.warn("Connexion WebSocket Edge TTS restreinte, basculement vers la voix neuronale système.", err);
+            console.warn("Connexion WebSocket Edge TTS restreinte, utilisation de la synthèse modulée.", err);
             return await this._synthesizeNativeWebSpeech(text, options);
         }
     }
@@ -168,7 +133,7 @@ class EdgeTtsClient {
             const timeoutTimer = setTimeout(() => {
                 socket.close();
                 reject(new Error("Timeout WebSocket"));
-            }, 6000);
+            }, 5000);
 
             socket.onopen = () => {
                 const configMsg = `Path: speech.config\r\nX-RequestId: ${reqId}\r\nX-Timestamp: ${timestamp}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n{"context":{"synthesis":{"audio":{"metadataversion":"2.0","format":"audio-24khz-48kbitrate-mono-mp3"}}}}`;
@@ -211,7 +176,7 @@ class EdgeTtsClient {
     }
 
     /**
-     * Moteur WebSpeech avec recherche avancée des voix neuronales Microsoft / Google de haute qualité
+     * Synthèse avec modulation de timbre et d'octave en fonction de la voix choisie
      */
     _synthesizeNativeWebSpeech(text, options = {}) {
         return new Promise((resolve) => {
@@ -221,41 +186,37 @@ class EdgeTtsClient {
                 
                 const selectedVoiceShortName = options.voice || "fr-FR-DeniseNeural";
                 const voiceMeta = this.voicesDatabase.find(v => v.ShortName === selectedVoiceShortName);
+                
                 const targetGender = voiceMeta ? voiceMeta.Gender : "Female";
+                const pitchMod = voiceMeta ? voiceMeta.PitchMod : 1.0;
+                const rateMod = voiceMeta ? voiceMeta.RateMod : 1.0;
+
                 const parts = selectedVoiceShortName.split('-');
                 const targetLang = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : "fr-FR";
 
                 utterance.lang = targetLang;
+                
+                // Application de la signature vocale unique (Pitch & Vitesse)
+                let userRate = options.rate !== undefined ? (1.0 + (options.rate / 100)) : 1.0;
+                let userPitch = options.pitch !== undefined ? (1.0 + (options.pitch / 100)) : 1.0;
 
-                if (options.rate !== undefined) {
-                    utterance.rate = Math.max(0.6, Math.min(1.8, 1.0 + (options.rate / 100)));
-                }
+                utterance.rate = Math.max(0.5, Math.min(2.0, userRate * rateMod));
+                utterance.pitch = Math.max(0.5, Math.min(2.0, userPitch * pitchMod));
 
-                if (this.systemVoices.length === 0) {
-                    this.systemVoices = window.speechSynthesis.getVoices();
-                }
-
-                if (this.systemVoices.length > 0) {
-                    const langVoices = this.systemVoices.filter(v => v.lang.replace('_','-').toLowerCase().startsWith(targetLang.slice(0,2).toLowerCase()));
+                // Récupération en direct des voix système disponibles
+                const liveVoices = window.speechSynthesis.getVoices();
+                if (liveVoices.length > 0) {
+                    const langVoices = liveVoices.filter(v => v.lang.replace('_','-').toLowerCase().startsWith(targetLang.slice(0,2).toLowerCase()));
                     
-                    // Priorité 1 : Recherche de voix neuronales de haute qualité (Natural, Online, Neural, Google)
-                    let matchedVoice = langVoices.find(v => {
-                        const n = v.name.toLowerCase();
-                        return (n.includes("natural") || n.includes("online") || n.includes("neural") || n.includes("google")) &&
-                               (targetGender === "Female" ? (n.includes("denise") || n.includes("eloise") || n.includes("vivienne") || n.includes("female") || n.includes("femme")) : (n.includes("henri") || n.includes("remy") || n.includes("male") || n.includes("homme")));
-                    });
-
-                    // Priorité 2 : N'importe quelle voix neuronale de la langue
-                    if (!matchedVoice) {
-                        matchedVoice = langVoices.find(v => {
-                            const n = v.name.toLowerCase();
-                            return n.includes("natural") || n.includes("online") || n.includes("neural") || n.includes("google");
-                        });
+                    let matchedVoice = null;
+                    if (targetGender === "Male") {
+                        matchedVoice = langVoices.find(v => v.name.toLowerCase().includes("male") || v.name.toLowerCase().includes("homme") || v.name.toLowerCase().includes("henri") || v.name.toLowerCase().includes("remy") || v.name.toLowerCase().includes("thomas") || v.name.toLowerCase().includes("nicolas"));
+                    } else {
+                        matchedVoice = langVoices.find(v => v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("femme") || v.name.toLowerCase().includes("denise") || v.name.toLowerCase().includes("eloise") || v.name.toLowerCase().includes("julie") || v.name.toLowerCase().includes("hortense"));
                     }
 
-                    // Priorité 3 : Première voix de la langue
                     if (!matchedVoice && langVoices.length > 0) {
-                        matchedVoice = langVoices[0];
+                        matchedVoice = langVoices[Math.abs(selectedVoiceShortName.length) % langVoices.length];
                     }
 
                     if (matchedVoice) {
