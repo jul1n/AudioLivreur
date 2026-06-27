@@ -51,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnDownloadTranscript: document.getElementById('btnDownloadTranscript'),
         btnNewConversion: document.getElementById('btnNewConversion'),
 
-        // Modals Elements
         modalOverlay: document.getElementById('modalOverlay'),
         modalTitle: document.getElementById('modalTitle'),
         modalBody: document.getElementById('modalBody'),
@@ -59,6 +58,16 @@ document.addEventListener('DOMContentLoaded', () => {
         btnOpenModalHow: document.getElementById('btnOpenModalHow'),
         btnOpenModalLegal: document.getElementById('btnOpenModalLegal'),
         btnOpenModalCredits: document.getElementById('btnOpenModalCredits')
+    };
+
+    // Native Test Sentences per Language
+    const sampleTextsByLang = {
+        'fr-FR': "Bonjour ! Ceci est un extrait de test de la voix sélectionnée pour votre livre audio.",
+        'en-US': "Hello! This is a sample recording to test the selected neural voice for your audiobook.",
+        'en-GB': "Hello! This is a sample recording to test the selected neural voice for your audiobook.",
+        'es-ES': "¡Hola! Este es un fragmento de prueba para evaluar la voz seleccionada para tu libro hablado.",
+        'de-DE': "Hallo! Dies ist eine Hörprobe, um die ausgewählte Stimme für Ihr Hörbuch zu testen.",
+        'it-IT': "Ciao! Questo è un campione audio di prova per testare la voce selezionata per il tuo audiolibro."
     };
 
     // Modal Controller
@@ -77,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === elements.modalOverlay) closeModal();
     });
 
-    // Pop-up 1: Comment ça marche ?
     elements.btnOpenModalHow.addEventListener('click', () => {
         openModal("📖 Comment ça marche ?", `
             <p><strong>audiolivreur.ai</strong> transforme vos livres numériques en audiobooks haute définition en 3 étapes simples :</p>
@@ -89,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `);
     });
 
-    // Pop-up 2: Confidentialité & CGU
     elements.btnOpenModalLegal.addEventListener('click', () => {
         openModal("🔒 Confidentialité & Traitement des Données", `
             <p><strong>Respect total de votre vie privée :</strong></p>
@@ -101,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `);
     });
 
-    // Pop-up 3: Crédits
     elements.btnOpenModalCredits.addEventListener('click', () => {
         openModal("✨ Crédits & Bibliothèques Open-Source", `
             <p>Ce projet utilise d'excellentes bibliothèques open-source :</p>
@@ -115,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `);
     });
 
-    // Populate Voice Select Dropdown based on Language Select
     function updateVoiceSelect() {
         const lang = elements.selectLanguage.value;
         const voices = ttsClient.getVoices(lang);
@@ -148,7 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.consoleLogs.scrollTop = elements.consoleLogs.scrollHeight;
     }
 
+    // Test Voice with Native Sample Text matching selected language
     elements.btnTestVoice.addEventListener('click', async () => {
+        const lang = elements.selectLanguage.value;
         const voice = elements.selectVoice.value;
         const rate = parseInt(elements.rangeRate.value);
         const pitch = parseInt(elements.rangePitch.value);
@@ -157,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Génération...`;
 
         try {
-            const testText = "Bonjour ! Ceci est un extrait de test de la voix sélectionnée pour votre livre audio.";
+            const testText = sampleTextsByLang[lang] || sampleTextsByLang['fr-FR'];
             const audioBlob = await ttsClient.synthesize(testText, { voice, rate, pitch });
             const audioUrl = URL.createObjectURL(audioBlob);
             const audio = new Audio(audioUrl);
