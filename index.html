@@ -3,8 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>audiolivreur.ai — Studio de Synthèse Vocale Client-Side</title>
-    <meta name="description" content="Convertissez vos livres EPUB, PDF, DOCX en audiobooks de haute qualité directement depuis votre navigateur.">
+    <title>audiolivreur.ai — Convertisseur Livre Audio Gratuit (EPUB, PDF en MP3 & M4B)</title>
+    <meta name="description" content="Convertissez vos livres EPUB, PDF, DOCX et TXT en livres audio MP3 & M4B de haute qualité avec les voix neuronales Microsoft. 100% Gratuit, Privé et dans votre navigateur.">
+    <meta name="keywords" content="livre audio, audiobook, convertisseur epub en mp3, pdf en mp3, synthése vocale, edge tts, text to speech, m4b generator, julien houssin">
+    <meta name="author" content="Julien HOUSSIN">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://jul1n.github.io/AudioLivreur/">
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jul1n.github.io/AudioLivreur/">
+    <meta property="og:title" content="audiolivreur.ai — Convertissez vos livres en audiobooks 100% gratuit">
+    <meta property="og:description" content="Transformez n'importe quel livre numérique (EPUB, PDF, DOCX) en écoute immersive MP3. 100% local, aucune inscription requise.">
+    <meta property="og:image" content="https://jul1n.github.io/AudioLivreur/assets/app_icon.png">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="audiolivreur.ai — Studio de Synthèse Vocale d'Audiobooks">
+    <meta name="twitter:description" content="Créez vos livres audio instantanément dans votre navigateur avec les voix neuronales les plus réalistes.">
+    <meta name="twitter:image" content="https://jul1n.github.io/AudioLivreur/assets/app_icon.png">
     
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
@@ -21,6 +39,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+    <!-- JSON-LD Structured Data for Google Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "audiolivreur.ai",
+      "url": "https://jul1n.github.io/AudioLivreur/",
+      "description": "Studio de synthèse vocale d'audiobooks 100% client-side permettant de convertir EPUB, PDF et DOCX en fichiers audio MP3 et M4B.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "All (Web Browser)",
+      "author": {
+        "@type": "Person",
+        "name": "Julien HOUSSIN"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      }
+    }
+    </script>
 </head>
 <body>
 
@@ -61,11 +101,29 @@
         <!-- Main Workspace Neubrutalist Grid -->
         <section class="workspace-grid">
             
-            <!-- Left Panel: Settings with Dropdowns -->
+            <!-- Left Panel: Settings with Dropdowns & Format Toggle -->
             <aside class="card-box settings-panel">
                 <h3 class="panel-title"><i class="fa-solid fa-sliders"></i> Réglages de Synthèse</h3>
                 
-                <!-- Language Dropdown Clean Flags & Names -->
+                <!-- Format Toggle MP3 vs M4B -->
+                <div class="form-group">
+                    <label>Format de Sortie</label>
+                    <div class="toggle-switch-group">
+                        <button class="toggle-btn active" id="toggleMp3">
+                            🎵 MP3 <span class="badge-mini">Rapide & Léger</span>
+                        </button>
+                        <button class="toggle-btn" id="toggleM4b">
+                            📚 M4B <span class="badge-mini">Fichier Unique</span>
+                        </button>
+                    </div>
+                    <div class="format-hint" id="formatHint">
+                        ⚡ <strong>Recommandé (MP3) :</strong> Génération ultra-rapide par chapitres sans solliciter inutilement votre batterie.
+                    </div>
+                </div>
+
+                <hr style="border:none; border-top:2px solid var(--border-black); margin:0.5rem 0 1rem 0;">
+
+                <!-- Language Dropdown -->
                 <div class="form-group">
                     <label for="selectLanguage">Langue du Livre</label>
                     <select id="selectLanguage" class="input-neubrutal">
@@ -91,7 +149,7 @@
                     <i class="fa-solid fa-volume-high"></i> Tester la Voix
                 </button>
 
-                <hr style="border:none; border-top:2px solid var(--border-black); margin:0.5rem 0;">
+                <hr style="border:none; border-top:2px solid var(--border-black); margin:0.8rem 0;">
 
                 <!-- Rate / Speed Range -->
                 <div class="form-group">
@@ -220,7 +278,7 @@
 
                     <div style="display:flex; gap:1rem; width:100%; max-width:500px; flex-wrap:wrap; margin-top:0.5rem;">
                         <button id="btnDownloadAudiobook" class="btn-main yellow flex-1">
-                            <i class="fa-solid fa-file-audio"></i> Télécharger les MP3 (.zip)
+                            <i class="fa-solid fa-file-audio"></i> Télécharger les Audiobooks (<span id="lblDownloadFormat">.zip MP3</span>)
                         </button>
                         <button id="btnDownloadTranscript" class="btn-main purple flex-1">
                             <i class="fa-solid fa-file-lines"></i> Télécharger Texte (.txt)

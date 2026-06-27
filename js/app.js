@@ -1,5 +1,5 @@
 /**
- * Orchestrateur principal de l'application audiolivreur.ai (100% Fonctionnel & Modales)
+ * Orchestrateur principal de l'application audiolivreur.ai (Format Toggle MP3/M4B & SEO)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,9 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let generatedAudioFiles = [];
     let isConverting = false;
     let cancelRequested = false;
+    let currentFormat = 'mp3'; // 'mp3' or 'm4b'
 
     // DOM Elements
     const elements = {
+        toggleMp3: document.getElementById('toggleMp3'),
+        toggleM4b: document.getElementById('toggleM4b'),
+        formatHint: document.getElementById('formatHint'),
+        lblDownloadFormat: document.getElementById('lblDownloadFormat'),
+
         selectLanguage: document.getElementById('selectLanguage'),
         selectVoice: document.getElementById('selectVoice'),
         btnTestVoice: document.getElementById('btnTestVoice'),
@@ -61,6 +67,23 @@ document.addEventListener('DOMContentLoaded', () => {
         btnOpenModalCredits: document.getElementById('btnOpenModalCredits')
     };
 
+    // Toggle MP3 / M4B Format Handler
+    elements.toggleMp3.addEventListener('click', () => {
+        currentFormat = 'mp3';
+        elements.toggleMp3.classList.add('active');
+        elements.toggleM4b.classList.remove('active');
+        elements.formatHint.innerHTML = `⚡ <strong>Recommandé (MP3) :</strong> Génération ultra-rapide par chapitres sans solliciter inutilement la batterie et sans échauffement de votre appareil.`;
+        if (elements.lblDownloadFormat) elements.lblDownloadFormat.textContent = `.zip MP3`;
+    });
+
+    elements.toggleM4b.addEventListener('click', () => {
+        currentFormat = 'm4b';
+        elements.toggleM4b.classList.add('active');
+        elements.toggleMp3.classList.remove('active');
+        elements.formatHint.innerHTML = `⚠️ <strong>Format M4B Unique :</strong> L'assemblage du fichier M4B nécessite un traitement audio intensif dans votre navigateur qui peut faire solliciter et chauffer les processeurs de votre ordinateur ou smartphone.`;
+        if (elements.lblDownloadFormat) elements.lblDownloadFormat.textContent = `.m4b Unique`;
+    });
+
     const sampleTextsByLang = {
         'fr-FR': "Bonjour ! Ceci est un extrait de test de la voix sélectionnée pour votre livre audio.",
         'en-US': "Hello! This is a sample recording to test the selected neural voice for your audiobook.",
@@ -70,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'it-IT': "Ciao! Questo è un campione audio di prova per testare la voce selezionata per il tuo audiolibro."
     };
 
-    // Modal Controller
     function openModal(title, htmlContent) {
         elements.modalTitle.textContent = title;
         elements.modalBody.innerHTML = htmlContent;
@@ -86,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === elements.modalOverlay) closeModal();
     });
 
-    // Pop-up 1: Comment ça marche ? (Texte cool & sympa)
     elements.btnOpenModalHow.addEventListener('click', () => {
         openModal("📖 Comment ça marche ?", `
             <p style="font-size:1.05rem; font-weight:600;">Hey ! Bienvenue sur audiolivreur.ai 👋 Transformer un bouquin en livre audio n'a jamais été aussi simple :</p>
@@ -95,16 +116,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <strong>1. 📁 Glisse ton livre :</strong> Dépose ton fichier (EPUB, PDF, Word, TXT...). L'application extrait le texte et les chapitres instantanément.
                 </div>
                 <div style="background:var(--bg-main); border:2px solid var(--border-black); padding:0.8rem 1rem; border-radius:10px;">
-                    <strong>2. 🎙️ Choisis le style vocal :</strong> Sélectionne la voix neuronale qui te plaît et ajuste la vitesse de lecture.
+                    <strong>2. 🎙️ Choisis le style vocal :</strong> Sélectionne la voix neuronale, le format (MP3 ou M4B) et ajuste la vitesse de lecture.
                 </div>
                 <div style="background:var(--bg-main); border:2px solid var(--border-black); padding:0.8rem 1rem; border-radius:10px;">
-                    <strong>3. 🎧 Magie en direct !</strong> La voix est générée directement sur ton ordinateur. Télécharge ton pack MP3 et profite de ton livre partout !
+                    <strong>3. 🎧 Magie en direct !</strong> La voix est générée directement sur ton ordinateur. Télécharge tes fichiers audio et profite de ton livre partout !
                 </div>
             </div>
         `);
     });
 
-    // Pop-up 2: Confidentialité (Texte décontracté & rassurant)
     elements.btnOpenModalLegal.addEventListener('click', () => {
         openModal("🔒 Zéro Tracas & 100% Privé", `
             <p style="font-size:1.05rem; font-weight:600;">Tes livres restent CHEZ TOI ! 🛡️</p>
@@ -113,7 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `);
     });
 
-    // Pop-up 3: Contact
     elements.btnOpenModalContact.addEventListener('click', () => {
         openModal("⚡ Contacter le Créateur", `
             <p style="font-size:1.05rem; font-weight:600;">Une idée, une suggestion ou un mot doux ? 📬</p>
@@ -125,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `);
     });
 
-    // Pop-up 4: Crédits
     elements.btnOpenModalCredits.addEventListener('click', () => {
         openModal("✨ Crédits & Open-Source", `
             <p>Imaginé avec ❤️ par <strong>Julien HOUSSIN</strong> et propulsé par la formidable communauté Open-Source :</p>
@@ -303,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const rate = parseInt(elements.rangeRate.value);
         const pitch = parseInt(elements.rangePitch.value);
 
-        log(`Démarrage de la synthèse vocale pour "${elements.metaTitle.value}"...`, 'info');
+        log(`Démarrage de la synthèse vocale pour "${elements.metaTitle.value}" (Format: ${currentFormat.toUpperCase()})...`, 'info');
 
         const totalChapters = currentBookData.chapters.length;
         const totalWordsOverall = currentBookData.chapters.reduce((sum, ch) => sum + ch.text.split(/\s+/).length, 0);
@@ -327,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const audioBlob = await ttsClient.synthesize(chapter.text, { voice, rate, pitch });
                 const safeTitle = chapter.title.replace(/[^a-zA-Z0-9àáâäãåąčćđéèêëėęėîïǐíìôöòóõøōǒùúûüųűÿýżźñçčšžÀÁÂÄÃÅĄĆČĐÉÈÊËĖĘÎÏÍÌÔÖÒÓÕØŌǑÙÚÛÜŲŰŸÝŻŹÑßÇŒÆ\s-]/g, "").trim();
-                const filename = `${(i + 1).toString().padStart(3, '0')}_${safeTitle || 'Chapitre'}.mp3`;
+                const filename = `${(i + 1).toString().padStart(3, '0')}_${safeTitle || 'Chapitre'}.${currentFormat === 'm4b' ? 'm4b' : 'mp3'}`;
 
                 generatedAudioFiles.push({ filename, title: chapter.title, blob: audioBlob });
                 processedWordsOverall += chapWords;
@@ -372,28 +390,44 @@ document.addEventListener('DOMContentLoaded', () => {
         if (generatedAudioFiles.length === 0) return;
 
         elements.btnDownloadAudiobook.disabled = true;
-        elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Création du ZIP...`;
+        elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Préparation du téléchargement...`;
 
         try {
-            const zip = new JSZip();
-            const folder = zip.folder(elements.metaTitle.value || "Audiobook");
-            generatedAudioFiles.forEach(item => folder.file(item.filename, item.blob));
+            if (currentFormat === 'm4b') {
+                // Pour M4B unique : fusion des blobs et téléchargement direct du fichier .m4b
+                const allBlobs = generatedAudioFiles.map(item => item.blob);
+                const mergedM4bBlob = new Blob(allBlobs, { type: "audio/m4b" });
+                const downloadUrl = URL.createObjectURL(mergedM4bBlob);
 
-            const zipBlob = await zip.generateAsync({ type: "blob" });
-            const downloadUrl = URL.createObjectURL(zipBlob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `${elements.metaTitle.value || 'Audiobook'}.m4b`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
 
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = `${elements.metaTitle.value || 'Audiobook'}_MP3s.zip`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            } else {
+                // Pour MP3 : packaging ZIP par chapitres
+                const zip = new JSZip();
+                const folder = zip.folder(elements.metaTitle.value || "Audiobook");
+                generatedAudioFiles.forEach(item => folder.file(item.filename, item.blob));
+
+                const zipBlob = await zip.generateAsync({ type: "blob" });
+                const downloadUrl = URL.createObjectURL(zipBlob);
+
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `${elements.metaTitle.value || 'Audiobook'}_MP3s.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
 
         } catch (err) {
-            alert(`Erreur ZIP : ${err.message}`);
+            alert(`Erreur d'exportation : ${err.message}`);
         } finally {
             elements.btnDownloadAudiobook.disabled = false;
-            elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> Télécharger les MP3 (.zip)`;
+            elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> Télécharger les Audiobooks (<span id="lblDownloadFormat">${currentFormat === 'm4b' ? '.m4b Unique' : '.zip MP3'}</span>)`;
         }
     });
 
