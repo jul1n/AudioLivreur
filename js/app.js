@@ -225,6 +225,25 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.consoleLogs.scrollTop = elements.consoleLogs.scrollHeight;
     }
 
+    function showToast(msg, isError = false) {
+        let toast = document.getElementById('appToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'appToast';
+            toast.style.cssText = 'position:fixed; bottom:20px; right:20px; z-index:9999; padding:12px 20px; border-radius:10px; font-weight:700; font-family:sans-serif; border:3px solid #0f0f0f; box-shadow:4px 4px 0px #0f0f0f; transition:all 0.3s; opacity:0; transform:translateY(20px);';
+            document.body.appendChild(toast);
+        }
+        toast.style.background = isError ? '#ff6b6b' : '#51cf66';
+        toast.style.color = '#0f0f0f';
+        toast.innerHTML = (isError ? '⚠️ ' : '✅ ') + msg;
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+        }, 4000);
+    }
+
     elements.btnTestVoice.addEventListener('click', async () => {
         const lang = elements.selectLanguage.value;
         const voice = elements.selectVoice.value;
@@ -232,13 +251,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const pitch = parseInt(elements.rangePitch.value);
 
         elements.btnTestVoice.disabled = true;
-        elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Test vocal...`;
+        elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Connexion Microsoft...`;
 
         try {
-            const testText = sampleTextsByLang[lang] || sampleTextsByLang['fr-FR'];
-            await ttsClient.testVoice(testText, { voice, rate, pitch });
+            const testText = sampleTextsByLang[lang] || sampleTextsByLang['fr'];
+            await ttsClient.testVoice(testText, { voice, rate, pitch }, (status) => {
+                elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${status}`;
+            });
+            showToast("Lecture audio en cours...");
         } catch (err) {
             console.warn("Test vocal : ", err);
+            showToast("Connexion au serveur Microsoft bloquée ou indisponible sur cette origine web.", true);
+            alert("⚠️ Impossible d'établir la connexion WebSocket avec le serveur Microsoft Bing TTS.\n\nRaison : Microsoft restreint l'accès direct aux WebSocket depuis le domaine public github.io sans proxy intermédiaire.");
         } finally {
             elements.btnTestVoice.disabled = false;
             elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-volume-high"></i> Tester la Voix`;

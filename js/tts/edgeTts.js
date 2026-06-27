@@ -1,6 +1,6 @@
 /**
- * Studio Synthèse Vocale 100% Serveur Microsoft Bing Edge Neural - v0.6.0
- * - AUCUNE VOIX LOCALE. 100% Voix Neuronales Haute Définition Serveur Microsoft.
+ * Studio Synthèse Vocale 100% Serveur Microsoft Bing Edge Neural - v0.6.1
+ * - Feedback utilisateur dynamique & Gestion des erreurs réseau
  */
 
 class EdgeTtsClient {
@@ -1198,15 +1198,14 @@ class EdgeTtsClient {
         return chunks;
     }
 
-    /**
-     * Test vocal 100% Serveur Microsoft avec tentative multiple
-     */
-    async testVoice(text, options = {}) {
+    async testVoice(text, options = {}, statusCallback = null) {
         let lastError = null;
-        for (let attempt = 1; attempt <= 3; attempt++) {
+        for (let attempt = 1; attempt <= 2; attempt++) {
+            if (statusCallback) statusCallback(`Connexion Microsoft (${attempt}/2)...`);
             try {
-                const blob = await this._synthesizeChunkWebSocket(text, options);
+                const blob = await this._synthesizeChunkWebSocket(text, options, 3000);
                 if (blob && blob.size > 100) {
+                    if (statusCallback) statusCallback(`Lecture audio...`);
                     const audioUrl = URL.createObjectURL(blob);
                     const audio = new Audio(audioUrl);
                     await audio.play();
@@ -1214,43 +1213,43 @@ class EdgeTtsClient {
                 }
             } catch (err) {
                 lastError = err;
-                await new Promise(r => setTimeout(r, 500 * attempt));
+                await new Promise(r => setTimeout(r, 300));
             }
         }
-        throw new Error("Impossible de se connecter au serveur Microsoft Bing TTS : " + (lastError ? lastError.message : "Erreur réseau"));
+        throw new Error("Impossible de joindre le serveur Microsoft Bing TTS (" + (lastError ? lastError.message : "Erreur WebSocket") + ")");
     }
 
-    /**
-     * Synthèse 100% Serveur Microsoft Bing
-     */
-    async synthesize(text, options = {}) {
+    async synthesize(text, options = {}, progressCallback = null) {
         const chunks = this.splitTextSmart(text, 2000);
         const audioBlobs = [];
+        let i = 0;
         for (const chunk of chunks) {
             if (!chunk) continue;
+            i++;
+            if (progressCallback) progressCallback(i, chunks.length);
             
             let blob = null;
             let lastErr = null;
-            for (let attempt = 1; attempt <= 3; attempt++) {
+            for (let attempt = 1; attempt <= 2; attempt++) {
                 try {
-                    blob = await this._synthesizeChunkWebSocket(chunk, options);
+                    blob = await this._synthesizeChunkWebSocket(chunk, options, 4000);
                     if (blob && blob.size > 100) break;
                 } catch (err) {
                     lastErr = err;
-                    await new Promise(r => setTimeout(r, 600 * attempt));
+                    await new Promise(r => setTimeout(r, 400));
                 }
             }
             
             if (blob && blob.size > 100) {
                 audioBlobs.push(blob);
             } else {
-                throw new Error("Échec de la génération audio serveur Microsoft pour le fragment : " + (lastErr ? lastErr.message : "Erreur serveur"));
+                throw new Error("Échec du téléchargement auprès du serveur Microsoft : " + (lastErr ? lastErr.message : "Erreur réseau"));
             }
         }
         return new Blob(audioBlobs, { type: "audio/mp3" });
     }
 
-    async _synthesizeChunkWebSocket(text, options = {}) {
+    async _synthesizeChunkWebSocket(text, options = {}, timeoutMs = 3500) {
         const voice = options.voice || "fr-FR-VivienneMultilingualNeural";
         const rate = options.rate !== undefined ? `${options.rate >= 0 ? '+' : ''}${options.rate}%` : "+0%";
         const pitch = options.pitch !== undefined ? `${options.pitch >= 0 ? '+' : ''}${options.pitch}Hz` : "+0Hz";
@@ -1265,14 +1264,20 @@ class EdgeTtsClient {
         const wsUrl = `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${this.trustedToken}&ConnectionId=${reqId}&Sec-MS-GEC=${secMsGec}&Sec-MS-GEC-Version=${this.secMsGecVersion}`;
 
         return new Promise((resolve, reject) => {
-            const socket = new WebSocket(wsUrl);
+            let socket = null;
+            try {
+                socket = new WebSocket(wsUrl);
+            } catch(e) {
+                return reject(e);
+            }
+            
             const audioBuffers = [];
             socket.binaryType = 'arraybuffer';
 
             const timeoutTimer = setTimeout(() => {
                 try { socket.close(); } catch(e) {}
-                reject(new Error("Timeout Serveur Microsoft Bing"));
-            }, 6000);
+                reject(new Error("Délai d'attente serveur dépassé (Timeout)"));
+            }, timeoutMs);
 
             socket.onopen = () => {
                 const configMsg = `Path: speech.config\r\nX-RequestId: ${reqId}\r\nX-Timestamp: ${timestamp}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n{"context":{"synthesis":{"audio":{"metadataversion":"2.0","format":"audio-24khz-48kbitrate-mono-mp3"}}}}`;
@@ -1303,7 +1308,7 @@ class EdgeTtsClient {
                 if (audioBuffers.length > 0) {
                     resolve(new Blob(audioBuffers, { type: 'audio/mp3' }));
                 } else {
-                    reject(new Error("Le serveur Microsoft n'a pas renvoyé de données audio"));
+                    reject(new Error("Connexion fermée sans données audio"));
                 }
             };
 
