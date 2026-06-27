@@ -184,9 +184,17 @@ document.addEventListener('DOMContentLoaded', () => {
         voices.forEach(v => {
             const opt = document.createElement('option');
             opt.value = v.ShortName;
-            opt.textContent = `${v.LocalName} (${v.Gender === 'Male' ? 'Homme' : 'Femme'})`;
+            opt.textContent = v.LocalName;
+            if (v.ShortName.includes("Vivienne")) {
+                opt.selected = true;
+            }
             elements.selectVoice.appendChild(opt);
         });
+
+        // Si Vivienne n'est pas dans la liste courante, sélectionner la première voix
+        if (!elements.selectVoice.value && elements.selectVoice.options.length > 0) {
+            elements.selectVoice.options[0].selected = true;
+        }
     }
 
     updateVoiceSelect();

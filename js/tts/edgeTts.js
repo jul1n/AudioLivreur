@@ -14,8 +14,16 @@ class EdgeTtsClient {
 
         this.voicesDatabase = [
             {
+                        "ShortName": "fr-FR-VivienneMultilingualNeural",
+                        "LocalName": "Vivienne (Multilingue) (Femme - fr-FR)",
+                        "Gender": "Female",
+                        "Locale": "fr-FR",
+                        "PitchMod": 1.05,
+                        "RateMod": 0.9
+            },
+            {
                         "ShortName": "en-AU-WilliamMultilingualNeural",
-                        "LocalName": "William (Multilingue) (en-AU - Homme)",
+                        "LocalName": "William (Multilingue) (Homme - en-AU)",
                         "Gender": "Male",
                         "Locale": "en-AU",
                         "PitchMod": 0.81,
@@ -23,7 +31,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-AU-NatashaNeural",
-                        "LocalName": "Natasha (en-AU - Femme)",
+                        "LocalName": "Natasha (Femme - en-AU)",
                         "Gender": "Female",
                         "Locale": "en-AU",
                         "PitchMod": 0.95,
@@ -31,7 +39,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-CA-ClaraNeural",
-                        "LocalName": "Clara (en-CA - Femme)",
+                        "LocalName": "Clara (Femme - en-CA)",
                         "Gender": "Female",
                         "Locale": "en-CA",
                         "PitchMod": 1.06,
@@ -39,7 +47,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-CA-LiamNeural",
-                        "LocalName": "Liam (en-CA - Homme)",
+                        "LocalName": "Liam (Homme - en-CA)",
                         "Gender": "Male",
                         "Locale": "en-CA",
                         "PitchMod": 1.1,
@@ -47,7 +55,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-HK-YanNeural",
-                        "LocalName": "Yan (en-HK - Femme)",
+                        "LocalName": "Yan (Femme - en-HK)",
                         "Gender": "Female",
                         "Locale": "en-HK",
                         "PitchMod": 0.84,
@@ -55,7 +63,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-HK-SamNeural",
-                        "LocalName": "Sam (en-HK - Homme)",
+                        "LocalName": "Sam (Homme - en-HK)",
                         "Gender": "Male",
                         "Locale": "en-HK",
                         "PitchMod": 0.77,
@@ -63,7 +71,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-IN-NeerjaExpressiveNeural",
-                        "LocalName": "Neerja (Expressif) (en-IN - Femme)",
+                        "LocalName": "Neerja (Expressif) (Femme - en-IN)",
                         "Gender": "Female",
                         "Locale": "en-IN",
                         "PitchMod": 1.09,
@@ -71,7 +79,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-IN-NeerjaNeural",
-                        "LocalName": "Neerja (en-IN - Femme)",
+                        "LocalName": "Neerja (Femme - en-IN)",
                         "Gender": "Female",
                         "Locale": "en-IN",
                         "PitchMod": 0.89,
@@ -79,7 +87,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-IN-PrabhatNeural",
-                        "LocalName": "Prabhat (en-IN - Homme)",
+                        "LocalName": "Prabhat (Homme - en-IN)",
                         "Gender": "Male",
                         "Locale": "en-IN",
                         "PitchMod": 0.98,
@@ -87,7 +95,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-IE-ConnorNeural",
-                        "LocalName": "Connor (en-IE - Homme)",
+                        "LocalName": "Connor (Homme - en-IE)",
                         "Gender": "Male",
                         "Locale": "en-IE",
                         "PitchMod": 1.06,
@@ -95,7 +103,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-IE-EmilyNeural",
-                        "LocalName": "Emily (en-IE - Femme)",
+                        "LocalName": "Emily (Femme - en-IE)",
                         "Gender": "Female",
                         "Locale": "en-IE",
                         "PitchMod": 0.95,
@@ -103,7 +111,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-KE-AsiliaNeural",
-                        "LocalName": "Asilia (en-KE - Femme)",
+                        "LocalName": "Asilia (Femme - en-KE)",
                         "Gender": "Female",
                         "Locale": "en-KE",
                         "PitchMod": 0.8,
@@ -111,7 +119,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-KE-ChilembaNeural",
-                        "LocalName": "Chilemba (en-KE - Homme)",
+                        "LocalName": "Chilemba (Homme - en-KE)",
                         "Gender": "Male",
                         "Locale": "en-KE",
                         "PitchMod": 1.24,
@@ -119,7 +127,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-NZ-MitchellNeural",
-                        "LocalName": "Mitchell (en-NZ - Homme)",
+                        "LocalName": "Mitchell (Homme - en-NZ)",
                         "Gender": "Male",
                         "Locale": "en-NZ",
                         "PitchMod": 0.77,
@@ -127,7 +135,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-NZ-MollyNeural",
-                        "LocalName": "Molly (en-NZ - Femme)",
+                        "LocalName": "Molly (Femme - en-NZ)",
                         "Gender": "Female",
                         "Locale": "en-NZ",
                         "PitchMod": 0.84,
@@ -135,7 +143,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-NG-AbeoNeural",
-                        "LocalName": "Abeo (en-NG - Homme)",
+                        "LocalName": "Abeo (Homme - en-NG)",
                         "Gender": "Male",
                         "Locale": "en-NG",
                         "PitchMod": 1.15,
@@ -143,7 +151,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-NG-EzinneNeural",
-                        "LocalName": "Ezinne (en-NG - Femme)",
+                        "LocalName": "Ezinne (Femme - en-NG)",
                         "Gender": "Female",
                         "Locale": "en-NG",
                         "PitchMod": 1.07,
@@ -151,7 +159,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-PH-JamesNeural",
-                        "LocalName": "James (en-PH - Homme)",
+                        "LocalName": "James (Homme - en-PH)",
                         "Gender": "Male",
                         "Locale": "en-PH",
                         "PitchMod": 0.89,
@@ -159,7 +167,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-PH-RosaNeural",
-                        "LocalName": "Rosa (en-PH - Femme)",
+                        "LocalName": "Rosa (Femme - en-PH)",
                         "Gender": "Female",
                         "Locale": "en-PH",
                         "PitchMod": 0.98,
@@ -167,7 +175,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-AvaNeural",
-                        "LocalName": "Ava (en-US - Femme)",
+                        "LocalName": "Ava (Femme - en-US)",
                         "Gender": "Female",
                         "Locale": "en-US",
                         "PitchMod": 0.89,
@@ -175,7 +183,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-AndrewNeural",
-                        "LocalName": "Andrew (en-US - Homme)",
+                        "LocalName": "Andrew (Homme - en-US)",
                         "Gender": "Male",
                         "Locale": "en-US",
                         "PitchMod": 1.18,
@@ -183,7 +191,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-EmmaNeural",
-                        "LocalName": "Emma (en-US - Femme)",
+                        "LocalName": "Emma (Femme - en-US)",
                         "Gender": "Female",
                         "Locale": "en-US",
                         "PitchMod": 0.93,
@@ -191,7 +199,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-BrianNeural",
-                        "LocalName": "Brian (en-US - Homme)",
+                        "LocalName": "Brian (Homme - en-US)",
                         "Gender": "Male",
                         "Locale": "en-US",
                         "PitchMod": 1.01,
@@ -199,7 +207,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-SG-LunaNeural",
-                        "LocalName": "Luna (en-SG - Femme)",
+                        "LocalName": "Luna (Femme - en-SG)",
                         "Gender": "Female",
                         "Locale": "en-SG",
                         "PitchMod": 0.95,
@@ -207,7 +215,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-SG-WayneNeural",
-                        "LocalName": "Wayne (en-SG - Homme)",
+                        "LocalName": "Wayne (Homme - en-SG)",
                         "Gender": "Male",
                         "Locale": "en-SG",
                         "PitchMod": 1.11,
@@ -215,7 +223,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-ZA-LeahNeural",
-                        "LocalName": "Leah (en-ZA - Femme)",
+                        "LocalName": "Leah (Femme - en-ZA)",
                         "Gender": "Female",
                         "Locale": "en-ZA",
                         "PitchMod": 1.24,
@@ -223,7 +231,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-ZA-LukeNeural",
-                        "LocalName": "Luke (en-ZA - Homme)",
+                        "LocalName": "Luke (Homme - en-ZA)",
                         "Gender": "Male",
                         "Locale": "en-ZA",
                         "PitchMod": 0.97,
@@ -231,7 +239,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-TZ-ElimuNeural",
-                        "LocalName": "Elimu (en-TZ - Homme)",
+                        "LocalName": "Elimu (Homme - en-TZ)",
                         "Gender": "Male",
                         "Locale": "en-TZ",
                         "PitchMod": 1.23,
@@ -239,7 +247,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-TZ-ImaniNeural",
-                        "LocalName": "Imani (en-TZ - Femme)",
+                        "LocalName": "Imani (Femme - en-TZ)",
                         "Gender": "Female",
                         "Locale": "en-TZ",
                         "PitchMod": 1.09,
@@ -247,7 +255,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-GB-LibbyNeural",
-                        "LocalName": "Libby (en-GB - Femme)",
+                        "LocalName": "Libby (Femme - en-GB)",
                         "Gender": "Female",
                         "Locale": "en-GB",
                         "PitchMod": 0.76,
@@ -255,7 +263,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-GB-MaisieNeural",
-                        "LocalName": "Maisie (en-GB - Femme)",
+                        "LocalName": "Maisie (Femme - en-GB)",
                         "Gender": "Female",
                         "Locale": "en-GB",
                         "PitchMod": 0.78,
@@ -263,7 +271,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-GB-RyanNeural",
-                        "LocalName": "Ryan (en-GB - Homme)",
+                        "LocalName": "Ryan (Homme - en-GB)",
                         "Gender": "Male",
                         "Locale": "en-GB",
                         "PitchMod": 0.88,
@@ -271,7 +279,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-GB-SoniaNeural",
-                        "LocalName": "Sonia (en-GB - Femme)",
+                        "LocalName": "Sonia (Femme - en-GB)",
                         "Gender": "Female",
                         "Locale": "en-GB",
                         "PitchMod": 0.84,
@@ -279,7 +287,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-GB-ThomasNeural",
-                        "LocalName": "Thomas (en-GB - Homme)",
+                        "LocalName": "Thomas (Homme - en-GB)",
                         "Gender": "Male",
                         "Locale": "en-GB",
                         "PitchMod": 0.98,
@@ -287,7 +295,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-AnaNeural",
-                        "LocalName": "Ana (en-US - Femme)",
+                        "LocalName": "Ana (Femme - en-US)",
                         "Gender": "Female",
                         "Locale": "en-US",
                         "PitchMod": 0.81,
@@ -295,7 +303,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-AndrewMultilingualNeural",
-                        "LocalName": "Andrew (Multilingue) (en-US - Homme)",
+                        "LocalName": "Andrew (Multilingue) (Homme - en-US)",
                         "Gender": "Male",
                         "Locale": "en-US",
                         "PitchMod": 0.89,
@@ -303,7 +311,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-AriaNeural",
-                        "LocalName": "Aria (en-US - Femme)",
+                        "LocalName": "Aria (Femme - en-US)",
                         "Gender": "Female",
                         "Locale": "en-US",
                         "PitchMod": 0.9,
@@ -311,7 +319,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-AvaMultilingualNeural",
-                        "LocalName": "Ava (Multilingue) (en-US - Femme)",
+                        "LocalName": "Ava (Multilingue) (Femme - en-US)",
                         "Gender": "Female",
                         "Locale": "en-US",
                         "PitchMod": 1.1,
@@ -319,7 +327,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-BrianMultilingualNeural",
-                        "LocalName": "Brian (Multilingue) (en-US - Homme)",
+                        "LocalName": "Brian (Multilingue) (Homme - en-US)",
                         "Gender": "Male",
                         "Locale": "en-US",
                         "PitchMod": 1.22,
@@ -327,7 +335,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-ChristopherNeural",
-                        "LocalName": "Christopher (en-US - Homme)",
+                        "LocalName": "Christopher (Homme - en-US)",
                         "Gender": "Male",
                         "Locale": "en-US",
                         "PitchMod": 1.22,
@@ -335,7 +343,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-EmmaMultilingualNeural",
-                        "LocalName": "Emma (Multilingue) (en-US - Femme)",
+                        "LocalName": "Emma (Multilingue) (Femme - en-US)",
                         "Gender": "Female",
                         "Locale": "en-US",
                         "PitchMod": 1.14,
@@ -343,7 +351,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-EricNeural",
-                        "LocalName": "Eric (en-US - Homme)",
+                        "LocalName": "Eric (Homme - en-US)",
                         "Gender": "Male",
                         "Locale": "en-US",
                         "PitchMod": 0.96,
@@ -351,7 +359,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-GuyNeural",
-                        "LocalName": "Guy (en-US - Homme)",
+                        "LocalName": "Guy (Homme - en-US)",
                         "Gender": "Male",
                         "Locale": "en-US",
                         "PitchMod": 1.18,
@@ -359,7 +367,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-JennyNeural",
-                        "LocalName": "Jenny (en-US - Femme)",
+                        "LocalName": "Jenny (Femme - en-US)",
                         "Gender": "Female",
                         "Locale": "en-US",
                         "PitchMod": 0.75,
@@ -367,7 +375,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-MichelleNeural",
-                        "LocalName": "Michelle (en-US - Femme)",
+                        "LocalName": "Michelle (Femme - en-US)",
                         "Gender": "Female",
                         "Locale": "en-US",
                         "PitchMod": 1.12,
@@ -375,7 +383,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-RogerNeural",
-                        "LocalName": "Roger (en-US - Homme)",
+                        "LocalName": "Roger (Homme - en-US)",
                         "Gender": "Male",
                         "Locale": "en-US",
                         "PitchMod": 1.2,
@@ -383,7 +391,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "en-US-SteffanNeural",
-                        "LocalName": "Steffan (en-US - Homme)",
+                        "LocalName": "Steffan (Homme - en-US)",
                         "Gender": "Male",
                         "Locale": "en-US",
                         "PitchMod": 1.2,
@@ -391,7 +399,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "fr-BE-CharlineNeural",
-                        "LocalName": "Charline (fr-BE - Femme)",
+                        "LocalName": "Charline (Femme - fr-BE)",
                         "Gender": "Female",
                         "Locale": "fr-BE",
                         "PitchMod": 0.87,
@@ -399,7 +407,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "fr-BE-GerardNeural",
-                        "LocalName": "Gerard (fr-BE - Homme)",
+                        "LocalName": "Gerard (Homme - fr-BE)",
                         "Gender": "Male",
                         "Locale": "fr-BE",
                         "PitchMod": 0.78,
@@ -407,7 +415,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "fr-CA-ThierryNeural",
-                        "LocalName": "Thierry (fr-CA - Homme)",
+                        "LocalName": "Thierry (Homme - fr-CA)",
                         "Gender": "Male",
                         "Locale": "fr-CA",
                         "PitchMod": 1.21,
@@ -415,7 +423,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "fr-CA-AntoineNeural",
-                        "LocalName": "Antoine (fr-CA - Homme)",
+                        "LocalName": "Antoine (Homme - fr-CA)",
                         "Gender": "Male",
                         "Locale": "fr-CA",
                         "PitchMod": 0.96,
@@ -423,7 +431,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "fr-CA-JeanNeural",
-                        "LocalName": "Jean (fr-CA - Homme)",
+                        "LocalName": "Jean (Homme - fr-CA)",
                         "Gender": "Male",
                         "Locale": "fr-CA",
                         "PitchMod": 1.1,
@@ -431,23 +439,15 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "fr-CA-SylvieNeural",
-                        "LocalName": "Sylvie (fr-CA - Femme)",
+                        "LocalName": "Sylvie (Femme - fr-CA)",
                         "Gender": "Female",
                         "Locale": "fr-CA",
                         "PitchMod": 1.14,
                         "RateMod": 0.99
             },
             {
-                        "ShortName": "fr-FR-VivienneMultilingualNeural",
-                        "LocalName": "Vivienne (Multilingue) (fr-FR - Femme)",
-                        "Gender": "Female",
-                        "Locale": "fr-FR",
-                        "PitchMod": 1.05,
-                        "RateMod": 0.9
-            },
-            {
                         "ShortName": "fr-FR-RemyMultilingualNeural",
-                        "LocalName": "Remy (Multilingue) (fr-FR - Homme)",
+                        "LocalName": "Remy (Multilingue) (Homme - fr-FR)",
                         "Gender": "Male",
                         "Locale": "fr-FR",
                         "PitchMod": 0.82,
@@ -455,7 +455,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "fr-FR-DeniseNeural",
-                        "LocalName": "Denise (fr-FR - Femme)",
+                        "LocalName": "Denise (Femme - fr-FR)",
                         "Gender": "Female",
                         "Locale": "fr-FR",
                         "PitchMod": 0.98,
@@ -463,7 +463,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "fr-FR-EloiseNeural",
-                        "LocalName": "Eloise (fr-FR - Femme)",
+                        "LocalName": "Eloise (Femme - fr-FR)",
                         "Gender": "Female",
                         "Locale": "fr-FR",
                         "PitchMod": 1.07,
@@ -471,7 +471,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "fr-FR-HenriNeural",
-                        "LocalName": "Henri (fr-FR - Homme)",
+                        "LocalName": "Henri (Homme - fr-FR)",
                         "Gender": "Male",
                         "Locale": "fr-FR",
                         "PitchMod": 1.0,
@@ -479,7 +479,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "fr-CH-ArianeNeural",
-                        "LocalName": "Ariane (fr-CH - Femme)",
+                        "LocalName": "Ariane (Femme - fr-CH)",
                         "Gender": "Female",
                         "Locale": "fr-CH",
                         "PitchMod": 0.77,
@@ -487,7 +487,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "fr-CH-FabriceNeural",
-                        "LocalName": "Fabrice (fr-CH - Homme)",
+                        "LocalName": "Fabrice (Homme - fr-CH)",
                         "Gender": "Male",
                         "Locale": "fr-CH",
                         "PitchMod": 1.19,
@@ -495,7 +495,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "de-AT-IngridNeural",
-                        "LocalName": "Ingrid (de-AT - Femme)",
+                        "LocalName": "Ingrid (Femme - de-AT)",
                         "Gender": "Female",
                         "Locale": "de-AT",
                         "PitchMod": 0.85,
@@ -503,7 +503,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "de-AT-JonasNeural",
-                        "LocalName": "Jonas (de-AT - Homme)",
+                        "LocalName": "Jonas (Homme - de-AT)",
                         "Gender": "Male",
                         "Locale": "de-AT",
                         "PitchMod": 0.87,
@@ -511,7 +511,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "de-DE-SeraphinaMultilingualNeural",
-                        "LocalName": "Seraphina (Multilingue) (de-DE - Femme)",
+                        "LocalName": "Seraphina (Multilingue) (Femme - de-DE)",
                         "Gender": "Female",
                         "Locale": "de-DE",
                         "PitchMod": 1.12,
@@ -519,7 +519,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "de-DE-FlorianMultilingualNeural",
-                        "LocalName": "Florian (Multilingue) (de-DE - Homme)",
+                        "LocalName": "Florian (Multilingue) (Homme - de-DE)",
                         "Gender": "Male",
                         "Locale": "de-DE",
                         "PitchMod": 1.04,
@@ -527,7 +527,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "de-DE-AmalaNeural",
-                        "LocalName": "Amala (de-DE - Femme)",
+                        "LocalName": "Amala (Femme - de-DE)",
                         "Gender": "Female",
                         "Locale": "de-DE",
                         "PitchMod": 0.94,
@@ -535,7 +535,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "de-DE-ConradNeural",
-                        "LocalName": "Conrad (de-DE - Homme)",
+                        "LocalName": "Conrad (Homme - de-DE)",
                         "Gender": "Male",
                         "Locale": "de-DE",
                         "PitchMod": 1.17,
@@ -543,7 +543,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "de-DE-KatjaNeural",
-                        "LocalName": "Katja (de-DE - Femme)",
+                        "LocalName": "Katja (Femme - de-DE)",
                         "Gender": "Female",
                         "Locale": "de-DE",
                         "PitchMod": 1.09,
@@ -551,7 +551,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "de-DE-KillianNeural",
-                        "LocalName": "Killian (de-DE - Homme)",
+                        "LocalName": "Killian (Homme - de-DE)",
                         "Gender": "Male",
                         "Locale": "de-DE",
                         "PitchMod": 0.76,
@@ -559,7 +559,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "de-CH-JanNeural",
-                        "LocalName": "Jan (de-CH - Homme)",
+                        "LocalName": "Jan (Homme - de-CH)",
                         "Gender": "Male",
                         "Locale": "de-CH",
                         "PitchMod": 1.01,
@@ -567,7 +567,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "de-CH-LeniNeural",
-                        "LocalName": "Leni (de-CH - Femme)",
+                        "LocalName": "Leni (Femme - de-CH)",
                         "Gender": "Female",
                         "Locale": "de-CH",
                         "PitchMod": 1.12,
@@ -575,7 +575,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "it-IT-GiuseppeMultilingualNeural",
-                        "LocalName": "Giuseppe (Multilingue) (it-IT - Homme)",
+                        "LocalName": "Giuseppe (Multilingue) (Homme - it-IT)",
                         "Gender": "Male",
                         "Locale": "it-IT",
                         "PitchMod": 1.13,
@@ -583,7 +583,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "it-IT-DiegoNeural",
-                        "LocalName": "Diego (it-IT - Homme)",
+                        "LocalName": "Diego (Homme - it-IT)",
                         "Gender": "Male",
                         "Locale": "it-IT",
                         "PitchMod": 0.96,
@@ -591,7 +591,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "it-IT-ElsaNeural",
-                        "LocalName": "Elsa (it-IT - Femme)",
+                        "LocalName": "Elsa (Femme - it-IT)",
                         "Gender": "Female",
                         "Locale": "it-IT",
                         "PitchMod": 0.97,
@@ -599,7 +599,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "it-IT-IsabellaNeural",
-                        "LocalName": "Isabella (it-IT - Femme)",
+                        "LocalName": "Isabella (Femme - it-IT)",
                         "Gender": "Female",
                         "Locale": "it-IT",
                         "PitchMod": 1.05,
@@ -607,7 +607,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-AR-ElenaNeural",
-                        "LocalName": "Elena (es-AR - Femme)",
+                        "LocalName": "Elena (Femme - es-AR)",
                         "Gender": "Female",
                         "Locale": "es-AR",
                         "PitchMod": 0.78,
@@ -615,7 +615,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-AR-TomasNeural",
-                        "LocalName": "Tomas (es-AR - Homme)",
+                        "LocalName": "Tomas (Homme - es-AR)",
                         "Gender": "Male",
                         "Locale": "es-AR",
                         "PitchMod": 1.09,
@@ -623,7 +623,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-BO-MarceloNeural",
-                        "LocalName": "Marcelo (es-BO - Homme)",
+                        "LocalName": "Marcelo (Homme - es-BO)",
                         "Gender": "Male",
                         "Locale": "es-BO",
                         "PitchMod": 0.98,
@@ -631,7 +631,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-BO-SofiaNeural",
-                        "LocalName": "Sofia (es-BO - Femme)",
+                        "LocalName": "Sofia (Femme - es-BO)",
                         "Gender": "Female",
                         "Locale": "es-BO",
                         "PitchMod": 0.89,
@@ -639,7 +639,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-CL-CatalinaNeural",
-                        "LocalName": "Catalina (es-CL - Femme)",
+                        "LocalName": "Catalina (Femme - es-CL)",
                         "Gender": "Female",
                         "Locale": "es-CL",
                         "PitchMod": 0.86,
@@ -647,7 +647,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-CL-LorenzoNeural",
-                        "LocalName": "Lorenzo (es-CL - Homme)",
+                        "LocalName": "Lorenzo (Homme - es-CL)",
                         "Gender": "Male",
                         "Locale": "es-CL",
                         "PitchMod": 0.84,
@@ -655,7 +655,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-CO-GonzaloNeural",
-                        "LocalName": "Gonzalo (es-CO - Homme)",
+                        "LocalName": "Gonzalo (Homme - es-CO)",
                         "Gender": "Male",
                         "Locale": "es-CO",
                         "PitchMod": 1.22,
@@ -663,7 +663,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-CO-SalomeNeural",
-                        "LocalName": "Salome (es-CO - Femme)",
+                        "LocalName": "Salome (Femme - es-CO)",
                         "Gender": "Female",
                         "Locale": "es-CO",
                         "PitchMod": 1.01,
@@ -671,7 +671,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-ES-XimenaNeural",
-                        "LocalName": "Ximena (es-ES - Femme)",
+                        "LocalName": "Ximena (Femme - es-ES)",
                         "Gender": "Female",
                         "Locale": "es-ES",
                         "PitchMod": 1.08,
@@ -679,7 +679,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-CR-JuanNeural",
-                        "LocalName": "Juan (es-CR - Homme)",
+                        "LocalName": "Juan (Homme - es-CR)",
                         "Gender": "Male",
                         "Locale": "es-CR",
                         "PitchMod": 0.93,
@@ -687,7 +687,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-CR-MariaNeural",
-                        "LocalName": "Maria (es-CR - Femme)",
+                        "LocalName": "Maria (Femme - es-CR)",
                         "Gender": "Female",
                         "Locale": "es-CR",
                         "PitchMod": 0.85,
@@ -695,7 +695,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-CU-BelkysNeural",
-                        "LocalName": "Belkys (es-CU - Femme)",
+                        "LocalName": "Belkys (Femme - es-CU)",
                         "Gender": "Female",
                         "Locale": "es-CU",
                         "PitchMod": 1.16,
@@ -703,7 +703,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-CU-ManuelNeural",
-                        "LocalName": "Manuel (es-CU - Homme)",
+                        "LocalName": "Manuel (Homme - es-CU)",
                         "Gender": "Male",
                         "Locale": "es-CU",
                         "PitchMod": 1.08,
@@ -711,7 +711,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-DO-EmilioNeural",
-                        "LocalName": "Emilio (es-DO - Homme)",
+                        "LocalName": "Emilio (Homme - es-DO)",
                         "Gender": "Male",
                         "Locale": "es-DO",
                         "PitchMod": 1.0,
@@ -719,7 +719,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-DO-RamonaNeural",
-                        "LocalName": "Ramona (es-DO - Femme)",
+                        "LocalName": "Ramona (Femme - es-DO)",
                         "Gender": "Female",
                         "Locale": "es-DO",
                         "PitchMod": 0.99,
@@ -727,7 +727,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-EC-AndreaNeural",
-                        "LocalName": "Andrea (es-EC - Femme)",
+                        "LocalName": "Andrea (Femme - es-EC)",
                         "Gender": "Female",
                         "Locale": "es-EC",
                         "PitchMod": 1.19,
@@ -735,7 +735,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-EC-LuisNeural",
-                        "LocalName": "Luis (es-EC - Homme)",
+                        "LocalName": "Luis (Homme - es-EC)",
                         "Gender": "Male",
                         "Locale": "es-EC",
                         "PitchMod": 0.95,
@@ -743,7 +743,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-SV-LorenaNeural",
-                        "LocalName": "Lorena (es-SV - Femme)",
+                        "LocalName": "Lorena (Femme - es-SV)",
                         "Gender": "Female",
                         "Locale": "es-SV",
                         "PitchMod": 1.24,
@@ -751,7 +751,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-SV-RodrigoNeural",
-                        "LocalName": "Rodrigo (es-SV - Homme)",
+                        "LocalName": "Rodrigo (Homme - es-SV)",
                         "Gender": "Male",
                         "Locale": "es-SV",
                         "PitchMod": 0.91,
@@ -759,7 +759,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-GQ-JavierNeural",
-                        "LocalName": "Javier (es-GQ - Homme)",
+                        "LocalName": "Javier (Homme - es-GQ)",
                         "Gender": "Male",
                         "Locale": "es-GQ",
                         "PitchMod": 1.07,
@@ -767,7 +767,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-GQ-TeresaNeural",
-                        "LocalName": "Teresa (es-GQ - Femme)",
+                        "LocalName": "Teresa (Femme - es-GQ)",
                         "Gender": "Female",
                         "Locale": "es-GQ",
                         "PitchMod": 1.1,
@@ -775,7 +775,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-GT-AndresNeural",
-                        "LocalName": "Andres (es-GT - Homme)",
+                        "LocalName": "Andres (Homme - es-GT)",
                         "Gender": "Male",
                         "Locale": "es-GT",
                         "PitchMod": 1.06,
@@ -783,7 +783,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-GT-MartaNeural",
-                        "LocalName": "Marta (es-GT - Femme)",
+                        "LocalName": "Marta (Femme - es-GT)",
                         "Gender": "Female",
                         "Locale": "es-GT",
                         "PitchMod": 1.02,
@@ -791,7 +791,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-HN-CarlosNeural",
-                        "LocalName": "Carlos (es-HN - Homme)",
+                        "LocalName": "Carlos (Homme - es-HN)",
                         "Gender": "Male",
                         "Locale": "es-HN",
                         "PitchMod": 1.08,
@@ -799,7 +799,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-HN-KarlaNeural",
-                        "LocalName": "Karla (es-HN - Femme)",
+                        "LocalName": "Karla (Femme - es-HN)",
                         "Gender": "Female",
                         "Locale": "es-HN",
                         "PitchMod": 0.87,
@@ -807,7 +807,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-MX-DaliaNeural",
-                        "LocalName": "Dalia (es-MX - Femme)",
+                        "LocalName": "Dalia (Femme - es-MX)",
                         "Gender": "Female",
                         "Locale": "es-MX",
                         "PitchMod": 0.86,
@@ -815,7 +815,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-MX-JorgeNeural",
-                        "LocalName": "Jorge (es-MX - Homme)",
+                        "LocalName": "Jorge (Homme - es-MX)",
                         "Gender": "Male",
                         "Locale": "es-MX",
                         "PitchMod": 1.14,
@@ -823,7 +823,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-NI-FedericoNeural",
-                        "LocalName": "Federico (es-NI - Homme)",
+                        "LocalName": "Federico (Homme - es-NI)",
                         "Gender": "Male",
                         "Locale": "es-NI",
                         "PitchMod": 0.98,
@@ -831,7 +831,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-NI-YolandaNeural",
-                        "LocalName": "Yolanda (es-NI - Femme)",
+                        "LocalName": "Yolanda (Femme - es-NI)",
                         "Gender": "Female",
                         "Locale": "es-NI",
                         "PitchMod": 1.09,
@@ -839,7 +839,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-PA-MargaritaNeural",
-                        "LocalName": "Margarita (es-PA - Femme)",
+                        "LocalName": "Margarita (Femme - es-PA)",
                         "Gender": "Female",
                         "Locale": "es-PA",
                         "PitchMod": 1.11,
@@ -847,7 +847,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-PA-RobertoNeural",
-                        "LocalName": "Roberto (es-PA - Homme)",
+                        "LocalName": "Roberto (Homme - es-PA)",
                         "Gender": "Male",
                         "Locale": "es-PA",
                         "PitchMod": 1.24,
@@ -855,7 +855,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-PY-MarioNeural",
-                        "LocalName": "Mario (es-PY - Homme)",
+                        "LocalName": "Mario (Homme - es-PY)",
                         "Gender": "Male",
                         "Locale": "es-PY",
                         "PitchMod": 1.19,
@@ -863,7 +863,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-PY-TaniaNeural",
-                        "LocalName": "Tania (es-PY - Femme)",
+                        "LocalName": "Tania (Femme - es-PY)",
                         "Gender": "Female",
                         "Locale": "es-PY",
                         "PitchMod": 1.08,
@@ -871,7 +871,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-PE-AlexNeural",
-                        "LocalName": "Alex (es-PE - Homme)",
+                        "LocalName": "Alex (Homme - es-PE)",
                         "Gender": "Male",
                         "Locale": "es-PE",
                         "PitchMod": 0.89,
@@ -879,7 +879,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-PE-CamilaNeural",
-                        "LocalName": "Camila (es-PE - Femme)",
+                        "LocalName": "Camila (Femme - es-PE)",
                         "Gender": "Female",
                         "Locale": "es-PE",
                         "PitchMod": 0.78,
@@ -887,7 +887,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-PR-KarinaNeural",
-                        "LocalName": "Karina (es-PR - Femme)",
+                        "LocalName": "Karina (Femme - es-PR)",
                         "Gender": "Female",
                         "Locale": "es-PR",
                         "PitchMod": 1.06,
@@ -895,7 +895,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-PR-VictorNeural",
-                        "LocalName": "Victor (es-PR - Homme)",
+                        "LocalName": "Victor (Homme - es-PR)",
                         "Gender": "Male",
                         "Locale": "es-PR",
                         "PitchMod": 0.89,
@@ -903,7 +903,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-ES-AlvaroNeural",
-                        "LocalName": "Alvaro (es-ES - Homme)",
+                        "LocalName": "Alvaro (Homme - es-ES)",
                         "Gender": "Male",
                         "Locale": "es-ES",
                         "PitchMod": 1.11,
@@ -911,7 +911,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-ES-ElviraNeural",
-                        "LocalName": "Elvira (es-ES - Femme)",
+                        "LocalName": "Elvira (Femme - es-ES)",
                         "Gender": "Female",
                         "Locale": "es-ES",
                         "PitchMod": 1.09,
@@ -919,7 +919,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-US-AlonsoNeural",
-                        "LocalName": "Alonso (es-US - Homme)",
+                        "LocalName": "Alonso (Homme - es-US)",
                         "Gender": "Male",
                         "Locale": "es-US",
                         "PitchMod": 0.84,
@@ -927,7 +927,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-US-PalomaNeural",
-                        "LocalName": "Paloma (es-US - Femme)",
+                        "LocalName": "Paloma (Femme - es-US)",
                         "Gender": "Female",
                         "Locale": "es-US",
                         "PitchMod": 1.16,
@@ -935,7 +935,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-UY-MateoNeural",
-                        "LocalName": "Mateo (es-UY - Homme)",
+                        "LocalName": "Mateo (Homme - es-UY)",
                         "Gender": "Male",
                         "Locale": "es-UY",
                         "PitchMod": 1.22,
@@ -943,7 +943,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-UY-ValentinaNeural",
-                        "LocalName": "Valentina (es-UY - Femme)",
+                        "LocalName": "Valentina (Femme - es-UY)",
                         "Gender": "Female",
                         "Locale": "es-UY",
                         "PitchMod": 1.0,
@@ -951,7 +951,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-VE-PaolaNeural",
-                        "LocalName": "Paola (es-VE - Femme)",
+                        "LocalName": "Paola (Femme - es-VE)",
                         "Gender": "Female",
                         "Locale": "es-VE",
                         "PitchMod": 0.94,
@@ -959,7 +959,7 @@ class EdgeTtsClient {
             },
             {
                         "ShortName": "es-VE-SebastianNeural",
-                        "LocalName": "Sebastian (es-VE - Homme)",
+                        "LocalName": "Sebastian (Homme - es-VE)",
                         "Gender": "Male",
                         "Locale": "es-VE",
                         "PitchMod": 1.23,
