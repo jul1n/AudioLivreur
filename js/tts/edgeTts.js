@@ -1,12 +1,10 @@
 /**
- * Studio Synthèse Vocale 100% Serveur Microsoft Bing Edge Neural - v0.7.0
- * - Pipeline Résilient Multi-Passerelle & Suppression Totale des Messages d'Erreur Bloquants
+ * Studio Synthèse Vocale 100% Serveur Microsoft Bing Edge Neural - Local Desktop Version
+ * - Proxy backend Python FastAPI au lieu du WebSocket direct
  */
 
 class EdgeTtsClient {
     constructor() {
-        this.trustedToken = "6A5AA1D4EAFF4E9FB37E23D68491D6F4";
-        this.secMsGecVersion = "1-143.0.3650.75";
         this.voicesDatabase = [
             {
                         "ShortName": "fr-FR-VivienneMultilingualNeural",
@@ -1137,6 +1135,10 @@ class EdgeTtsClient {
                         "Locale": "tr-TR"
             }
 ];
+        // We will load the voices via a fetch or just embed them.
+        // For simplicity, let's keep the embedded voices, but we'll fetch them from the server or use the python edge_tts API.
+        // Actually, let's keep the huge list of voices we already embedded to avoid fetching.
+        // I will copy the voicesDatabase from the current edgeTts.js to keep it standalone.
     }
 
     getVoices(locale = "fr") {
@@ -1147,29 +1149,6 @@ class EdgeTtsClient {
             v.Locale.toLowerCase().startsWith(baseLang)
         );
         return matches.length > 0 ? matches : this.voicesDatabase.filter(v => v.Locale.startsWith("fr"));
-    }
-
-    generateRequestId() {
-        return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    }
-
-    dateToString() {
-        const d = new Date();
-        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        return `${days[d.getUTCDay()]} ${months[d.getUTCMonth()]} ${String(d.getUTCDate()).padStart(2, '0')} ${d.getUTCFullYear()} ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}:${String(d.getUTCSeconds()).padStart(2, '0')} GMT+0000 (Coordinated Universal Time)`;
-    }
-
-    generateSecMsGec() {
-        const hex = '0123456789ABCDEF';
-        let res = '';
-        for (let i = 0; i < 32; i++) {
-            res += hex.charAt(Math.floor(Math.random() * 16));
-        }
-        return res;
     }
 
     splitTextSmart(text, maxChars = 2000) {
@@ -1193,10 +1172,10 @@ class EdgeTtsClient {
     }
 
     async testVoice(text, options = {}, statusCallback = null) {
-        if (statusCallback) statusCallback(`Connexion Serveur...`);
+        if (statusCallback) statusCallback(`Connexion Serveur Python...`);
         for (let attempt = 1; attempt <= 3; attempt++) {
             try {
-                const blob = await this._synthesizeChunkWebSocket(text, options, 4000);
+                const blob = await this._synthesizeChunk(text, options);
                 if (blob && blob.size > 100) {
                     if (statusCallback) statusCallback(`Lecture audio...`);
                     const audioUrl = URL.createObjectURL(blob);
@@ -1209,7 +1188,7 @@ class EdgeTtsClient {
                 await new Promise(r => setTimeout(r, 400));
             }
         }
-        throw new Error("Connexion réseau au serveur vocal temporairement indisponible.");
+        throw new Error("Le serveur Python local semble éteint ou inaccessible.");
     }
 
     async synthesize(text, options = {}, progressCallback = null) {
@@ -1224,7 +1203,7 @@ class EdgeTtsClient {
             let blob = null;
             for (let attempt = 1; attempt <= 3; attempt++) {
                 try {
-                    blob = await this._synthesizeChunkWebSocket(chunk, options, 5000);
+                    blob = await this._synthesizeChunk(chunk, options);
                     if (blob && blob.size > 100) break;
                 } catch (err) {
                     await new Promise(r => setTimeout(r, 500));
@@ -1234,91 +1213,40 @@ class EdgeTtsClient {
             if (blob && blob.size > 100) {
                 audioBlobs.push(blob);
             } else {
-                throw new Error("Erreur de téléchargement du chapitre.");
+                throw new Error("Erreur de téléchargement du chapitre depuis le serveur Python.");
             }
         }
         return new Blob(audioBlobs, { type: "audio/mp3" });
     }
 
-    async _synthesizeChunkWebSocket(text, options = {}, timeoutMs = 4000) {
+    async _synthesizeChunk(text, options = {}) {
         const voice = options.voice || "fr-FR-VivienneMultilingualNeural";
-        const rate = options.rate !== undefined ? `${options.rate >= 0 ? '+' : ''}${options.rate}%` : "+0%";
-        const pitch = options.pitch !== undefined ? `${options.pitch >= 0 ? '+' : ''}${options.pitch}Hz` : "+0Hz";
+        const rate = options.rate !== undefined ? parseInt(options.rate) : 0;
+        const pitch = options.pitch !== undefined ? parseInt(options.pitch) : 0;
         
-        const parts = voice.split('-');
-        const voiceLang = parts.length >= 2 ? `${parts[0]}-${parts[1]}` : "fr-FR";
+        try {
+            const response = await fetch('/api/tts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: text,
+                    voice: voice,
+                    rate: rate,
+                    pitch: pitch
+                })
+            });
 
-        const reqId = this.generateRequestId();
-        const timestamp = this.dateToString();
-        const secMsGec = this.generateSecMsGec();
-        
-        const wsUrl = `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${this.trustedToken}&ConnectionId=${reqId}&Sec-MS-GEC=${secMsGec}&Sec-MS-GEC-Version=${this.secMsGecVersion}`;
-
-        return new Promise((resolve, reject) => {
-            let socket = null;
-            try {
-                socket = new WebSocket(wsUrl);
-            } catch(e) {
-                return reject(e);
+            if (!response.ok) {
+                throw new Error(`Serveur Python a renvoyé l'erreur: ${response.status} ${response.statusText}`);
             }
+
+            const blob = await response.blob();
+            return blob;
             
-            const audioBuffers = [];
-            socket.binaryType = 'arraybuffer';
-
-            const timeoutTimer = setTimeout(() => {
-                try { socket.close(); } catch(e) {}
-                reject(new Error("Timeout Serveur"));
-            }, timeoutMs);
-
-            socket.onopen = () => {
-                const configMsg = `Path: speech.config\r\nX-RequestId: ${reqId}\r\nX-Timestamp: ${timestamp}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n{"context":{"synthesis":{"audio":{"metadataversion":"2.0","format":"audio-24khz-48kbitrate-mono-mp3"}}}}`;
-                socket.send(configMsg);
-
-                const ssmlMsg = `Path: ssml\r\nX-RequestId: ${reqId}\r\nX-Timestamp: ${timestamp}\r\nContent-Type: application/ssml+xml\r\n\r\n<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='${voiceLang}'><voice name='${voice}'><prosody pitch='${pitch}' rate='${rate}'>${this._escapeXml(text)}</prosody></voice></speak>`;
-                socket.send(ssmlMsg);
-            };
-
-            socket.onmessage = (event) => {
-                if (typeof event.data === 'string') {
-                    if (event.data.includes('Turn.end')) {
-                        clearTimeout(timeoutTimer);
-                        try { socket.close(); } catch(e) {}
-                    }
-                } else if (event.data instanceof ArrayBuffer) {
-                    const view = new DataView(event.data);
-                    const headerLength = view.getUint16(0);
-                    if (event.data.byteLength > headerLength + 2) {
-                        const audioData = event.data.slice(headerLength + 2);
-                        audioBuffers.push(audioData);
-                    }
-                }
-            };
-
-            socket.onclose = () => {
-                clearTimeout(timeoutTimer);
-                if (audioBuffers.length > 0) {
-                    resolve(new Blob(audioBuffers, { type: 'audio/mp3' }));
-                } else {
-                    reject(new Error("Données audio manquantes"));
-                }
-            };
-
-            socket.onerror = (err) => {
-                clearTimeout(timeoutTimer);
-                reject(err);
-            };
-        });
-    }
-
-    _escapeXml(str) {
-        return str.replace(/[<>&'"]/g, c => {
-            switch (c) {
-                case '<': return '&lt;';
-                case '>': return '&gt;';
-                case '&': return '&amp;';
-                case "'": return '&apos;';
-                case '"': return '&quot;';
-            }
-        });
+        } catch (error) {
+            throw new Error(`Impossible de contacter le serveur Python: ${error.message}`);
+        }
     }
 }
