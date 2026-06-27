@@ -105,12 +105,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const sampleTextsByLang = {
-        'fr-FR': "Bonjour ! Ceci est un extrait de test de la voix sélectionnée pour votre livre audio.",
-        'en-US': "Hello! This is a sample recording to test the selected neural voice for your audiobook.",
-        'en-GB': "Hello! This is a sample recording to test the selected neural voice for your audiobook.",
-        'es-ES': "¡Hola! Este es un fragmento de prueba para evaluar la voz seleccionada para tu libro hablado.",
-        'de-DE': "Hallo! Dies ist eine Hörprobe, um die ausgewählte Stimme für Ihr Hörbuch zu testen.",
-        'it-IT': "Ciao! Questo è un campione audio di prova per testare la voce sélectionata pour votre livre audio."
+        'fr': "Bonjour ! Ceci est un extrait de test de la voix sélectionnée pour votre livre audio.",
+        'en': "Hello! This is a sample recording to test the selected neural voice for your audiobook.",
+        'es': "¡Hola! Este es un fragmento de prueba para evaluar la voz seleccionada para tu libro hablado.",
+        'de': "Hallo! Dies ist eine Hörprobe, um die ausgewählte Stimme für Ihr Hörbuch zu testen.",
+        'it': "Ciao! Questo è un campione audio di prova per testare la voce selezionata per il tuo audiolibro.",
+        'pt': "Olá! Este é um trecho de teste para avaliar a voz selecionada para o seu livro falado.",
+        'nl': "Hallo! Dit is een proefopname om de geselecteerde stem voor uw luisterboek te testen.",
+        'pl': "Cześć! To jest próbka dźwiękowa do przetestowania wybranego głosu dla Twojego audiobooka.",
+        'ru': "Здравствуйте! Это тестовая аудиозапись для проверки выбранного голоса для вашей аудиокниги.",
+        'ja': "こんにちは！これはオーディオブックの選択された音声を確認するためのテスト録音です。",
+        'zh': "你好！这是用于测试您的有声读物所选语音的示例录音。",
+        'ko': "안녕하세요! 오디오북에 선택한 음성을 테스트하기 위한 샘플 녹음입니다.",
+        'ar': "مرحباً! هذا تسجيل عينة لاختبار الصوت العصبي المحدد للكتاب الصوتي الخاص بك.",
+        'tr': "Merhaba! Bu, sesli kitabınız için seçilen sesi test etmek üzere hazırlanmış bir örnek kayıttır.",
+        'hi': "नमस्कार! यह आपकी ऑडियोबुक के लिए चयनित आवाज का परीक्षण करने के लिए एक नमूना रिकॉर्डिंग है।"
     };
 
     function openModal(title, htmlContent) {

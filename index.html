@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>audiolivreur.ai (v0.4.0) — Convertisseur Livre Audio Gratuit (EPUB, PDF en MP3 & M4B)</title>
+    <title>audiolivreur.ai (v0.5.0) — Convertisseur Livre Audio Gratuit (EPUB, PDF en MP3 & M4B)</title>
     <meta name="description" content="Convertissez vos livres EPUB, PDF, DOCX et TXT en livres audio MP3 & M4B de haute qualité avec les voix neuronales Microsoft. 100% Gratuit, Privé et dans votre navigateur.">
     <meta name="keywords" content="livre audio, audiobook, convertisseur epub en mp3, pdf en mp3, synthése vocale, edge tts, text to speech, m4b generator, julien">
     <meta name="author" content="Julien">
@@ -40,7 +40,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Stylesheet Neubrutalist -->
-    <link rel="stylesheet" href="css/style.css?v=0.4.0">
+    <link rel="stylesheet" href="css/style.css?v=0.5.0">
 
     <!-- External Parsing Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -79,7 +79,7 @@
             </div>
             <div class="brand-text">
                 <h1>audiolivreur.ai</h1>
-                <span class="version">V 0.4.0 · CLIENT IP</span>
+                <span class="version">V 0.5.0 · CLIENT IP</span>
             </div>
         </div>
 
@@ -138,16 +138,25 @@
 
                 <hr style="border:none; border-top:2px solid var(--border-black); margin:0.5rem 0 1rem 0;">
 
-                <!-- Language Dropdown -->
+                <!-- Language Dropdown avec Anglais Unifié et nouvelles langues Bing TTS -->
                 <div class="form-group">
                     <label for="selectLanguage">Langue du Livre</label>
                     <select id="selectLanguage" class="input-neubrutal">
-                        <option value="fr-FR" selected>Français</option>
-                        <option value="en-US">English (US)</option>
-                        <option value="en-GB">English (UK)</option>
-                        <option value="es-ES">Español</option>
-                        <option value="de-DE">Deutsch</option>
-                        <option value="it-IT">Italiano</option>
+                        <option value="fr" selected>Français</option>
+                        <option value="en">Anglais (English)</option>
+                        <option value="es">Espagnol (Español)</option>
+                        <option value="de">Allemand (Deutsch)</option>
+                        <option value="it">Italien (Italiano)</option>
+                        <option value="pt">Portugais (Português)</option>
+                        <option value="nl">Néerlandais (Nederlands)</option>
+                        <option value="pl">Polonais (Polski)</option>
+                        <option value="ru">Russe (Русский)</option>
+                        <option value="ja">Japonais (日本語)</option>
+                        <option value="zh">Chinois (中文)</option>
+                        <option value="ko">Coréen (한국어)</option>
+                        <option value="ar">Arabe (العربية)</option>
+                        <option value="tr">Turc (Türkçe)</option>
+                        <option value="hi">Hindi (हिन्दी)</option>
                     </select>
                 </div>
 
@@ -312,7 +321,7 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
-            <p>© 2026 <strong>audiolivreur.ai</strong> · Créé avec ❤️ par <strong>Julien</strong> (v0.4.0 Client-Side)</p>
+            <p>© 2026 <strong>audiolivreur.ai</strong> · Créé avec ❤️ par <strong>Julien</strong> (v0.5.0 Client-Side)</p>
             <div class="footer-links">
                 <button class="footer-link-btn" id="btnOpenModalHow">Comment ça marche ?</button>
                 <button class="footer-link-btn" id="btnOpenModalLegal">Confidentialité</button>
@@ -335,9 +344,9 @@
         </div>
     </div>
 
-    <!-- Application Scripts avec Cache Busting v0.4.0 -->
-    <script src="js/tts/edgeTts.js?v=0.4.0"></script>
-    <script src="js/parsers/fileParser.js?v=0.4.0"></script>
-    <script src="js/app.js?v=0.4.0"></script>
+    <!-- Application Scripts avec Cache Busting v0.5.0 -->
+    <script src="js/tts/edgeTts.js?v=0.5.0"></script>
+    <script src="js/parsers/fileParser.js?v=0.5.0"></script>
+    <script src="js/app.js?v=0.5.0"></script>
 </body>
 </html>
