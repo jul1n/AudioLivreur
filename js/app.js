@@ -605,7 +605,15 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.btnDownloadTranscript.addEventListener('click', () => {
         if (!currentBookData) return;
         let fullTranscript = `=== ${elements.metaTitle.value} ===\nAuteur: ${elements.metaAuthor.value}\n\n`;
-        currentBookData.chapters.forEach(ch => fullTranscript += `--- ${ch.title} ---\n\n${ch.text}\n\n`);
+        currentBookData.chapters.forEach(ch => {
+            const textTrim = ch.text.trim();
+            const titleTrim = ch.title.trim();
+            if (textTrim.toLowerCase().startsWith(titleTrim.toLowerCase())) {
+                fullTranscript += `${textTrim}\n\n`;
+            } else {
+                fullTranscript += `--- ${titleTrim} ---\n\n${textTrim}\n\n`;
+            }
+        });
 
         const blob = new Blob([fullTranscript], { type: "text/plain;charset=utf-8" });
         const downloadUrl = URL.createObjectURL(blob);
