@@ -208,51 +208,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     elements.btnOpenModalHow.addEventListener('click', () => {
-        openModal("📖 Comment ça marche ?", `
-            <p style="font-size:1.05rem; font-weight:600;">Hey ! Bienvenue sur audiolivreur.ai 👋 Transformer un bouquin en livre audio n'a jamais été aussi simple :</p>
-            <div style="display:flex; flex-direction:column; gap:0.8rem; margin-top:0.4rem;">
-                <div style="background:var(--bg-main); border:2px solid var(--border-black); padding:0.8rem 1rem; border-radius:10px;">
-                    <strong>1. 📁 Glisse ton livre :</strong> Dépose ton fichier (EPUB, PDF, Word, TXT...). L'application extrait le texte et les chapitres instantanément.
-                </div>
-                <div style="background:var(--bg-main); border:2px solid var(--border-black); padding:0.8rem 1rem; border-radius:10px;">
-                    <strong>2. 🎙️ Choisis le style vocal :</strong> Sélectionne la voix neuronale, le format (MP3 ou M4B) et ajuste la vitesse de lecture.
-                </div>
-                <div style="background:var(--bg-main); border:2px solid var(--border-black); padding:0.8rem 1rem; border-radius:10px;">
-                    <strong>3. 🎧 Magie en direct !</strong> La voix est générée directement sur ton ordinateur. Télécharge tes fichiers audio et profite de ton livre partout !
-                </div>
-            </div>
-        `);
+        openModal(
+            window.t('modal_how_title') || "📖 Comment ça marche ?", 
+            window.t('modal_how_body') || "<p>Contenu non chargé</p>"
+        );
     });
 
     elements.btnOpenModalLegal.addEventListener('click', () => {
-        openModal("🔒 Zéro Tracas & 100% Privé", `
-            <p style="font-size:1.05rem; font-weight:600;">Tes livres restent CHEZ TOI ! 🛡️</p>
-            <p>Pas de cloud mystérieux, pas de serveur intermédiaire qui conserve tes fichiers. Toute la lecture, le découpage et l'assemblage de tes documents s'exécutent <strong>100% dans la mémoire de ton propre navigateur</strong>.</p>
-            <p>Les requêtes vocales sont envoyées en direct depuis ton accès internet. Tes livres, tes données et ta vie privée t'appartiennent à 100% !</p>
-        `);
+        openModal(
+            window.t('modal_legal_title') || "🔒 Zéro Tracas & 100% Privé", 
+            window.t('modal_legal_body') || "<p>Contenu non chargé</p>"
+        );
     });
 
     elements.btnOpenModalContact.addEventListener('click', () => {
-        openModal("⚡ Contacter le Créateur", `
-            <p style="font-size:1.05rem; font-weight:600;">Une idée, une suggestion ou un mot doux ? 📬</p>
-            <p>Cette application a été imaginée et développée par <strong>Julien</strong> pour rendre la création d'audiobooks accessible à tous, gratuitement et sans contraintes.</p>
-            <div style="background:var(--accent-yellow); border:2px solid var(--border-black); padding:1rem; border-radius:10px; margin-top:0.5rem;">
-                <p><strong>👤 Créateur :</strong> Julien</p>
-                <p><strong>🌐 Code Source :</strong> Disponible sur <a href="https://github.com/jul1n/AudioLivreur" target="_blank" style="color:var(--text-main); font-weight:700;">GitHub</a></p>
-            </div>
-        `);
+        openModal(
+            window.t('modal_contact_title') || "⚡ Contacter le Créateur", 
+            window.t('modal_contact_body') || "<p>Contenu non chargé</p>"
+        );
     });
 
     elements.btnOpenModalCredits.addEventListener('click', () => {
-        openModal("✨ Crédits & Open-Source", `
-            <p>Imaginé avec ❤️ par <strong>Julien</strong> et propulsé par la formidable communauté Open-Source :</p>
-            <ul style="margin-left: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                <li><strong>Microsoft Edge TTS API</strong> - Moteur de synthèse vocale neuronale haute définition.</li>
-                <li><strong>JSZip</strong> - Gestion des archives et création des fichiers ZIP MP3.</li>
-                <li><strong>PDF.js</strong> (Mozilla) - Lecture et extraction du texte des PDF.</li>
-                <li><strong>Mammoth.js</strong> - Parseur de documents Microsoft Word (.docx).</li>
-            </ul>
-        `);
+        openModal(
+            window.t('modal_credits_title') || "✨ Crédits & Open-Source", 
+            window.t('modal_credits_body') || "<p>Contenu non chargé</p>"
+        );
     });
 
     function updateVoiceSelect() {
