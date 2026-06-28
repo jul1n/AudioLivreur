@@ -182,11 +182,16 @@ async def merge_m4b(
         ffmpeg_cmd = [
             "ffmpeg", "-y",
             "-f", "concat", "-safe", "0", "-i", concat_path,
-            "-i", metadata_path, "-map_metadata", "1"
+            "-i", metadata_path
         ]
         
         if cover_path:
-            ffmpeg_cmd.extend(["-i", cover_path, "-map", "0:a", "-map", "2:v", "-c:v", "mjpeg", "-disposition:v", "attached_pic"])
+            ffmpeg_cmd.extend(["-i", cover_path])
+            
+        ffmpeg_cmd.extend(["-map_metadata", "1"])
+        
+        if cover_path:
+            ffmpeg_cmd.extend(["-map", "0:a", "-map", "2:v", "-c:v", "mjpeg", "-disposition:v", "attached_pic"])
         else:
             ffmpeg_cmd.extend(["-map", "0:a"])
 
