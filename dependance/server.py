@@ -198,7 +198,8 @@ async def merge_m4b(
         ffmpeg_cmd.extend([
             "-map_chapters", "1",
             "-c:a", "copy",
-            "-f", "mp4",
+            "-id3v2_version", "3",
+            "-f", "mp3",
             output_m4b
         ])
 
