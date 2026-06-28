@@ -572,9 +572,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const transitionType = document.getElementById('selectTransition').value;
                     if (transitionType === 'silence') {
                         audioBlob = new Blob([audioBlob, silenceBlob], { type: 'audio/mp3' });
-                    } else if (transitionType === 'chime') {
+                    } else if (transitionType.startsWith('chime')) {
                         try {
-                            const res = await fetch('assets/sounds/chime.mp3');
+                            const res = await fetch(`assets/sounds/${transitionType}.mp3`);
                             if (res.ok) {
                                 const chimeBuf = await res.arrayBuffer();
                                 const chimeBlob = new Blob([chimeBuf], { type: 'audio/mp3' });
