@@ -191,7 +191,7 @@
 
                 <!-- Voice Dropdown -->
                 <div class="form-group">
-                    <label for="selectVoice">🎤 Voix Système Locales</label>
+                    <label for="selectVoice" data-i18n="voice_local_label">🎤 Voix Système Locales</label>
                     <select id="selectVoice" class="input-neubrutal">
                         <!-- Rempli dynamiquement avec les voix locales -->
                     </select>
@@ -199,8 +199,8 @@
 
                 <!-- Mode Web : 1 canal, threads non applicables -->
                 <div class="form-group">
-                    <label>⚡ Mode Web (Canal Unique)</label>
-                    <div style="background:var(--bg-main); border:2px solid var(--border-black); padding:0.6rem 0.8rem; border-radius:8px; font-size:0.85rem; font-weight:600;">
+                    <label data-i18n="mode_web_label">⚡ Mode Web (Canal Unique)</label>
+                    <div style="background:var(--bg-main); border:2px solid var(--border-black); padding:0.6rem 0.8rem; border-radius:8px; font-size:0.85rem; font-weight:600;" data-i18n="mode_web_desc">
                         🔉 1 flux audio en direct. Jusqu'à 20 processus parallèles avec l'App Desktop !
                     </div>
                     <select id="selectThreads" style="display:none;"><option value="1" selected>1</option></select>
