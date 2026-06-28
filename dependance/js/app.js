@@ -596,6 +596,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                     
+                    const rawAudioBlob = audioBlob;
+                    
                     audioBlob = await tagAudioBlob(
                         audioBlob, 
                         chapter.title, 
@@ -609,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const chapFallback = (window.t && window.t('chapter_default')) ? window.t('chapter_default') : 'Chapitre';
                     const filename = `${(i + 1).toString().padStart(3, '0')}_${safeTitle || chapFallback}.${currentFormat === 'm4b' ? 'm4b' : 'mp3'}`;
 
-                    generatedAudioFiles.push({ filename, title: chapter.title, blob: audioBlob, index: i });
+                    generatedAudioFiles.push({ filename, title: chapter.title, blob: audioBlob, rawBlob: rawAudioBlob, index: i });
                     processedWordsOverall += chapWords;
                     
                     const elapsedSec = (Date.now() - startTime) / 1000;
@@ -701,14 +703,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             if (currentFormat === 'm4b') {
-                const allBlobs = generatedAudioFiles.map(item => item.blob);
-                const mergedM4bBlob = new Blob(allBlobs, { type: "audio/m4b" });
-                const downloadUrl = URL.createObjectURL(mergedM4bBlob);
+                const author = elements.metaAuthor.value || window.t('unknown_author') || 'Auteur inconnu';
+                const title = elements.metaTitle.value || window.t('unknown_title') || 'Audiobook';
+                
+                let useServerMerge = false;
+                try {
+                    const res = await fetch('http://localhost:8000/api/ping', { method: 'GET' }).catch(() => null);
+                    if (res && res.ok) useServerMerge = true;
+                } catch(e) {}
+
+                let downloadUrl = null;
+
+                if (useServerMerge) {
+                    elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Création M4B Studio (FFmpeg)... 🎁`;
+                    const formData = new FormData();
+                    formData.append('title', title);
+                    formData.append('author', author);
+                    if (currentBookData.coverUrl) {
+                        const coverResp = await fetch(currentBookData.coverUrl);
+                        const coverBlob = await coverResp.blob();
+                        formData.append('cover', coverBlob, 'cover.jpg');
+                    }
+                    generatedAudioFiles.forEach((item, i) => {
+                        formData.append('chapters', item.rawBlob || item.blob, `chap_${i}.mp3`);
+                        formData.append('chapter_titles', item.title || `Chapitre ${i+1}`);
+                    });
+
+                    const mergeRes = await fetch('http://localhost:8000/api/merge_m4b', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (!mergeRes.ok) throw new Error("Erreur du serveur lors de la fusion M4B");
+                    const m4bBlob = await mergeRes.blob();
+                    downloadUrl = URL.createObjectURL(m4bBlob);
+                } else {
+                    // Fallback Web : Tag ID3 Global + Raw MP3s
+                    let globalId3Buffer = new ArrayBuffer(0);
+                    if (typeof ID3Writer !== 'undefined') {
+                        try {
+                            const writer = new ID3Writer(new ArrayBuffer(0));
+                            writer.setFrame('TIT2', title)
+                                  .setFrame('TPE1', [author])
+                                  .setFrame('TALB', title);
+                            if (currentBookData.coverUrl) {
+                                const coverResp = await fetch(currentBookData.coverUrl);
+                                const coverBuffer = await coverResp.arrayBuffer();
+                                writer.setFrame('APIC', {
+                                    type: 3,
+                                    data: coverBuffer,
+                                    description: 'Cover',
+                                    useUnicodeEncoding: false
+                                });
+                            }
+                            writer.addTag();
+                            globalId3Buffer = writer.arrayBuffer;
+                        } catch(e) {
+                            console.warn("Global ID3 tag failed", e);
+                        }
+                    }
+                    
+                    const id3Blob = new Blob([globalId3Buffer], { type: "audio/mp3" });
+                    const allRawBlobs = generatedAudioFiles.map(item => item.rawBlob || item.blob);
+                    const mergedM4bBlob = new Blob([id3Blob, ...allRawBlobs], { type: "audio/m4b" });
+                    downloadUrl = URL.createObjectURL(mergedM4bBlob);
+                }
 
                 const a = document.createElement('a');
                 a.href = downloadUrl;
-                const author = elements.metaAuthor.value || window.t('unknown_author') || 'Auteur inconnu';
-                const title = elements.metaTitle.value || window.t('unknown_title') || 'Audiobook';
                 a.download = `${author} - ${title}.m4b`;
                 document.body.appendChild(a);
                 a.click();

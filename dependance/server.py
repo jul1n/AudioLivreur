@@ -76,6 +76,125 @@ async def generate_tts(req: TTSRequest):
         print(f"Erreur de Synthèse : {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/ping")
+async def ping():
+    import subprocess
+    # Check if ffmpeg is available
+    try:
+        subprocess.run(["ffmpeg", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        return {"status": "ok", "ffmpeg": True}
+    except Exception:
+        return {"status": "ok", "ffmpeg": False}
+
+from fastapi import Form, UploadFile, File
+from typing import List, Optional
+import shutil
+import tempfile
+import uuid
+
+@app.post("/api/merge_m4b")
+async def merge_m4b(
+    title: str = Form("Audiobook"),
+    author: str = Form("Auteur inconnu"),
+    cover: Optional[UploadFile] = File(None),
+    chapters: List[UploadFile] = File(...),
+    chapter_titles: List[str] = Form(...)
+):
+    import subprocess
+    try:
+        # Check if ffmpeg is available
+        subprocess.run(["ffmpeg", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+    except Exception:
+        raise HTTPException(status_code=500, detail="FFmpeg n'est pas installé sur le serveur.")
+
+    # Create a temporary directory for processing
+    temp_dir = tempfile.mkdtemp()
+    try:
+        cover_path = None
+        if cover:
+            cover_path = os.path.join(temp_dir, "cover.jpg")
+            with open(cover_path, "wb") as buffer:
+                shutil.copyfileobj(cover.file, buffer)
+
+        # Save chapters
+        chapter_paths = []
+        for i, chap_file in enumerate(chapters):
+            chap_path = os.path.join(temp_dir, f"chap_{i}.mp3")
+            with open(chap_path, "wb") as buffer:
+                shutil.copyfileobj(chap_file.file, buffer)
+            chapter_paths.append(chap_path)
+
+        # Create FFmpeg concat file
+        concat_path = os.path.join(temp_dir, "concat.txt")
+        with open(concat_path, "w", encoding="utf-8") as f:
+            for chap_path in chapter_paths:
+                f.write(f"file '{os.path.basename(chap_path)}'\n")
+
+        # Get durations to build metadata
+        durations = []
+        for chap_path in chapter_paths:
+            # We use ffprobe to get duration in seconds
+            ffprobe_cmd = [
+                "ffprobe", "-v", "error", "-show_entries",
+                "format=duration", "-of", "default=noprint_wrappers=1:nokey=1",
+                chap_path
+            ]
+            result = subprocess.run(ffprobe_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            duration_sec = float(result.stdout.strip()) if result.stdout.strip() else 0
+            durations.append(duration_sec)
+
+        # Create FFmpeg metadata file
+        metadata_path = os.path.join(temp_dir, "metadata.txt")
+        with open(metadata_path, "w", encoding="utf-8") as f:
+            f.write(";FFMETADATA1\n")
+            f.write(f"title={title}\n")
+            f.write(f"artist={author}\n\n")
+            
+            current_time_ms = 0
+            for i, duration_sec in enumerate(durations):
+                duration_ms = int(duration_sec * 1000)
+                start_time = current_time_ms
+                end_time = current_time_ms + duration_ms
+                f.write("[CHAPTER]\n")
+                f.write("TIMEBASE=1/1000\n")
+                f.write(f"START={start_time}\n")
+                f.write(f"END={end_time}\n")
+                chap_title = chapter_titles[i] if i < len(chapter_titles) else f"Chapitre {i+1}"
+                f.write(f"title={chap_title}\n\n")
+                current_time_ms = end_time
+
+        output_m4b = os.path.join(temp_dir, "output.m4b")
+        
+        ffmpeg_cmd = [
+            "ffmpeg", "-y",
+            "-f", "concat", "-safe", "0", "-i", concat_path,
+            "-i", metadata_path, "-map_metadata", "1"
+        ]
+        
+        if cover_path:
+            ffmpeg_cmd.extend(["-i", cover_path, "-map", "0:a", "-map", "2:v", "-c:v", "copy", "-disposition:v", "attached_pic"])
+        else:
+            ffmpeg_cmd.extend(["-map", "0:a"])
+
+        ffmpeg_cmd.extend([
+            "-c:a", "copy", # On garde le format d'origine (MP3) ou on peut transcode "-c:a", "aac", "-b:a", "64k" 
+            output_m4b
+        ])
+
+        process = subprocess.run(ffmpeg_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if process.returncode != 0:
+            print("FFmpeg Error:", process.stderr)
+            raise HTTPException(status_code=500, detail="Erreur lors de la fusion par FFmpeg.")
+
+        with open(output_m4b, "rb") as f:
+            m4b_data = f.read()
+
+        return Response(content=m4b_data, media_type="audio/m4b")
+    
+    finally:
+        # Cleanup temp dir
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
 # Mount static files
 app.mount("/js", StaticFiles(directory="js"), name="js")
 app.mount("/css", StaticFiles(directory="css"), name="css")
