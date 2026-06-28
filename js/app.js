@@ -75,11 +75,40 @@ document.addEventListener('DOMContentLoaded', () => {
         btnOpenModalCredits: document.getElementById('btnOpenModalCredits')
     };
 
-    // Initialisation i18n
-    const uiLangSelect = document.getElementById('uiLangSelect');
-    if (uiLangSelect) {
-        uiLangSelect.addEventListener('change', (e) => {
-            window.applyTranslations(e.target.value);
+    // Custom UI Language Selector
+    const langBtn = document.getElementById('langSelectorBtn');
+    const langDropdown = document.getElementById('langSelectorDropdown');
+    const langCurrent = document.getElementById('langSelectorCurrent');
+    
+    if (langBtn && langDropdown && langCurrent) {
+        langBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isHidden = langDropdown.style.display === 'none';
+            langDropdown.style.display = isHidden ? 'block' : 'none';
+        });
+
+        document.querySelectorAll('.custom-select-option').forEach(opt => {
+            opt.addEventListener('click', (e) => {
+                const val = opt.getAttribute('data-value');
+                // Update current text to match selected option HTML but keep the chevron
+                langCurrent.innerHTML = opt.innerHTML;
+                langDropdown.style.display = 'none';
+                localStorage.setItem('audiolivreur_lang', val);
+                window.applyTranslations(val);
+                if (typeof updateInterfaceAfterLangChange === 'function') {
+                    updateInterfaceAfterLangChange();
+                }
+            });
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', () => {
+            langDropdown.style.display = 'none';
+        });
+    }
+
+    // Fonction de mise à jour des textes dynamiques post-traduction
+    function updateInterfaceAfterLangChange() {
             // Re-render programmatic strings if needed
             if(currentFormat === 'mp3') {
                 elements.formatHint.innerHTML = window.t('format_hint_text');
@@ -103,8 +132,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
-        });
-        window.applyTranslations(uiLangSelect.value);
+        }
+        
+        const savedLang = localStorage.getItem('audiolivreur_lang') || 'fr';
+        // Set initial UI state
+        const initialOpt = document.querySelector(`.custom-select-option[data-value="${savedLang}"]`);
+        if (initialOpt && langCurrent) {
+            langCurrent.innerHTML = initialOpt.innerHTML;
+        }
+        window.applyTranslations(savedLang);
+        updateInterfaceAfterLangChange();
     }
 
     // Toggle MP3 / M4B Format Handler avec textes super funs

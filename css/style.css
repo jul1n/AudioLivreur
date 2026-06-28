@@ -640,3 +640,18 @@ body {
     flex-direction: column;
     gap: 1.2rem;
 }
+
+/* Custom Select Lang Dropdown */
+.custom-select-option {
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.1s;
+    font-size: 0.95rem;
+}
+.custom-select-option:hover {
+    background-color: var(--accent-mint);
+}
+.custom-select-option:not(:last-child) {
+    border-bottom: 1px solid #eaeaea;
+}

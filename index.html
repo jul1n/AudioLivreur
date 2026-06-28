@@ -85,19 +85,25 @@
         </div>
 
         <div class="nav-actions">
-            <!-- Language Selector -->
-            <select id="uiLangSelect" class="input-neubrutal" style="padding: 0.3rem 0.5rem; border-radius: 6px; font-weight: bold;">
-                <option value="fr" selected>🇫🇷 Français</option>
-                <option value="en">🇬🇧 English</option>
-                <option value="es">🇪🇸 Español</option>
-                <option value="de">🇩🇪 Deutsch</option>
-                <option value="it">🇮🇹 Italiano</option>
-                <option value="pt">🇵🇹 Português</option>
-                <option value="ru">🇷🇺 Русский</option>
-                <option value="zh">🇨🇳 中文</option>
-                <option value="ja">🇯🇵 日本語</option>
-                <option value="ar">🇸🇦 العربية</option>
-            </select>
+            <!-- Custom Language Selector -->
+            <div class="custom-select-wrapper" id="langSelectorWrapper" style="position: relative; width: 140px;">
+                <div class="custom-select-btn input-neubrutal" id="langSelectorBtn" style="padding: 0.3rem 0.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: white;">
+                    <span id="langSelectorCurrent"><img src="https://flagcdn.com/w20/fr.png" style="vertical-align: middle; margin-right: 5px; width: 20px;"> Français</span>
+                    <i class="fa-solid fa-chevron-down" style="font-size: 0.8rem;"></i>
+                </div>
+                <div class="custom-select-dropdown" id="langSelectorDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: var(--border-width) solid var(--border-black); border-radius: 6px; margin-top: 4px; box-shadow: var(--shadow-hard-sm); z-index: 100; max-height: 300px; overflow-y: auto;">
+                    <div class="custom-select-option" data-value="fr"><img src="https://flagcdn.com/w20/fr.png" style="vertical-align: middle; margin-right: 5px; width: 20px;"> Français</div>
+                    <div class="custom-select-option" data-value="en"><img src="https://flagcdn.com/w20/gb.png" style="vertical-align: middle; margin-right: 5px; width: 20px;"> English</div>
+                    <div class="custom-select-option" data-value="es"><img src="https://flagcdn.com/w20/es.png" style="vertical-align: middle; margin-right: 5px; width: 20px;"> Español</div>
+                    <div class="custom-select-option" data-value="de"><img src="https://flagcdn.com/w20/de.png" style="vertical-align: middle; margin-right: 5px; width: 20px;"> Deutsch</div>
+                    <div class="custom-select-option" data-value="it"><img src="https://flagcdn.com/w20/it.png" style="vertical-align: middle; margin-right: 5px; width: 20px;"> Italiano</div>
+                    <div class="custom-select-option" data-value="pt"><img src="https://flagcdn.com/w20/pt.png" style="vertical-align: middle; margin-right: 5px; width: 20px;"> Português</div>
+                    <div class="custom-select-option" data-value="ru"><img src="https://flagcdn.com/w20/ru.png" style="vertical-align: middle; margin-right: 5px; width: 20px;"> Русский</div>
+                    <div class="custom-select-option" data-value="zh"><img src="https://flagcdn.com/w20/cn.png" style="vertical-align: middle; margin-right: 5px; width: 20px;"> 中文</div>
+                    <div class="custom-select-option" data-value="ja"><img src="https://flagcdn.com/w20/jp.png" style="vertical-align: middle; margin-right: 5px; width: 20px;"> 日本語</div>
+                    <div class="custom-select-option" data-value="ar"><img src="https://flagcdn.com/w20/sa.png" style="vertical-align: middle; margin-right: 5px; width: 20px;"> العربية</div>
+                </div>
+            </div>
             <span class="status-pill-static" data-i18n="nav_local">
                 🚀 Moteur Local Activé
             </span>
