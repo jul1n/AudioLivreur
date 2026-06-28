@@ -177,11 +177,26 @@ async def merge_m4b(
                 f.write(f"title={chap_title}\n\n")
                 current_time_ms = end_time
 
-        output_m4b = os.path.join(temp_dir, "output.m4b")
+        temp_mp3 = os.path.join(temp_dir, "temp.mp3")
         
-        ffmpeg_cmd = [
+        # Step 1: Concat to raw MP3 to fix any timestamp gaps
+        ffmpeg_cmd_concat = [
             "ffmpeg", "-y",
             "-f", "concat", "-safe", "0", "-i", concat_path,
+            "-c", "copy",
+            temp_mp3
+        ]
+        process_concat = subprocess.run(ffmpeg_cmd_concat, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if process_concat.returncode != 0:
+            print("FFmpeg Concat Error:", process_concat.stderr)
+            raise HTTPException(status_code=500, detail="Erreur lors de la pre-fusion par FFmpeg.")
+
+        output_m4b = os.path.join(temp_dir, "output.m4b")
+        
+        # Step 2: Mux to M4B with chapters and cover
+        ffmpeg_cmd = [
+            "ffmpeg", "-y",
+            "-i", temp_mp3,
             "-i", metadata_path
         ]
         
@@ -197,9 +212,8 @@ async def merge_m4b(
 
         ffmpeg_cmd.extend([
             "-map_chapters", "1",
-            "-c:a", "aac",
-            "-b:a", "64k",
-            "-f", "ipod",
+            "-c:a", "copy",
+            "-f", "mp4",
             output_m4b
         ])
 
