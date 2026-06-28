@@ -127,9 +127,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Update badge words label
                 const totalWords = currentBookData.chapters.reduce((sum, ch) => sum + ch.text.split(/\\s+/).length, 0);
                 const totalMinutes = Math.round(totalWords / 150);
-                elements.statChapters.innerHTML = `<i class="fa-solid fa-list-ol"></i> <strong id="statChapters">${currentBookData.chapters.length}</strong> <span data-i18n="stat_chapters">${window.t('stat_chapters')}</span>`;
-                elements.statWords.innerHTML = `<strong id="statWords">${totalWords.toLocaleString()}</strong> <span data-i18n="stat_words">${window.t('stat_words')}</span>`;
-                elements.statEstTime.innerHTML = `<i class="fa-solid fa-clock"></i> ~<strong id="statEstTime">${totalMinutes > 60 ? `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}min` : `${totalMinutes}`}</strong> <span data-i18n="stat_time_min">${window.t('stat_time_min')}</span>`;
+                // Les statistiques globales (statChapters, statWords, statEstTime) sont déjà traduites
+                // par la fonction applyTranslations via leurs attributs data-i18n respectifs.
+                // Nous n'avons pas besoin de réinjecter leur HTML ici.
                 
                 // Update chapter rows
                 currentBookData.chapters.forEach((ch, idx) => {
@@ -466,6 +466,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetToDropzone() {
         currentBookData = null;
+        if (elements.fileInput) {
+            elements.fileInput.value = ''; // Reset the input so the same file can trigger 'change'
+        }
         elements.dropzoneCard.classList.remove('hidden');
         elements.bookDetailsCard.classList.add('hidden');
         document.getElementById('actionButtonsRow').classList.remove('hidden');
@@ -474,10 +477,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         elements.dropzone.innerHTML = `
             <div class="dropzone-icon-box"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-            <h2>Glissez-déposez votre livre ici</h2>
-            <p style="color:var(--text-muted); font-weight:500;">Formats acceptés : <strong>EPUB, PDF, DOCX, TXT, MOBI</strong></p>
-            <button class="btn-main" id="btnBrowseReload">
-                <i class="fa-solid fa-folder-open"></i> Parcourir les fichiers
+            <h2 data-i18n="dz_title">${window.t('dz_title') || "Glissez-déposez votre livre ici"}</h2>
+            <p style="color:var(--text-muted); font-weight:500;" data-i18n="dz_formats">${window.t('dz_formats') || "Formats acceptés : <strong>EPUB, PDF, DOCX, TXT, MOBI</strong>"}</p>
+            <button class="btn-main" id="btnBrowseReload" data-i18n="dz_browse_btn">
+                ${window.t('dz_browse_btn') || "<i class=\"fa-solid fa-folder-open\"></i> Parcourir les fichiers"}
             </button>
         `;
         document.getElementById('btnBrowseReload')?.addEventListener('click', () => elements.fileInput.click());
