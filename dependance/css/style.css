@@ -241,6 +241,9 @@ body {
     box-shadow: var(--shadow-hard-sm);
     transition: var(--transition);
     cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    text-overflow: ellipsis;
 }
 
 .input-neubrutal:focus {
