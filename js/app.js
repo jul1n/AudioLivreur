@@ -195,15 +195,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const opt = document.createElement('option');
             opt.value = v.ShortName;
             opt.textContent = v.LocalName;
-            if (v.ShortName.includes("Remy")) {
-                opt.selected = true;
-            }
             elements.selectVoice.appendChild(opt);
         });
 
-        // Si Remy n'est pas dans la liste courante, sélectionner la première voix
-        if (!elements.selectVoice.value && elements.selectVoice.options.length > 0) {
-            elements.selectVoice.options[0].selected = true;
+        const options = Array.from(elements.selectVoice.options);
+        let preferred = options.find(o => o.value.includes('VivienneMultilingual'));
+        if (!preferred) preferred = options.find(o => o.value.toLowerCase().includes('multilingual'));
+        if (!preferred) preferred = options.find(o => o.value.includes('Remy'));
+        if (!preferred && options.length > 0) preferred = options[0];
+
+        if (preferred) {
+            preferred.selected = true;
         }
     }
 
@@ -370,10 +372,11 @@ document.addEventListener('DOMContentLoaded', () => {
             currentBookData.chapters.forEach((ch, idx) => {
                 const item = document.createElement('div');
                 item.className = 'chapter-row';
+                item.id = `chapter-row-${idx}`;
                 const wordCount = ch.text.split(/\s+/).length;
                 item.innerHTML = `
                     <span><strong>${idx + 1}.</strong> ${ch.title}</span>
-                    <span class="pill-badge" style="font-size:0.75rem;">${wordCount.toLocaleString()} mots</span>
+                    <span class="pill-badge" style="font-size:0.75rem;"><span id="chapter-status-${idx}"><i class="fa-solid fa-clock" style="color:var(--text-muted)"></i></span> &nbsp;${wordCount.toLocaleString()} mots</span>
                 `;
                 elements.chaptersList.appendChild(item);
             });
@@ -392,6 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentBookData = null;
         elements.dropzoneCard.classList.remove('hidden');
         elements.bookDetailsCard.classList.add('hidden');
+        document.getElementById('actionButtonsRow').classList.remove('hidden');
         elements.progressCard.classList.add('hidden');
         elements.finishedCard.classList.add('hidden');
         
@@ -416,8 +420,17 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelRequested = false;
         generatedAudioFiles = [];
 
-        elements.bookDetailsCard.classList.add('hidden');
+        document.getElementById('actionButtonsRow').classList.add('hidden');
         elements.progressCard.classList.remove('hidden');
+
+        // Reset chapitres style
+        const totalChapters = currentBookData.chapters.length;
+        for(let i=0; i<totalChapters; i++) {
+            const row = document.getElementById(`chapter-row-${i}`);
+            const stat = document.getElementById(`chapter-status-${i}`);
+            if(row) row.style.border = '';
+            if(stat) stat.innerHTML = `<i class="fa-solid fa-clock" style="color:var(--text-muted)"></i>`;
+        }
 
         const voice = elements.selectVoice.value;
         const rate = parseInt(elements.rangeRate.value);
@@ -426,7 +439,6 @@ document.addEventListener('DOMContentLoaded', () => {
         log(`🚀 Démarrage de la synthèse vocale pour "${elements.metaTitle.value}"...`, 'info');
         log(`💡 Note Discord : ${getRandomFunnyMessage()}`, 'warning');
 
-        const totalChapters = currentBookData.chapters.length;
         const totalWordsOverall = currentBookData.chapters.reduce((sum, ch) => sum + ch.text.split(/\s+/).length, 0);
         let processedWordsOverall = 0;
         const startTime = Date.now();
@@ -448,8 +460,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const chapWords = chapter.text.split(/\s+/).length;
                 
                 const funnyStatus = getRandomFunnyMessage();
-                log(`🎙️ Chapitre ${i + 1}/${totalChapters} : "${chapter.title}" (${chapWords} mots)... [Thread]`);
-                elements.progressStatusText.textContent = `${funnyStatus} (${chapter.title})`;
+                document.getElementById('progressStatusText').textContent = `Synthèse Chapitre ${i + 1}/${totalChapters} : ${funnyStatus}`;
+                
+                // Maj UI Chapitre en cours
+                const row = document.getElementById(`chapter-row-${i}`);
+                const statIcon = document.getElementById(`chapter-status-${i}`);
+                if (row) row.style.border = '2px solid var(--accent-blue)';
+                if (statIcon) statIcon.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="color:var(--accent-blue)"></i>`;
 
                 try {
                     const audioBlob = await ttsClient.synthesize(chapter.text, { voice, rate, pitch });
@@ -472,10 +489,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     elements.metricSpeed.textContent = `${speed} mots/sec`;
                     elements.metricEta.textContent = `${Math.floor(etaSec / 60)}m ${etaSec % 60}s`;
 
-                    log(`✅ Chapitre ${i + 1} synthétisé avec succès !`, 'success');
+                    // Maj UI Chapitre terminé
+                    if (row) row.style.border = '2px solid var(--accent-mint)';
+                    if (statIcon) statIcon.innerHTML = `<i class="fa-solid fa-check" style="color:var(--text-main)"></i>`;
 
                 } catch (err) {
                     log(`❌ Erreur au chapitre ${i + 1} : ${err.message}`, 'error');
+                    // Maj UI Chapitre erreur
+                    if (row) row.style.border = '2px solid var(--accent-pink)';
+                    if (statIcon) statIcon.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:var(--accent-pink)"></i>`;
                 }
             }
         };
@@ -491,6 +513,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!cancelRequested && generatedAudioFiles.length > 0) {
             log("🎉 Synthèse terminée avec succès ! Préparez vos écouteurs !", 'success');
             elements.progressCard.classList.add('hidden');
+            elements.bookDetailsCard.classList.add('hidden');
+            document.getElementById('actionButtonsRow').classList.remove('hidden');
             elements.finishedCard.classList.remove('hidden');
 
             elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> Sauvegarder l'Audiobook (<span id="lblDownloadFormat">${currentFormat === 'm4b' ? '.m4b' : '.zip'}</span>)`;
