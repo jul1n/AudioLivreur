@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let generatedAudioFiles = [];
     let isConverting = false;
     let cancelRequested = false;
-    let currentFormat = 'mp3';
+    let currentFormat = 'm4b';
 
     // Discord-style funny loading messages
     const funnyLoadingMessages = [
@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         selectLanguage: document.getElementById('selectLanguage'),
         selectVoice: document.getElementById('selectVoice'),
+        selectThreads: document.getElementById('selectThreads'),
         btnTestVoice: document.getElementById('btnTestVoice'),
         rangeRate: document.getElementById('rangeRate'),
         valRate: document.getElementById('valRate'),
@@ -194,13 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const opt = document.createElement('option');
             opt.value = v.ShortName;
             opt.textContent = v.LocalName;
-            if (v.ShortName.includes("Vivienne")) {
+            if (v.ShortName.includes("Remy")) {
                 opt.selected = true;
             }
             elements.selectVoice.appendChild(opt);
         });
 
-        // Si Vivienne n'est pas dans la liste courante, sélectionner la première voix
+        // Si Remy n'est pas dans la liste courante, sélectionner la première voix
         if (!elements.selectVoice.value && elements.selectVoice.options.length > 0) {
             elements.selectVoice.options[0].selected = true;
         }
@@ -388,46 +389,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
         elements.metricWords.textContent = `0 / ${totalWordsOverall.toLocaleString()}`;
 
-        for (let i = 0; i < totalChapters; i++) {
-            if (cancelRequested) {
-                log("🛑 Synthèse annulée par l'utilisateur.", 'warning');
-                break;
-            }
+        const maxThreads = parseInt(elements.selectThreads.value) || 5;
+        let currentIndex = 0;
 
-            const chapter = currentBookData.chapters[i];
-            const chapWords = chapter.text.split(/\s+/).length;
-            
-            const funnyStatus = getRandomFunnyMessage();
-            log(`🎙️ Chapitre ${i + 1}/${totalChapters} : "${chapter.title}" (${chapWords} mots)...`);
-            elements.progressStatusText.textContent = `${funnyStatus} (${chapter.title})`;
+        const workerTask = async () => {
+            while (currentIndex < totalChapters) {
+                if (cancelRequested) {
+                    log("🛑 Synthèse annulée par l'utilisateur.", 'warning');
+                    break;
+                }
 
-            try {
-                const audioBlob = await ttsClient.synthesize(chapter.text, { voice, rate, pitch });
-                const safeTitle = chapter.title.replace(/[^a-zA-Z0-9àáâäãåąčćđéèêëėęėîïǐíìôöòóõøōǒùúûüųűÿýżźñçčšžÀÁÂÄÃÅĄĆČĐÉÈÊËĖĘÎÏÍÌÔÖÒÓÕØŌǑÙÚÛÜŲŰŸÝŻŹÑßÇŒÆ\s-]/g, "").trim();
-                const filename = `${(i + 1).toString().padStart(3, '0')}_${safeTitle || 'Chapitre'}.${currentFormat === 'm4b' ? 'm4b' : 'mp3'}`;
-
-                generatedAudioFiles.push({ filename, title: chapter.title, blob: audioBlob });
-                processedWordsOverall += chapWords;
+                const i = currentIndex++;
+                const chapter = currentBookData.chapters[i];
+                const chapWords = chapter.text.split(/\s+/).length;
                 
-                const elapsedSec = (Date.now() - startTime) / 1000;
-                const speed = Math.round(processedWordsOverall / elapsedSec);
-                const remainingWords = totalWordsOverall - processedWordsOverall;
-                const etaSec = speed > 0 ? Math.round(remainingWords / speed) : 0;
+                const funnyStatus = getRandomFunnyMessage();
+                log(`🎙️ Chapitre ${i + 1}/${totalChapters} : "${chapter.title}" (${chapWords} mots)... [Thread]`);
+                elements.progressStatusText.textContent = `${funnyStatus} (${chapter.title})`;
 
-                const percent = Math.round((processedWordsOverall / totalWordsOverall) * 100);
-                elements.progressBarFill.style.width = `${percent}%`;
-                elements.progressPercentText.textContent = `${percent}%`;
-                
-                elements.metricWords.textContent = `${processedWordsOverall.toLocaleString()} / ${totalWordsOverall.toLocaleString()}`;
-                elements.metricSpeed.textContent = `${speed} mots/sec`;
-                elements.metricEta.textContent = `${Math.floor(etaSec / 60)}m ${etaSec % 60}s`;
+                try {
+                    const audioBlob = await ttsClient.synthesize(chapter.text, { voice, rate, pitch });
+                    const safeTitle = chapter.title.replace(/[^a-zA-Z0-9àáâäãåąčćđéèêëėęėîïǐíìôöòóõøōǒùúûüųűÿýżźñçčšžÀÁÂÄÃÅĄĆČĐÉÈÊËĖĘÎÏÍÌÔÖÒÓÕØŌǑÙÚÛÜŲŰŸÝŻŹÑßÇŒÆ\s-]/g, "").trim();
+                    const filename = `${(i + 1).toString().padStart(3, '0')}_${safeTitle || 'Chapitre'}.${currentFormat === 'm4b' ? 'm4b' : 'mp3'}`;
 
-                log(`✅ Chapitre ${i + 1} synthétisé avec succès !`, 'success');
+                    generatedAudioFiles.push({ filename, title: chapter.title, blob: audioBlob, index: i });
+                    processedWordsOverall += chapWords;
+                    
+                    const elapsedSec = (Date.now() - startTime) / 1000;
+                    const speed = Math.round(processedWordsOverall / elapsedSec);
+                    const remainingWords = totalWordsOverall - processedWordsOverall;
+                    const etaSec = speed > 0 ? Math.round(remainingWords / speed) : 0;
 
-            } catch (err) {
-                log(`❌ Erreur au chapitre ${i + 1} : ${err.message}`, 'error');
+                    const percent = Math.round((processedWordsOverall / totalWordsOverall) * 100);
+                    elements.progressBarFill.style.width = `${percent}%`;
+                    elements.progressPercentText.textContent = `${percent}%`;
+                    
+                    elements.metricWords.textContent = `${processedWordsOverall.toLocaleString()} / ${totalWordsOverall.toLocaleString()}`;
+                    elements.metricSpeed.textContent = `${speed} mots/sec`;
+                    elements.metricEta.textContent = `${Math.floor(etaSec / 60)}m ${etaSec % 60}s`;
+
+                    log(`✅ Chapitre ${i + 1} synthétisé avec succès !`, 'success');
+
+                } catch (err) {
+                    log(`❌ Erreur au chapitre ${i + 1} : ${err.message}`, 'error');
+                }
             }
-        }
+        };
+
+        const workers = Array.from({ length: maxThreads }, () => workerTask());
+        await Promise.all(workers);
+
+        // Trier le tableau final pour garantir l'ordre chronologique des chapitres
+        generatedAudioFiles.sort((a, b) => a.index - b.index);
 
         isConverting = false;
 

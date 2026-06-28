@@ -116,14 +116,14 @@
                 <div class="form-group">
                     <label>Format de Sortie</label>
                     <div class="toggle-switch-group">
-                        <button class="toggle-btn active" id="toggleMp3">
+                        <button class="toggle-btn" id="toggleMp3">
                             <i class="fa-solid fa-compact-disc toggle-icon"></i>
                             <div class="toggle-text-stack">
                                 <span class="toggle-title">MP3</span>
                                 <span class="toggle-subtitle">Rapide & Léger</span>
                             </div>
                         </button>
-                        <button class="toggle-btn" id="toggleM4b">
+                        <button class="toggle-btn active" id="toggleM4b">
                             <i class="fa-solid fa-book-bookmark toggle-icon"></i>
                             <div class="toggle-text-stack">
                                 <span class="toggle-title">M4B</span>
@@ -165,6 +165,17 @@
                     <label for="selectVoice">Voix Neuronale</label>
                     <select id="selectVoice" class="input-neubrutal">
                         <!-- Dynamically filled on load -->
+                    </select>
+                </div>
+
+                <!-- Threads Dropdown -->
+                <div class="form-group">
+                    <label for="selectThreads">Vitesse de génération (Threads)</label>
+                    <select id="selectThreads" class="input-neubrutal">
+                        <option value="1">1 (Lent / Sûr)</option>
+                        <option value="2">2</option>
+                        <option value="5" selected>5 (Recommandé)</option>
+                        <option value="10">10 (Très Rapide)</option>
                     </select>
                 </div>
 
