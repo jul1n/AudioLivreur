@@ -1,53 +1,93 @@
-# 🎧 audiolivreur.ai — Studio de Synthèse Vocale d'Audiobooks (v0.1 Web)
+<div align="center">
+  <img src="https://img.icons8.com/?size=256&id=w5oD-3a21k0T&format=png" alt="AudioLivreur Logo" width="120">
+  <h1>🎧 AudioLivreur</h1>
+  <p><b>Le premier studio de synthèse vocale ultra-rapide et 100% privé.</b></p>
+  <p>Transformez n'importe quel livre (EPUB, PDF, Word) en un livre audio immersif, propulsé par des voix neuronales de pointe.</p>
 
-[![GitHub Pages](https://img.shields.io/badge/Deploy-GitHub%20Pages-brightgreen)](https://jul1n.github.io/AudioLivreur/)
-[![Version](https://img.shields.io/badge/Version-v0.1-blue)](https://github.com/jul1n/AudioLivreur)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+  <a href="#fonctionnalités"><strong>Explorer les fonctionnalités »</strong></a>
+  <br>
+  <br>
 
-**audiolivreur.ai** est une Progressive Web App (PWA) **100% Client-Side** permettant de transformer vos livres numériques (EPUB, PDF, DOCX, TXT, MOBI) en livres audio MP3 de haute qualité, directement depuis votre navigateur web et en utilisant votre propre connexion internet.
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
+  [![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-00a393.svg)](https://fastapi.tiangolo.com/)
 
----
-
-## ✨ Fonctionnalités Clés
-
-* 🟢 **100% Dans le Navigateur (Zero Server)** : La lecture du livre, l'extraction des chapitres et le packaging ZIP s'exécutent intégralement dans la mémoire de votre navigateur. Aucun fichier n'est téléversé sur un serveur externe.
-* ⚡ **Requêtes Vocales sur IP Cliente** : La synthèse vocale communique en WebSocket directement depuis votre connexion internet vers le service public Microsoft Edge Read Aloud. Aucun risque de blocage ou d'erreur 429 liée à un serveur centralisé.
-* 📖 **Support Multi-formats** : Extraction native des fichiers **EPUB**, **PDF**, **DOCX**, **TXT** et **MOBI**.
-* 🎙️ **Voix Neuronales Internationales** : Choix de voix haute définition en Français, Anglais, Espagnol, Allemand, Italien... avec ajustement de la vitesse de lecture et du pitch.
-* 🎨 **Design Neubrutaliste Épuré** : Interface moderne, intuitive et réactive avec fenêtres modales d'information.
-* 📱 **PWA Installable** : Fonctionne hors-ligne et peut être installée comme une application sur Windows, macOS, iOS et Android.
+</div>
 
 ---
 
-## 🚀 Utilisation & Déploiement
+## 🚀 Pourquoi choisir AudioLivreur ?
 
-### 1. En Ligne via GitHub Pages
-L'application est directement accessible sans aucune installation sur :
-👉 **[https://jul1n.github.io/AudioLivreur/](https://jul1n.github.io/AudioLivreur/)**
+Vous avez des dizaines d'ebooks ou de documents PDF que vous n'avez pas le temps de lire ? **AudioLivreur** est conçu pour vous. Fini les voix robotiques insupportables et les services Cloud coûteux. Nous mettons la puissance des **voix neuronales** directement entre vos mains, avec une simplicité d'utilisation déconcertante.
 
-### 2. Lancement en Local
-Pour lancer l'application localement sur votre ordinateur :
+### ✨ Les 4 Piliers d'AudioLivreur
+
+1. **🎙️ Voix Neuronales Hyper-Réalistes**  
+   Oubliez les synthèses vocales des années 2000. AudioLivreur utilise les algorithmes de pointe de *Microsoft Edge TTS* pour vous offrir des narrateurs qui respirent, intonnent et racontent avec émotion.
+2. **⚡ Vitesse Foudroyante (Multi-Threads)**  
+   Un livre de 400 pages ? Généré en quelques minutes ! Grâce au traitement multi-threads (jusqu'à 20 processus simultanés), exploitez toute la puissance de votre ordinateur. 
+3. **🔒 Confidentialité Absolue (100% Local)**  
+   Vos livres, vos données. L'extraction du texte, le découpage en chapitres et la création des fichiers audio se font **entièrement sur votre propre machine**. Aucun fichier n'est stocké sur un serveur distant.
+4. **📦 Un Fichier, Une Écoute**  
+   Exportez vos livres au format classique **Archive ZIP (MP3 par chapitre)** pour une flexibilité maximale, ou en format **M4B Unique** pour l'importer directement dans votre application de livres audio préférée (Audible, Apple Books, Smart Audiobook Player).
+
+---
+
+## 🎯 Fonctionnalités Clés
+
+- **Formats supportés** : `EPUB`, `PDF`, `DOCX`, `TXT`. Le texte et les chapitres sont extraits automatiquement.
+- **Support multilingue** : Interface et voix disponibles dans plus de 15 langues (Français, Anglais, Espagnol, Japonais, Arabe, etc.)
+- **Personnalisation fine** : Ajustez la vitesse de lecture et la hauteur de la voix en temps réel.
+- **Transitions immersives** : Ajoutez des jingles ("Chime") ou des secondes de silence profond entre vos chapitres pour une véritable expérience "Studio".
+- **Métadonnées intégrées** : Couverture, Auteur, Titre et Numéro de chapitre sont injectés automatiquement dans les fichiers audio.
+- **Design "Neubrutalist"** : Une interface utilisateur percutante, moderne et intuitive.
+
+---
+
+## 🛠️ Installation Rapide
+
+Pour commencer à écouter vos livres en quelques minutes :
+
+### 1. Prérequis
+- [Python 3.9+](https://www.python.org/downloads/)
+- Optionnel : [FFmpeg](https://ffmpeg.org/download.html) (Recommandé pour certaines fonctionnalités de conversion)
+
+### 2. Cloner et Installer
 ```bash
-# Clonez le dépôt
+# Cloner le dépôt
 git clone https://github.com/jul1n/AudioLivreur.git
-cd AudioLivreur
+cd AudioLivreur/dependance
 
-# Lancez un petit serveur HTTP local (Python 3)
-python -m http.server 8000
+# Installer les dépendances
+pip install -r requirements.txt
 ```
-Ouvrez ensuite **`http://localhost:8000`** dans votre navigateur.
+
+### 3. Lancer le Studio
+```bash
+python server.py
+```
+Ouvrez ensuite votre navigateur préféré sur : **`http://localhost:8000`**
 
 ---
 
-## 🏛️ Ancienne Version Desktop (Python)
+## 💡 Comment ça marche ?
 
-Si vous cherchez la version initiale autonome pour Windows/macOS développée en Python (PyInstaller + CustomTkinter), elle a été archivée en toute sécurité sur la branche dédiée :
-👉 **[Branche desktop-version](https://github.com/jul1n/AudioLivreur/tree/desktop-version)**
+1. **Glissez votre fichier** : Déposez votre EPUB, PDF ou DOCX directement dans l'interface.
+2. **Faites vos réglages** : Choisissez la voix qui vous plaît (testez-la en direct !), réglez la vitesse et optez pour des transitions sonores.
+3. **Lancez la magie** : Cliquez sur "Générer mon livre audio". Admirez la progression de vos chapitres et téléchargez votre archive !
 
 ---
 
-## 🛠️ Stack Technique Web (v0.1)
+## 🤝 Contribution & Open-Source
 
-* **UI & Style** : HTML5, Vanilla CSS (Neubrutalism Design System), Google Fonts (*Space Grotesk* & *Plus Jakarta Sans*), FontAwesome.
-* **Moteur TTS** : JavaScript WebSocket natif avec chiffrement DRM `Sec-MS-GEC` (Web Crypto API SHA-256).
-* **Extracteurs de Documents** : `JSZip` (EPUB), `pdf.js` (PDF), `mammoth.browser.js` (DOCX).
+Imaginé et conçu par [Julien](https://github.com/jul1n). AudioLivreur est un projet Open-Source qui a pour vocation de rendre la culture et la lecture accessibles à tous, sans barrière technologique ni tarifaire.
+
+N'hésitez pas à :
+- Ouvrir une **Issue** si vous avez une idée géniale.
+- Proposer une **Pull Request** pour améliorer le code.
+- Laisser une **Étoile (⭐)** sur GitHub si ce projet vous a été utile !
+
+---
+<div align="center">
+  <i>Propulsé par FastAPI, Edge TTS, JSZip, et de l'amour pour la lecture.</i>
+</div>
