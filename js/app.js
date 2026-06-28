@@ -293,6 +293,39 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.dataTransfer.files.length > 0) handleFileSelect(e.dataTransfer.files[0]);
     });
 
+    function detectLanguageSimple(text) {
+        if (!text) return null;
+        text = text.toLowerCase();
+        const counters = { fr: 0, en: 0, es: 0, de: 0, it: 0, pt: 0, nl: 0 };
+        const stopwords = {
+            fr: ["le", "la", "les", "un", "une", "et", "dans", "pour", "qui", "que", "je", "tu", "il", "est", "pas", "sur", "avec", "ce", "se"],
+            en: ["the", "and", "to", "of", "a", "in", "is", "that", "it", "with", "as", "for", "on", "was", "at", "this", "be"],
+            es: ["el", "la", "los", "las", "un", "una", "y", "en", "para", "que", "de", "con", "por", "como", "su", "lo"],
+            de: ["der", "die", "das", "und", "in", "zu", "den", "auf", "mit", "von", "ist", "für", "nicht", "ein", "sich"],
+            it: ["il", "la", "i", "le", "e", "in", "di", "che", "per", "con", "non", "un", "una", "si"],
+            pt: ["o", "a", "os", "as", "um", "uma", "e", "em", "para", "que", "de", "com", "por", "não", "se"],
+            nl: ["de", "het", "een", "en", "in", "van", "te", "dat", "op", "is", "voor", "met", "niet", "zich"]
+        };
+
+        const words = text.split(/[\s,.;:!?()'"]+/).slice(0, 1000);
+        for (const w of words) {
+            if (!w || w.length < 2) continue;
+            for (const lang in stopwords) {
+                if (stopwords[lang].includes(w)) counters[lang]++;
+            }
+        }
+
+        let bestLang = null;
+        let maxCount = 5;
+        for (const lang in counters) {
+            if (counters[lang] > maxCount) {
+                maxCount = counters[lang];
+                bestLang = lang;
+            }
+        }
+        return bestLang;
+    }
+
     async function handleFileSelect(file) {
         try {
             log(`Analyse du fichier : ${file.name}...`);
@@ -304,6 +337,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             currentBookData = await FileParser.parse(file);
             log(`🎉 Livre extrait avec succès ! (${currentBookData.chapters.length} chapitres trouvés)`, 'success');
+
+            // Auto-détection de la langue
+            if (currentBookData.chapters.length > 0) {
+                const sampleText = currentBookData.chapters[Math.floor(currentBookData.chapters.length / 2)].text || currentBookData.chapters[0].text;
+                const detectedLang = detectLanguageSimple(sampleText);
+                if (detectedLang && elements.selectLanguage.value !== detectedLang) {
+                    elements.selectLanguage.value = detectedLang;
+                    elements.selectLanguage.dispatchEvent(new Event('change')); // Met à jour la liste des voix
+                    log(`🌍 Langue détectée automatiquement : ${elements.selectLanguage.options[elements.selectLanguage.selectedIndex].text}`, 'info');
+                }
+            }
 
             elements.metaTitle.value = currentBookData.title;
             elements.metaAuthor.value = currentBookData.author;
