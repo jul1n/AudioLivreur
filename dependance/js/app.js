@@ -299,22 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
-    const btnViderCache = document.getElementById('btnViderCache');
-    if (btnViderCache) {
-        btnViderCache.addEventListener('click', async () => {
-            try {
-                const response = await fetch('http://localhost:8000/api/clear-cache', { method: 'DELETE' });
-                if (response.ok) {
-                    const data = await response.json();
-                    showToast(window.t('toast_cache_cleared', { n: data.deleted }) || `Cache vidé avec succès ! (${data.deleted} fichiers)`);
-                } else {
-                    showToast("Erreur lors du vidage du cache", true);
-                }
-            } catch (err) {
-                showToast("Erreur de connexion au serveur local", true);
-            }
-        });
-    }
 
     elements.btnTestVoice.addEventListener('click', async () => {
         const lang = elements.selectLanguage.value;
@@ -585,8 +569,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     let audioBlob = await ttsClient.synthesize(chapter.text, { voice, rate, pitch });
                     
-                    // Ajout du silence à la fin
-                    audioBlob = new Blob([audioBlob, silenceBlob], { type: 'audio/mp3' });
+                    const transitionType = document.getElementById('selectTransition').value;
+                    if (transitionType === 'silence') {
+                        audioBlob = new Blob([audioBlob, silenceBlob], { type: 'audio/mp3' });
+                    } else if (transitionType === 'chime') {
+                        try {
+                            const res = await fetch('assets/sounds/chime.mp3');
+                            if (res.ok) {
+                                const chimeBuf = await res.arrayBuffer();
+                                const chimeBlob = new Blob([chimeBuf], { type: 'audio/mp3' });
+                                audioBlob = new Blob([audioBlob, chimeBlob], { type: 'audio/mp3' });
+                            }
+                        } catch (e) {
+                            console.error("Failed to load chime", e);
+                        }
+                    }
                     
                     audioBlob = await tagAudioBlob(
                         audioBlob, 

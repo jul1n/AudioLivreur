@@ -197,6 +197,16 @@
                     </select>
                 </div>
 
+                <!-- Transition Dropdown -->
+                <div class="form-group">
+                    <label for="selectTransition" data-i18n="transition_label">Transition Sonore</label>
+                    <select id="selectTransition" class="input-neubrutal">
+                        <option value="none" selected data-i18n="trans_none">Sans transition</option>
+                        <option value="silence" data-i18n="trans_silence">1 sec de silence</option>
+                        <option value="chime" data-i18n="trans_chime">Clochette (Chime)</option>
+                    </select>
+                </div>
+
                 <!-- Test Voice Button -->
                 <button id="btnTestVoice" class="btn-main yellow" style="padding:0.7rem 1rem; font-size:0.95rem;" data-i18n="test_voice_btn">
                     <i class="fa-solid fa-volume-high"></i> Tester la Voix
@@ -359,7 +369,6 @@
                 <button class="footer-link-btn" id="btnOpenModalLegal" data-i18n="ft_privacy">Confidentialité</button>
                 <button class="footer-link-btn" id="btnOpenModalContact" data-i18n="ft_contact">Contact</button>
                 <button class="footer-link-btn" id="btnOpenModalCredits" data-i18n="ft_credits">Crédits</button>
-                <button class="footer-link-btn" id="btnViderCache" data-i18n="ft_clear_cache" style="color:var(--primary-color);">Vider le cache</button>
             </div>
         </div>
     </footer>

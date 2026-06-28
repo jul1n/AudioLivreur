@@ -76,18 +76,6 @@ async def generate_tts(req: TTSRequest):
         print(f"Erreur de Synthèse : {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/api/clear-cache")
-async def clear_cache():
-    try:
-        count = 0
-        for f in os.listdir(CACHE_DIR):
-            if f.endswith(".mp3"):
-                os.remove(os.path.join(CACHE_DIR, f))
-                count += 1
-        return {"status": "success", "deleted": count}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 # Mount static files
 app.mount("/js", StaticFiles(directory="js"), name="js")
 app.mount("/css", StaticFiles(directory="css"), name="css")
