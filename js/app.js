@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         metricSpeed: document.getElementById('metricSpeed'),
         metricEta: document.getElementById('metricEta'),
         consoleLogs: document.getElementById('consoleLogs'),
+        metricsGrid: document.getElementById('metricsGrid'),
         btnCancelConversion: document.getElementById('btnCancelConversion'),
 
         finishedCard: document.getElementById('finishedCard'),
@@ -377,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const wordCount = ch.text.split(/\s+/).length;
                 item.innerHTML = `
                     <span><strong>${idx + 1}.</strong> ${ch.title}</span>
-                    <span class="pill-badge" style="font-size:0.75rem;"><span id="chapter-status-${idx}"><i class="fa-solid fa-clock" style="color:var(--text-muted)"></i></span> &nbsp;${wordCount.toLocaleString()} mots</span>
+                    <span id="chapter-badge-${idx}" class="pill-badge" style="font-size:0.75rem; transition: background-color 0.3s;"><span id="chapter-status-${idx}"><i class="fa-solid fa-clock" style="color:var(--text-muted)"></i></span> &nbsp;${wordCount.toLocaleString()} mots</span>
                 `;
                 elements.chaptersList.appendChild(item);
             });
@@ -414,6 +415,12 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.btnReset.addEventListener('click', resetToDropzone);
     elements.btnNewConversion.addEventListener('click', resetToDropzone);
 
+    if (elements.metricsGrid) {
+        elements.metricsGrid.addEventListener('click', () => {
+            elements.consoleLogs.classList.toggle('hidden');
+        });
+    }
+
     elements.btnStartConversion.addEventListener('click', async () => {
         if (!currentBookData || currentBookData.chapters.length === 0) return;
 
@@ -424,13 +431,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('actionButtonsRow').classList.add('hidden');
         elements.progressCard.classList.remove('hidden');
 
-        // Reset chapitres style
         const totalChapters = currentBookData.chapters.length;
         for(let i=0; i<totalChapters; i++) {
             const row = document.getElementById(`chapter-row-${i}`);
             const stat = document.getElementById(`chapter-status-${i}`);
+            const badge = document.getElementById(`chapter-badge-${i}`);
             if(row) row.style.border = '';
             if(stat) stat.innerHTML = `<i class="fa-solid fa-clock" style="color:var(--text-muted)"></i>`;
+            if(badge) badge.style.backgroundColor = '';
         }
 
         const voice = elements.selectVoice.value;
@@ -438,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pitch = parseInt(elements.rangePitch.value);
 
         log(`🚀 Démarrage de la synthèse vocale pour "${elements.metaTitle.value}"...`, 'info');
-        log(`💡 Note Discord : ${getRandomFunnyMessage()}`, 'warning');
+        log(`💡 ${getRandomFunnyMessage()}`, 'info');
 
         const totalWordsOverall = currentBookData.chapters.reduce((sum, ch) => sum + ch.text.split(/\s+/).length, 0);
         let processedWordsOverall = 0;
@@ -493,6 +501,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Maj UI Chapitre terminé
                     if (row) row.style.border = '2px solid var(--accent-mint)';
                     if (statIcon) statIcon.innerHTML = `<i class="fa-solid fa-check" style="color:var(--text-main)"></i>`;
+                    const badge = document.getElementById(`chapter-badge-${i}`);
+                    if (badge) badge.style.backgroundColor = 'var(--accent-mint)';
 
                 } catch (err) {
                     log(`❌ Erreur au chapitre ${i + 1} : ${err.message}`, 'error');

@@ -283,7 +283,7 @@
                         </div>
                     </div>
 
-                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem;">
+                    <div id="metricsGrid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem; cursor:pointer;" title="Afficher/Masquer le Terminal">
                         <div class="metric-card">
                             <span class="metric-label">MOTS TRAITÉS</span>
                             <span class="metric-val" id="metricWords">0 / 0</span>
@@ -298,7 +298,7 @@
                         </div>
                     </div>
 
-                    <div class="console-neubrutal" id="consoleLogs">
+                    <div class="console-neubrutal hidden" id="consoleLogs">
                         <div class="log-entry info">[INFO] Prêt pour la génération locale.</div>
                     </div>
                 </div>
