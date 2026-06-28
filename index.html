@@ -141,7 +141,7 @@
             
             <!-- Left Panel: Settings with Dropdowns & Format Toggle -->
             <aside class="card-box settings-panel">
-                <h3 class="panel-title" data-i18n="settings_title"><i class="fa-solid fa-sliders"></i> Réglages de Synthèse</h3>
+                <h3 class="panel-title"><i class="fa-solid fa-sliders"></i> <span data-i18n="settings_title">Réglages de Synthèse</span></h3>
                 
                 <!-- Format Toggle MP3 vs M4B Redesign Sleek -->
                 <div class="form-group">
@@ -219,8 +219,8 @@
                 </div>
 
                 <!-- Test Voice Button -->
-                <button id="btnTestVoice" class="btn-main yellow" style="padding:0.7rem 1rem; font-size:0.95rem;" data-i18n="test_voice_btn">
-                    <i class="fa-solid fa-volume-high"></i> Tester la Voix
+                <button id="btnTestVoice" class="btn-main yellow" style="padding:0.7rem 1rem; font-size:0.95rem;">
+                    <i class="fa-solid fa-volume-high"></i> <span data-i18n="test_voice_btn">Tester la Voix</span>
                 </button>
 
                 <hr style="border:none; border-top:2px solid var(--border-black); margin:0.8rem 0;">
@@ -255,8 +255,8 @@
                         </div>
                         <h2 data-i18n="dz_title">Glissez-déposez votre livre ici</h2>
                         <p style="color:var(--text-muted); font-weight:500;" data-i18n="dz_formats">Formats acceptés : <strong>EPUB, PDF, DOCX, TXT, MOBI</strong></p>
-                        <button class="btn-main" id="btnBrowse" data-i18n="dz_browse_btn">
-                            <i class="fa-solid fa-folder-open"></i> Parcourir les fichiers
+                        <button class="btn-main" id="btnBrowse">
+                            <i class="fa-solid fa-folder-open"></i> <span data-i18n="dz_browse_btn">Parcourir les fichiers</span>
                         </button>
                         <input type="file" id="fileInput" accept=".epub,.pdf,.docx,.txt,.md,.mobi" hidden>
                     </div>
@@ -287,11 +287,11 @@
                     </div>
 
                     <div id="actionButtonsRow" style="display:flex; gap:1rem;">
-                        <button id="btnStartConversion" class="btn-main flex-1" style="font-size:1.1rem;" data-i18n="start_btn">
-                            <i class="fa-solid fa-play"></i> Lancer la Synthèse Vocale
+                        <button id="btnStartConversion" class="btn-main flex-1" style="font-size:1.1rem;">
+                            <i class="fa-solid fa-play"></i> <span data-i18n="start_btn">Lancer la Synthèse Vocale</span>
                         </button>
-                        <button id="btnReset" class="btn-main pink" data-i18n="reset_btn">
-                            <i class="fa-solid fa-rotate-left"></i> Changer de livre
+                        <button id="btnReset" class="btn-main pink">
+                            <i class="fa-solid fa-rotate-left"></i> <span data-i18n="reset_btn">Changer de livre</span>
                         </button>
                     </div>
 
@@ -309,8 +309,8 @@
                         <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem;" data-i18n="prog_title">
                             ⚡ Synthèse Vocale en cours...
                         </h2>
-                        <button id="btnCancelConversion" class="btn-main pink" style="padding:0.5rem 1rem; font-size:0.9rem;" data-i18n="cancel_btn">
-                            <i class="fa-solid fa-xmark"></i> Annuler
+                        <button id="btnCancelConversion" class="btn-main pink" style="padding:0.5rem 1rem; font-size:0.9rem;">
+                            <i class="fa-solid fa-xmark"></i> <span data-i18n="cancel_btn">Annuler</span>
                         </button>
                     </div>
 
@@ -352,18 +352,18 @@
 
                     <div style="display:flex; gap:1rem; width:100%; max-width:500px; flex-wrap:wrap; margin-top:0.5rem;">
                         <button id="btnDownloadAudiobook" class="btn-main yellow flex-1">
-                            <span data-i18n="save_audio_btn"><i class="fa-solid fa-file-audio"></i> Sauvegarder l'Audiobook</span> (<span id="lblDownloadFormat">.zip</span>)
+                            <i class="fa-solid fa-file-audio"></i> <span data-i18n="save_audio_btn">Sauvegarder l'Audiobook</span> (<span id="lblDownloadFormat">.zip</span>)
                         </button>
                         <button id="btnDownloadMp3Zip" class="btn-main purple flex-1 hidden">
                             <i class="fa-solid fa-file-zipper"></i> <span data-i18n="save_zip_btn">Télécharger en MP3 (.zip)</span>
                         </button>
-                        <button id="btnDownloadTranscript" class="btn-main purple flex-1" data-i18n="save_txt_btn">
-                            <i class="fa-solid fa-file-lines"></i> Sauvegarder Texte (.txt)
+                        <button id="btnDownloadTranscript" class="btn-main purple flex-1">
+                            <i class="fa-solid fa-file-lines"></i> <span data-i18n="save_txt_btn">Sauvegarder Texte (.txt)</span>
                         </button>
                     </div>
 
-                    <button id="btnNewConversion" class="pill-btn" style="margin-top:1rem;" data-i18n="new_conv_btn">
-                        <i class="fa-solid fa-rotate-left"></i> Convertir un autre livre
+                    <button id="btnNewConversion" class="pill-btn" style="margin-top:1rem;">
+                        <i class="fa-solid fa-rotate-left"></i> <span data-i18n="new_conv_btn">Convertir un autre livre</span>
                     </button>
                 </div>
 
