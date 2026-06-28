@@ -24,6 +24,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def force_utf8_charset(request, call_next):
+    response = await call_next(request)
+    if response.headers.get("content-type") and "text/" in response.headers["content-type"] and "charset=" not in response.headers["content-type"].lower():
+        response.headers["content-type"] += "; charset=utf-8"
+    elif response.headers.get("content-type") and "application/javascript" in response.headers["content-type"] and "charset=" not in response.headers["content-type"].lower():
+        response.headers["content-type"] += "; charset=utf-8"
+    
+    # Force override for windows where mimetypes might guess cp1252
+    if response.headers.get("content-type") and "charset=cp1252" in response.headers["content-type"].lower():
+        response.headers["content-type"] = response.headers["content-type"].lower().replace("charset=cp1252", "charset=utf-8")
+        
+    return response
+
 # Mute edge-tts info logs
 logging.getLogger("edge_tts").setLevel(logging.ERROR)
 
@@ -204,7 +218,7 @@ if os.path.exists("assets"):
 
 @app.get("/")
 async def root():
-    return FileResponse("index.html")
+    return FileResponse("index.html", media_type="text/html; charset=utf-8")
 
 if __name__ == "__main__":
     print("\n=======================================================")

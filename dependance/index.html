@@ -104,8 +104,8 @@
                     <div class="custom-select-option" data-value="ar" style="display: flex; align-items: center; gap: 6px;"><img src="https://flagcdn.com/w20/sa.png" style="width: 20px; border-radius: 2px;"> العربية</div>
                 </div>
             </div>
-            <span class="status-pill-static" data-i18n="nav_local">
-                🚀 Moteur Local Activé
+            <span class="status-pill-static" data-i18n="top_demo_badge">
+                🌐 Démo Web &bull; Voix Système
             </span>
             <button id="btnPwaInstall" class="pill-btn hidden" data-i18n="nav_install">
                 <i class="fa-solid fa-download"></i> Installer App
@@ -122,15 +122,26 @@
                 ⚡ STUDIO DE SYNTHÈSE VOCALE
             </div>
             <h1 class="hero-title" data-i18n="hero_title">Donnez de la voix à vos bouquins !</h1>
-            <p class="hero-subtitle" data-i18n="hero_subtitle">Transformez facilement vos fichiers EPUB, PDF et DOCX en véritables livres audio grâce aux voix neuronales de Microsoft.</p>
+            <p class="hero-subtitle" data-i18n="hero_subtitle">Transformez facilement vos fichiers EPUB, PDF et DOCX en véritables livres audio.</p>
         </section>
+
+        <!-- Web Demo Banner -->
+        <div style="background:var(--accent-yellow); border:3px solid var(--border-black); box-shadow:4px 4px 0px var(--border-black); padding:1rem 1.5rem; border-radius:12px; margin-bottom:1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+            <div style="flex:1; min-width:280px;">
+                <strong style="font-size:1.05rem; display:block; margin-bottom:0.2rem;" data-i18n="demo_banner_title">🌐 Version Web Allégée • Voix Système</strong>
+                <span style="font-size:0.92rem; font-weight:500;" data-i18n="demo_banner_desc">Vous écoutez actuellement les voix (parfois un peu robotiques 🤖) de votre navigateur. Envie de la magie des voix neuronales Microsoft HD et d'une vitesse turbo (x20) ? Passez du côté obscur (ou juste sur l'App Desktop) !</span>
+            </div>
+            <a href="https://github.com/jul1n/AudioLivreur" target="_blank" class="btn-main" style="background:#000; color:#fff; text-decoration:none; padding:0.6rem 1.2rem; font-size:0.9rem; white-space:nowrap; text-align:center;" data-i18n="demo_banner_btn">
+                🚀 Télécharger l'App
+            </a>
+        </div>
 
         <!-- Main Workspace Neubrutalist Grid -->
         <section class="workspace-grid">
             
             <!-- Left Panel: Settings with Dropdowns & Format Toggle -->
             <aside class="card-box settings-panel">
-                <h3 class="panel-title" data-i18n="settings_title"><i class="fa-solid fa-sliders"></i> Réglages de Synthèse</h3>
+                <h3 class="panel-title"><i class="fa-solid fa-sliders"></i> <span data-i18n="settings_title">Réglages de Synthèse</span></h3>
                 
                 <!-- Format Toggle MP3 vs M4B Redesign Sleek -->
                 <div class="form-group">
@@ -180,16 +191,25 @@
 
                 <!-- Voice Dropdown -->
                 <div class="form-group">
-                    <label for="selectVoice" data-i18n="voice_label">Voix Neuronale</label>
+                    <label for="selectVoice" data-i18n="voice_local_label">🎤 Voix Système Locales</label>
                     <select id="selectVoice" class="input-neubrutal">
-                        <!-- Dynamically filled on load -->
+                        <!-- Rempli dynamiquement avec les voix locales -->
                     </select>
                 </div>
 
-                <!-- Threads Dropdown -->
-                <div class="form-group">
-                    <label for="selectThreads" data-i18n="speed_label">Vitesse de génération (Threads)</label>
-                    <select id="selectThreads" class="input-neubrutal">
+                <!-- Mode Web : 1 canal, threads non applicables -->
+                <div id="modeWebBox" class="form-group">
+                    <label data-i18n="mode_web_label">⚡ Mode Web (Canal Unique)</label>
+                    <div style="background:var(--bg-main); border:2px solid var(--border-black); padding:0.6rem 0.8rem; border-radius:8px; font-size:0.85rem; font-weight:600;" data-i18n="mode_web_desc">
+                        🔉 1 flux audio en direct. Jusqu'à 20 processus parallèles avec l'App Desktop !
+                    </div>
+                    <select id="selectThreadsWeb" style="display:none;"><option value="1" selected>1</option></select>
+                </div>
+
+                <!-- Mode Local : 20 threads applicables -->
+                <div id="modeLocalBox" class="form-group" style="display:none;">
+                    <label for="selectThreadsLocal" data-i18n="speed_label">Vitesse de génération (Threads)</label>
+                    <select id="selectThreadsLocal" class="input-neubrutal">
                         <option value="1" data-i18n="speed_1">🐢 1 (Mode Tortue / Ultra-Sûr)</option>
                         <option value="2" data-i18n="speed_2">🚴 2 (Tranquille Pilou)</option>
                         <option value="5" data-i18n="speed_5">🚀 5 (Vitesse de Croisière)</option>
@@ -211,8 +231,8 @@
                 </div>
 
                 <!-- Test Voice Button -->
-                <button id="btnTestVoice" class="btn-main yellow" style="padding:0.7rem 1rem; font-size:0.95rem;" data-i18n="test_voice_btn">
-                    <i class="fa-solid fa-volume-high"></i> Tester la Voix
+                <button id="btnTestVoice" class="btn-main yellow" style="padding:0.7rem 1rem; font-size:0.95rem;">
+                    <i class="fa-solid fa-volume-high"></i> <span data-i18n="test_voice_btn">Tester la Voix</span>
                 </button>
 
                 <hr style="border:none; border-top:2px solid var(--border-black); margin:0.8rem 0;">
@@ -247,8 +267,8 @@
                         </div>
                         <h2 data-i18n="dz_title">Glissez-déposez votre livre ici</h2>
                         <p style="color:var(--text-muted); font-weight:500;" data-i18n="dz_formats">Formats acceptés : <strong>EPUB, PDF, DOCX, TXT, MOBI</strong></p>
-                        <button class="btn-main" id="btnBrowse" data-i18n="dz_browse_btn">
-                            <i class="fa-solid fa-folder-open"></i> Parcourir les fichiers
+                        <button class="btn-main" id="btnBrowse">
+                            <i class="fa-solid fa-folder-open"></i> <span data-i18n="dz_browse_btn">Parcourir les fichiers</span>
                         </button>
                         <input type="file" id="fileInput" accept=".epub,.pdf,.docx,.txt,.md,.mobi" hidden>
                     </div>
@@ -279,11 +299,11 @@
                     </div>
 
                     <div id="actionButtonsRow" style="display:flex; gap:1rem;">
-                        <button id="btnStartConversion" class="btn-main flex-1" style="font-size:1.1rem;" data-i18n="start_btn">
-                            <i class="fa-solid fa-play"></i> Lancer la Synthèse Vocale
+                        <button id="btnStartConversion" class="btn-main flex-1" style="font-size:1.1rem;">
+                            <i class="fa-solid fa-play"></i> <span data-i18n="start_btn">Lancer la Synthèse Vocale</span>
                         </button>
-                        <button id="btnReset" class="btn-main pink" data-i18n="reset_btn">
-                            <i class="fa-solid fa-rotate-left"></i> Changer de livre
+                        <button id="btnReset" class="btn-main pink">
+                            <i class="fa-solid fa-rotate-left"></i> <span data-i18n="reset_btn">Changer de livre</span>
                         </button>
                     </div>
 
@@ -301,8 +321,8 @@
                         <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem;" data-i18n="prog_title">
                             ⚡ Synthèse Vocale en cours...
                         </h2>
-                        <button id="btnCancelConversion" class="btn-main pink" style="padding:0.5rem 1rem; font-size:0.9rem;" data-i18n="cancel_btn">
-                            <i class="fa-solid fa-xmark"></i> Annuler
+                        <button id="btnCancelConversion" class="btn-main pink" style="padding:0.5rem 1rem; font-size:0.9rem;">
+                            <i class="fa-solid fa-xmark"></i> <span data-i18n="cancel_btn">Annuler</span>
                         </button>
                     </div>
 
@@ -344,18 +364,18 @@
 
                     <div style="display:flex; gap:1rem; width:100%; max-width:500px; flex-wrap:wrap; margin-top:0.5rem;">
                         <button id="btnDownloadAudiobook" class="btn-main yellow flex-1">
-                            <span data-i18n="save_audio_btn"><i class="fa-solid fa-file-audio"></i> Sauvegarder l'Audiobook</span> (<span id="lblDownloadFormat">.zip</span>)
+                            <i class="fa-solid fa-file-audio"></i> <span data-i18n="save_audio_btn">Sauvegarder l'Audiobook</span> (<span id="lblDownloadFormat">.zip</span>)
                         </button>
                         <button id="btnDownloadMp3Zip" class="btn-main purple flex-1 hidden">
                             <i class="fa-solid fa-file-zipper"></i> <span data-i18n="save_zip_btn">Télécharger en MP3 (.zip)</span>
                         </button>
-                        <button id="btnDownloadTranscript" class="btn-main purple flex-1" data-i18n="save_txt_btn">
-                            <i class="fa-solid fa-file-lines"></i> Sauvegarder Texte (.txt)
+                        <button id="btnDownloadTranscript" class="btn-main purple flex-1">
+                            <i class="fa-solid fa-file-lines"></i> <span data-i18n="save_txt_btn">Sauvegarder Texte (.txt)</span>
                         </button>
                     </div>
 
-                    <button id="btnNewConversion" class="pill-btn" style="margin-top:1rem;" data-i18n="new_conv_btn">
-                        <i class="fa-solid fa-rotate-left"></i> Convertir un autre livre
+                    <button id="btnNewConversion" class="pill-btn" style="margin-top:1rem;">
+                        <i class="fa-solid fa-rotate-left"></i> <span data-i18n="new_conv_btn">Convertir un autre livre</span>
                     </button>
                 </div>
 
@@ -389,10 +409,11 @@
         </div>
     </div>
 
-    <!-- Application Scripts avec Cache Busting v0.7.0 -->
-    <script src="js/i18n.js?v=0.7.0"></script>
-    <script src="js/tts/edgeTts.js?v=0.7.0"></script>
-    <script src="js/parsers/fileParser.js?v=0.7.0"></script>
-    <script src="js/app.js?v=0.7.0"></script>
+    <!-- Application Scripts avec Cache Busting v0.7.3 -->
+    <script src="js/i18n.js?v=0.7.3"></script>
+    <script src="js/parsers/fileParser.js?v=0.7.3"></script>
+    <script src="js/tts/webSpeechTts.js?v=0.7.3"></script>
+    <script src="js/tts/edgeTts.js?v=0.7.3"></script>
+    <script src="js/app.js?v=0.7.3"></script>
 </body>
 </html>

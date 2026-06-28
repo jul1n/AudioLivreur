@@ -1,9 +1,6 @@
-/**
- * Orchestrateur principal de l'application audiolivreur.ai (Messages Cools & Fun style Discord)
- */
-
 document.addEventListener('DOMContentLoaded', () => {
-    const ttsClient = new EdgeTtsClient();
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    const ttsClient = isGitHubPages ? new WebSpeechTtsClient() : new EdgeTtsClient();
     let currentBookData = null;
     let generatedAudioFiles = [];
     let isConverting = false;
@@ -15,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return window.t(`funny_${Math.floor(Math.random() * 12) + 1}`);
     }
 
+
     // DOM Elements
     const elements = {
         toggleMp3: document.getElementById('toggleMp3'),
@@ -24,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         selectLanguage: document.getElementById('selectLanguage'),
         selectVoice: document.getElementById('selectVoice'),
-        selectThreads: document.getElementById('selectThreads'),
+        selectThreads: document.getElementById(isGitHubPages ? 'selectThreadsWeb' : 'selectThreadsLocal'),
         selectTransition: document.getElementById('selectTransition'),
         btnTestVoice: document.getElementById('btnTestVoice'),
         rangeRate: document.getElementById('rangeRate'),
@@ -264,6 +262,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     updateVoiceSelect();
     elements.selectLanguage.addEventListener('change', updateVoiceSelect);
+    
+    // For Web Speech API to reload voices when they become available
+    if (isGitHubPages && window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = updateVoiceSelect;
+    }
 
     elements.rangeRate.addEventListener('input', (e) => {
         elements.valRate.textContent = `${e.target.value >= 0 ? '+' : ''}${e.target.value}%`;
