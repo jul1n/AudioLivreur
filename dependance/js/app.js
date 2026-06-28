@@ -437,6 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
 
             currentBookData = await FileParser.parse(file);
+            document.getElementById('coverContainer').style.height = '';
             log(window.t('msg_book_ready', { chapters: currentBookData.chapters.length, words: 0 }), 'success');
 
             // Auto-détection de la langue
@@ -907,6 +908,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const newCoverUrl = canvas.toDataURL('image/jpeg', 0.9);
             currentBookData.coverUrl = newCoverUrl;
             elements.coverPreview.src = newCoverUrl;
+            document.getElementById('coverContainer').style.height = '140px';
             
             cropperModal.classList.add('hidden');
             cropperInstance.destroy();
