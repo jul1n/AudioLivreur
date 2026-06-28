@@ -73,6 +73,9 @@ class FileParser {
                 const items = doc.querySelectorAll("manifest > item");
                 const basePath = opfPath.includes("/") ? opfPath.substring(0, opfPath.lastIndexOf("/") + 1) : "";
 
+                let bestCoverHref = null;
+                let fallbackImageHref = null;
+
                 items.forEach(item => {
                     const mediaType = item.getAttribute("media-type") || "";
                     const href = item.getAttribute("href");
@@ -82,17 +85,29 @@ class FileParser {
                     // Chercher la couverture
                     const id = item.getAttribute("id") || "";
                     const properties = item.getAttribute("properties") || "";
-                    if (properties.includes("cover-image") || id.includes("cover") || href.includes("cover") || mediaType.startsWith("image/")) {
-                        const imgFile = zip.file(basePath + href);
-                        if (!coverUrl && imgFile) {
-                            coverPromises.push(
-                                imgFile.async("blob").then(blob => {
-                                    if (!coverUrl) coverUrl = URL.createObjectURL(blob);
-                                })
-                            );
-                        }
+                    const hrefLower = href.toLowerCase();
+                    const idLower = id.toLowerCase();
+                    
+                    if (properties.includes("cover-image") || idLower.includes("cover") || hrefLower.includes("cover")) {
+                        // Priority to explicit cover
+                        if (!bestCoverHref) bestCoverHref = basePath + href;
+                    } else if (mediaType.startsWith("image/") && !fallbackImageHref) {
+                        // Fallback to first image found
+                        fallbackImageHref = basePath + href;
                     }
                 });
+
+                const finalCoverHref = bestCoverHref || fallbackImageHref;
+                if (finalCoverHref && !coverUrl) {
+                    const imgFile = zip.file(finalCoverHref);
+                    if (imgFile) {
+                        coverPromises.push(
+                            imgFile.async("blob").then(blob => {
+                                coverUrl = URL.createObjectURL(blob);
+                            })
+                        );
+                    }
+                }
             }
         }
         await Promise.all(coverPromises);
