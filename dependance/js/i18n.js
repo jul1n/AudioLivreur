@@ -86,7 +86,9 @@ const translations = {
         toast_test_err: "Serveur temporairement indisponible. Réessayez.",
         toast_lang_detected: "🌍 Langue détectée automatiquement : {lang}",
         toast_parse_err: "Erreur d'analyse : {err}",
-        toast_file_err: "Impossible de lire le fichier : {err}",
+        toast_file_err: "Impossible de lire le fichier : {err}",        ft_clear_cache: "Vider le cache",
+        toast_cache_cleared: "Cache vidé avec succès ! ({n} fichiers)",
+
 
     },
     en: {
@@ -176,7 +178,9 @@ const translations = {
         toast_test_err: "Server temporarily unavailable. Try again.",
         toast_lang_detected: "🌍 Language automatically detected: {lang}",
         toast_parse_err: "Parsing error: {err}",
-        toast_file_err: "Unable to read file: {err}",
+        toast_file_err: "Unable to read file: {err}",        ft_clear_cache: "Clear cache",
+        toast_cache_cleared: "Cache cleared successfully! ({n} files)",
+
 
     },
     es: {
@@ -266,7 +270,9 @@ const translations = {
         toast_test_err: "Servidor temporalmente no disponible. Inténtalo de nuevo.",
         toast_lang_detected: "🌍 Idioma detectado automáticamente: {lang}",
         toast_parse_err: "Error de análisis: {err}",
-        toast_file_err: "Imposible leer el archivo: {err}",
+        toast_file_err: "Imposible leer el archivo: {err}",        ft_clear_cache: "Vaciar caché",
+        toast_cache_cleared: "¡Caché vaciada con éxito! ({n} archivos)",
+
 
     },
     de: {
@@ -356,7 +362,9 @@ const translations = {
         toast_test_err: "Server vorübergehend nicht erreichbar. Erneut versuchen.",
         toast_lang_detected: "🌍 Sprache automatisch erkannt: {lang}",
         toast_parse_err: "Analysefehler: {err}",
-        toast_file_err: "Datei kann nicht gelesen werden: {err}",
+        toast_file_err: "Datei kann nicht gelesen werden: {err}",        ft_clear_cache: "Cache leeren",
+        toast_cache_cleared: "Cache erfolgreich geleert! ({n} Dateien)",
+
 
     },
     it: {
@@ -446,7 +454,9 @@ const translations = {
         toast_test_err: "Server temporaneamente non disponibile. Riprova.",
         toast_lang_detected: "🌍 Lingua rilevata automaticamente: {lang}",
         toast_parse_err: "Errore di analisi: {err}",
-        toast_file_err: "Impossibile leggere il file: {err}",
+        toast_file_err: "Impossibile leggere il file: {err}",        ft_clear_cache: "Svuota cache",
+        toast_cache_cleared: "Cache svuotata con successo! ({n} file)",
+
 
     },
     pt: {
@@ -536,7 +546,9 @@ const translations = {
         toast_test_err: "Servidor temporariamente indisponível. Tente novamente.",
         toast_lang_detected: "🌍 Idioma detectado automaticamente: {lang}",
         toast_parse_err: "Erro de análise: {err}",
-        toast_file_err: "Não foi possível ler o arquivo: {err}",
+        toast_file_err: "Não foi possível ler o arquivo: {err}",        ft_clear_cache: "Limpar cache",
+        toast_cache_cleared: "Cache limpo com sucesso! ({n} arquivos)",
+
 
     },
     ru: {
@@ -626,7 +638,9 @@ const translations = {
         toast_test_err: "Сервер временно недоступен. Попробуйте еще раз.",
         toast_lang_detected: "🌍 Язык определен автоматически: {lang}",
         toast_parse_err: "Ошибка анализа: {err}",
-        toast_file_err: "Невозможно прочитать файл: {err}",
+        toast_file_err: "Невозможно прочитать файл: {err}",        ft_clear_cache: "Очистить кэш",
+        toast_cache_cleared: "Кэш успешно очищен! ({n} файлов)",
+
 
     },
     zh: {
@@ -716,7 +730,9 @@ const translations = {
         toast_test_err: "服务器暂时不可用。请重试。",
         toast_lang_detected: "🌍 自动检测到语言：{lang}",
         toast_parse_err: "解析错误：{err}",
-        toast_file_err: "无法读取文件：{err}",
+        toast_file_err: "无法读取文件：{err}",        ft_clear_cache: "清除缓存",
+        toast_cache_cleared: "缓存清除成功！({n} 个文件)",
+
 
     },
     ja: {
@@ -806,7 +822,9 @@ const translations = {
         toast_test_err: "サーバーは一時的に利用できません。再試行してください。",
         toast_lang_detected: "🌍 自動検出された言語: {lang}",
         toast_parse_err: "解析エラー: {err}",
-        toast_file_err: "ファイルを読み取れません: {err}",
+        toast_file_err: "ファイルを読み取れません: {err}",        ft_clear_cache: "キャッシュをクリア",
+        toast_cache_cleared: "キャッシュが正常にクリアされました！({n} ファイル)",
+
 
     },
     ar: {
@@ -896,7 +914,9 @@ const translations = {
         toast_test_err: "الخادم غير متاح مؤقتا. حاول مرة أخرى.",
         toast_lang_detected: "🌍 تم اكتشاف اللغة تلقائيا: {lang}",
         toast_parse_err: "خطأ في التحليل: {err}",
-        toast_file_err: "تعذرت قراءة الملف: {err}",
+        toast_file_err: "تعذرت قراءة الملف: {err}",        ft_clear_cache: "مسح ذاكرة التخزين المؤقت",
+        toast_cache_cleared: "تم مسح ذاكرة التخزين المؤقت بنجاح! ({n} ملفات)",
+
 
     }
 };

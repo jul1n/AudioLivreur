@@ -7,6 +7,11 @@ from pydantic import BaseModel
 import edge_tts
 import uvicorn
 import logging
+import hashlib
+
+CACHE_DIR = "cache"
+if not os.path.exists(CACHE_DIR):
+    os.makedirs(CACHE_DIR)
 
 app = FastAPI(title="AudioLivreur Local API")
 
@@ -31,6 +36,17 @@ class TTSRequest(BaseModel):
 @app.post("/api/tts")
 async def generate_tts(req: TTSRequest):
     try:
+        # Création d'une clé de cache unique basée sur le texte et les paramètres
+        raw_key = f"{req.text}|{req.voice}|{req.rate}|{req.pitch}".encode('utf-8')
+        cache_key = hashlib.md5(raw_key).hexdigest()
+        cache_file = os.path.join(CACHE_DIR, f"{cache_key}.mp3")
+        
+        # Si le fichier existe déjà en cache, on le renvoie directement (Reprise)
+        if os.path.exists(cache_file):
+            with open(cache_file, "rb") as f:
+                cached_data = f.read()
+            return Response(content=cached_data, media_type="audio/mpeg")
+
         # Format rate and pitch as required by edge_tts (e.g. "+0%", "+0Hz")
         rate_str = f"+{req.rate}%" if req.rate >= 0 else f"{req.rate}%"
         pitch_str = f"+{req.pitch}Hz" if req.pitch >= 0 else f"{req.pitch}Hz"
@@ -50,10 +66,26 @@ async def generate_tts(req: TTSRequest):
         if not audio_data:
             raise HTTPException(status_code=500, detail="Aucune donnée audio reçue de Microsoft.")
             
+        # Sauvegarde dans le cache pour les futures reprises
+        with open(cache_file, "wb") as f:
+            f.write(audio_data)
+            
         return Response(content=bytes(audio_data), media_type="audio/mpeg")
         
     except Exception as e:
         print(f"Erreur de Synthèse : {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/clear-cache")
+async def clear_cache():
+    try:
+        count = 0
+        for f in os.listdir(CACHE_DIR):
+            if f.endswith(".mp3"):
+                os.remove(os.path.join(CACHE_DIR, f))
+                count += 1
+        return {"status": "success", "deleted": count}
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 # Mount static files

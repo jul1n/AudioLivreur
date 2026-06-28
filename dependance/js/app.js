@@ -319,6 +319,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
+    const btnViderCache = document.getElementById('btnViderCache');
+    if (btnViderCache) {
+        btnViderCache.addEventListener('click', async () => {
+            try {
+                const response = await fetch('http://localhost:8000/api/clear-cache', { method: 'DELETE' });
+                if (response.ok) {
+                    const data = await response.json();
+                    showToast(window.t('toast_cache_cleared', { n: data.deleted }) || `Cache vidé avec succès ! (${data.deleted} fichiers)`);
+                } else {
+                    showToast("Erreur lors du vidage du cache", true);
+                }
+            } catch (err) {
+                showToast("Erreur de connexion au serveur local", true);
+            }
+        });
+    }
+
     elements.btnTestVoice.addEventListener('click', async () => {
         const lang = elements.selectLanguage.value;
         const voice = elements.selectVoice.value;
