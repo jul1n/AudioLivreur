@@ -74,6 +74,37 @@ document.addEventListener('DOMContentLoaded', () => {
         btnOpenModalCredits: document.getElementById('btnOpenModalCredits')
     };
 
+    // Ajustement de l'interface (Web vs Local)
+    if (isGitHubPages) {
+        if (document.getElementById('demoBanner')) document.getElementById('demoBanner').style.display = 'flex';
+        if (document.getElementById('modeWebBox')) document.getElementById('modeWebBox').style.display = 'block';
+        if (document.getElementById('modeLocalBox')) document.getElementById('modeLocalBox').style.display = 'none';
+        
+        // Header Text for Web
+        const topBadge = document.getElementById('topDemoBadge');
+        if (topBadge) {
+            topBadge.innerHTML = '🌐 Démo Web &bull; Voix Système';
+        }
+    } else {
+        if (document.getElementById('demoBanner')) document.getElementById('demoBanner').style.display = 'none';
+        if (document.getElementById('modeWebBox')) document.getElementById('modeWebBox').style.display = 'none';
+        if (document.getElementById('modeLocalBox')) document.getElementById('modeLocalBox').style.display = 'block';
+        
+        // Header Text for Local
+        const topBadge = document.getElementById('topDemoBadge');
+        if (topBadge) {
+            topBadge.innerHTML = '🚀 Moteur Local Activé';
+            topBadge.removeAttribute('data-i18n'); // prevent i18n from overriding
+        }
+        
+        // Voice label change for Local
+        const voiceLabel = document.querySelector('label[data-i18n="voice_local_label"]');
+        if (voiceLabel) {
+            voiceLabel.innerHTML = '<i class="fa-solid fa-microphone-lines"></i> Voix';
+            voiceLabel.removeAttribute('data-i18n'); // prevent i18n from overriding
+        }
+    }
+
     // Custom UI Language Selector
     const langBtn = document.getElementById('langSelectorBtn');
     const langDropdown = document.getElementById('langSelectorDropdown');
