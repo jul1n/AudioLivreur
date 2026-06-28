@@ -39,7 +39,7 @@ class EdgeTtsClient {
         if (matches.length === 0) {
             return [{
                 ShortName: "default",
-                LocalName: "Voix Système (Par Défaut)",
+                LocalName: window.t ? window.t('voice_default') : "Voix Système (Par Défaut)",
                 Gender: "Neutral",
                 Locale: locale
             }];
