@@ -119,7 +119,8 @@ class FileParser {
             const rawText = doc.body ? doc.body.textContent.trim() : "";
             // Ne garder que les chapitres avec du contenu substantiel (> 80 caractères)
             if (rawText.length > 80) {
-                let chapTitle = `Chapitre ${chapters.length + 1}`;
+                const chapWord = (window.t && window.t('chapter_default')) ? window.t('chapter_default') : 'Chapitre';
+                let chapTitle = `${chapWord} ${chapters.length + 1}`;
                 const heading = doc.querySelector("h1, h2, h3");
                 if (heading && heading.textContent.trim()) {
                     chapTitle = heading.textContent.trim().substring(0, 50);

@@ -142,7 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         window.applyTranslations(savedLang);
         updateInterfaceAfterLangChange();
-    }
 
     // Toggle MP3 / M4B Format Handler avec textes super funs
     elements.toggleMp3.addEventListener('click', () => {
@@ -582,7 +581,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     );
 
                     const safeTitle = chapter.title.replace(/[^a-zA-Z0-9àáâäãåąčćđéèêëėęėîïǐíìôöòóõøōǒùúûüųűÿýżźñçčšžÀÁÂÄÃÅĄĆČĐÉÈÊËĖĘÎÏÍÌÔÖÒÓÕØŌǑÙÚÛÜŲŰŸÝŻŹÑßÇŒÆ\s-]/g, "").trim();
-                    const filename = `${(i + 1).toString().padStart(3, '0')}_${safeTitle || 'Chapitre'}.${currentFormat === 'm4b' ? 'm4b' : 'mp3'}`;
+                    const chapFallback = (window.t && window.t('chapter_default')) ? window.t('chapter_default') : 'Chapitre';
+                    const filename = `${(i + 1).toString().padStart(3, '0')}_${safeTitle || chapFallback}.${currentFormat === 'm4b' ? 'm4b' : 'mp3'}`;
 
                     generatedAudioFiles.push({ filename, title: chapter.title, blob: audioBlob, index: i });
                     processedWordsOverall += chapWords;
