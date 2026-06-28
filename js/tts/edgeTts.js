@@ -29,6 +29,12 @@ class EdgeTtsClient {
             matches = this.systemVoices;
         }
 
+        // Ne garder que les voix 100% locales (localService === true)
+        const localOnly = matches.filter(v => v.localService === true);
+        if (localOnly.length > 0) {
+            matches = localOnly;
+        }
+
         if (matches.length === 0) {
             return [{
                 ShortName: "Voix Système Synthèse",
@@ -40,7 +46,7 @@ class EdgeTtsClient {
 
         return matches.map(v => ({
             ShortName: v.name,
-            LocalName: `${v.name} (${v.lang})`,
+            LocalName: `${v.name.replace(/Microsoft|Online|\(Natural\)|Google/gi, '').trim()} (${v.lang})`,
             Gender: "Neutral",
             Locale: v.lang
         }));

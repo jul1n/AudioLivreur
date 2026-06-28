@@ -191,21 +191,20 @@
 
                 <!-- Voice Dropdown -->
                 <div class="form-group">
-                    <label for="selectVoice" data-i18n="voice_label">Voix Neuronale</label>
+                    <label for="selectVoice">🎙️ Voix Système (Local)</label>
                     <select id="selectVoice" class="input-neubrutal">
-                        <!-- Dynamically filled on load -->
+                        <!-- Dynamically filled on load with local system voices -->
                     </select>
                 </div>
 
-                <!-- Threads Dropdown -->
+                <!-- Web Mode Single Channel Notice instead of Threads -->
                 <div class="form-group">
-                    <label for="selectThreads" data-i18n="speed_label">Vitesse de génération (Threads)</label>
-                    <select id="selectThreads" class="input-neubrutal">
-                        <option value="1" data-i18n="speed_1">🐢 1 (Mode Tortue / Ultra-Sûr)</option>
-                        <option value="2" data-i18n="speed_2">🚴 2 (Tranquille Pilou)</option>
-                        <option value="5" data-i18n="speed_5">🚀 5 (Vitesse de Croisière)</option>
-                        <option value="10" selected data-i18n="speed_10">⚡ 10 (Recommandé / Turbo)</option>
-                        <option value="20" data-i18n="speed_20">🔥 20 (Mode Supersonique Extrême !)</option>
+                    <label>⚡ Mode Web (Canal Unique)</label>
+                    <div style="background:var(--bg-main); border:2px solid var(--border-black); padding:0.6rem 0.8rem; border-radius:8px; font-size:0.85rem; font-weight:600;">
+                        🔊 Lecture vocale en direct (1 flux audio). Pour le multi-threading jusqu'à 20 processus, téléchargez l'App Desktop !
+                    </div>
+                    <select id="selectThreads" style="display:none;">
+                        <option value="1" selected>1</option>
                     </select>
                 </div>
 

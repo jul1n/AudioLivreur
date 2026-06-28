@@ -264,6 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     updateVoiceSelect();
     elements.selectLanguage.addEventListener('change', updateVoiceSelect);
+    if (window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = updateVoiceSelect;
+    }
 
     elements.rangeRate.addEventListener('input', (e) => {
         elements.valRate.textContent = `${e.target.value >= 0 ? '+' : ''}${e.target.value}%`;
