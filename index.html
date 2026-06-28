@@ -129,7 +129,7 @@
         <div style="background:var(--accent-yellow); border:3px solid var(--border-black); box-shadow:4px 4px 0px var(--border-black); padding:1rem 1.5rem; border-radius:12px; margin-bottom:1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
             <div style="flex:1; min-width:280px;">
                 <strong style="font-size:1.05rem; display:block; margin-bottom:0.2rem;">🌐 Version Web de Démonstration (Voix Système de votre appareil)</strong>
-                <span style="font-size:0.92rem; font-weight:500;">Vous utilisez les voix intégrées à votre navigateur. Pour bénéficier de <strong>voix neuronales Microsoft HD ultra-naturelles</strong>, téléchargez la version Desktop 100% autonome !</span>
+                <span style="font-size:0.92rem; font-weight:500;">Vous utilisez les voix locales installées sur votre appareil. Pour bénéficier de <strong>voix neuronales Microsoft HD ultra-naturelles</strong> et du multi-threading jusqu'à 20 processus, téléchargez la version Desktop !</span>
             </div>
             <a href="https://github.com/jul1n/AudioLivreur" target="_blank" class="btn-main" style="background:#000; color:#fff; text-decoration:none; padding:0.6rem 1.2rem; font-size:0.9rem; white-space:nowrap; text-align:center;">
                 🚀 Télécharger l'App Desktop
@@ -191,17 +191,17 @@
 
                 <!-- Voice Dropdown -->
                 <div class="form-group">
-                    <label for="selectVoice">🎙️ Voix Système (Local)</label>
+                    <label for="selectVoice">🎤 Voix Système Locales</label>
                     <select id="selectVoice" class="input-neubrutal">
                         <!-- Dynamically filled on load with local system voices -->
                     </select>
                 </div>
 
-                <!-- Web Mode Single Channel Notice instead of Threads -->
+                <!-- Web Mode: 1 seul canal audio, threads non applicables -->
                 <div class="form-group">
                     <label>⚡ Mode Web (Canal Unique)</label>
                     <div style="background:var(--bg-main); border:2px solid var(--border-black); padding:0.6rem 0.8rem; border-radius:8px; font-size:0.85rem; font-weight:600;">
-                        🔊 Lecture vocale en direct (1 flux audio). Pour le multi-threading jusqu'à 20 processus, téléchargez l'App Desktop !
+                        🔉 Lecture vocale en direct (1 flux). Pour jusqu'à 20 processus simultanés, téléchargez l'App Desktop !
                     </div>
                     <select id="selectThreads" style="display:none;">
                         <option value="1" selected>1</option>
