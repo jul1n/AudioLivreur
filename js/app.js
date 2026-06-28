@@ -98,6 +98,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof updateInterfaceAfterLangChange === 'function') {
                     updateInterfaceAfterLangChange();
                 }
+
+                // Si aucun livre n'est chargé, on synchronise la langue du livre avec l'interface
+                if (!currentBookData && elements.selectLanguage) {
+                    elements.selectLanguage.value = val;
+                    if (typeof updateVoiceSelect === 'function') {
+                        updateVoiceSelect();
+                    }
+                }
             });
         });
 
@@ -134,7 +142,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        const savedLang = localStorage.getItem('audiolivreur_lang') || 'fr';
+        let savedLang = localStorage.getItem('audiolivreur_lang');
+        if (!savedLang) {
+            const browserLang = (navigator.language || navigator.userLanguage || 'fr').split('-')[0].toLowerCase();
+            const availableLangs = ['fr', 'en', 'es', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ar'];
+            savedLang = availableLangs.includes(browserLang) ? browserLang : 'en';
+            localStorage.setItem('audiolivreur_lang', savedLang);
+        }
         // Set initial UI state
         const initialOpt = document.querySelector(`.custom-select-option[data-value="${savedLang}"]`);
         if (initialOpt && langCurrent) {
@@ -264,6 +278,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    if (elements.selectLanguage) {
+        elements.selectLanguage.value = savedLang;
+    }
     updateVoiceSelect();
     elements.selectLanguage.addEventListener('change', updateVoiceSelect);
 
