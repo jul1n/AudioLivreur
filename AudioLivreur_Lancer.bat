@@ -10,8 +10,18 @@ echo.
 echo Verification de Python...
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [ERREUR] Python n'est pas installe ou n'est pas dans le PATH.
-    echo Veuillez installer Python depuis le Microsoft Store ou python.org
+    echo [ERREUR] Python n'est pas installe sur votre ordinateur.
+    echo L'application AudioLivreur a besoin de Python pour fonctionner en local.
+    echo.
+    set /p dl="Voulez-vous ouvrir la page de telechargement de Python (O/N) ? "
+    if /I "%dl%"=="O" (
+        start https://www.python.org/downloads/
+        echo.
+        echo [INFO] Lors de l'installation, n'oubliez pas de cocher la case "Add Python to PATH" !
+        echo [INFO] Une fois Python installe, fermez cette fenetre et relancez ce script.
+    ) else (
+        echo Veuillez installer Python manuellement depuis le Microsoft Store ou python.org.
+    )
     pause
     exit
 )
