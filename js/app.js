@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         finishedCard: document.getElementById('finishedCard'),
         btnDownloadAudiobook: document.getElementById('btnDownloadAudiobook'),
+        btnDownloadMp3Zip: document.getElementById('btnDownloadMp3Zip'),
         btnDownloadTranscript: document.getElementById('btnDownloadTranscript'),
         btnNewConversion: document.getElementById('btnNewConversion'),
 
@@ -475,6 +476,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxThreads = parseInt(elements.selectThreads.value) || 5;
         let currentIndex = 0;
 
+        async function tagAudioBlob(blob, title, author, bookTitle, trackNum, coverUrl) {
+            if (typeof ID3Writer === 'undefined') return blob;
+            try {
+                const arrayBuffer = await blob.arrayBuffer();
+                const writer = new ID3Writer(arrayBuffer);
+                writer.setFrame('TIT2', title)
+                      .setFrame('TPE1', [author])
+                      .setFrame('TALB', bookTitle)
+                      .setFrame('TRCK', trackNum);
+                      
+                if (coverUrl) {
+                    const coverResp = await fetch(coverUrl);
+                    const coverBuffer = await coverResp.arrayBuffer();
+                    writer.setFrame('APIC', {
+                        type: 3, // front cover
+                        data: coverBuffer,
+                        description: 'Cover',
+                        useUnicodeEncoding: false
+                    });
+                }
+                writer.addTag();
+                return new Blob([writer.arrayBuffer], { type: 'audio/mp3' });
+            } catch(err) {
+                console.warn("Erreur d'injection ID3 de la pochette : ", err);
+                return blob;
+            }
+        }
+
         const workerTask = async () => {
             while (currentIndex < totalChapters) {
                 if (cancelRequested) {
@@ -496,7 +525,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (statIcon) statIcon.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="color:var(--accent-blue)"></i>`;
 
                 try {
-                    const audioBlob = await ttsClient.synthesize(chapter.text, { voice, rate, pitch });
+                    let audioBlob = await ttsClient.synthesize(chapter.text, { voice, rate, pitch });
+                    
+                    audioBlob = await tagAudioBlob(
+                        audioBlob, 
+                        chapter.title, 
+                        elements.metaAuthor.value || 'Inconnu', 
+                        elements.metaTitle.value || 'Audiobook', 
+                        `${i + 1}/${totalChapters}`, 
+                        currentBookData.coverUrl
+                    );
+
                     const safeTitle = chapter.title.replace(/[^a-zA-Z0-9àáâäãåąčćđéèêëėęėîïǐíìôöòóõøōǒùúûüųűÿýżźñçčšžÀÁÂÄÃÅĄĆČĐÉÈÊËĖĘÎÏÍÌÔÖÒÓÕØŌǑÙÚÛÜŲŰŸÝŻŹÑßÇŒÆ\s-]/g, "").trim();
                     const filename = `${(i + 1).toString().padStart(3, '0')}_${safeTitle || 'Chapitre'}.${currentFormat === 'm4b' ? 'm4b' : 'mp3'}`;
 
@@ -549,6 +588,12 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.finishedCard.classList.remove('hidden');
 
             elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> ${window.t('save_audio_btn')} (<span id="lblDownloadFormat">${currentFormat === 'm4b' ? '.m4b' : '.zip'}</span>)`;
+            
+            if (currentFormat === 'm4b' && elements.btnDownloadMp3Zip) {
+                elements.btnDownloadMp3Zip.classList.remove('hidden');
+            } else if (elements.btnDownloadMp3Zip) {
+                elements.btnDownloadMp3Zip.classList.add('hidden');
+            }
         }
     });
 
@@ -558,6 +603,25 @@ document.addEventListener('DOMContentLoaded', () => {
             resetToDropzone();
         }
     });
+
+    async function generateZipArchive() {
+        const zip = new JSZip();
+        const folder = zip.folder(elements.metaTitle.value || "Audiobook");
+        generatedAudioFiles.forEach(item => {
+            const filenameMp3 = item.filename.replace('.m4b', '.mp3');
+            folder.file(filenameMp3, item.blob);
+        });
+
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        const downloadUrl = URL.createObjectURL(zipBlob);
+
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `${elements.metaTitle.value || 'Audiobook'}_MP3s.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
 
     elements.btnDownloadAudiobook.addEventListener('click', async () => {
         if (generatedAudioFiles.length === 0) return;
@@ -579,28 +643,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.removeChild(a);
 
             } else {
-                const zip = new JSZip();
-                const folder = zip.folder(elements.metaTitle.value || "Audiobook");
-                generatedAudioFiles.forEach(item => folder.file(item.filename, item.blob));
-
-                const zipBlob = await zip.generateAsync({ type: "blob" });
-                const downloadUrl = URL.createObjectURL(zipBlob);
-
-                const a = document.createElement('a');
-                a.href = downloadUrl;
-                a.download = `${elements.metaTitle.value || 'Audiobook'}_MP3s.zip`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                await generateZipArchive();
             }
 
         } catch (err) {
             alert(`Erreur d'exportation : ${err.message}`);
         } finally {
             elements.btnDownloadAudiobook.disabled = false;
-            elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> Sauvegarder l'Audiobook (<span id="lblDownloadFormat">${currentFormat === 'm4b' ? '.m4b' : '.zip'}</span>)`;
+            elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> ${window.t('save_audio_btn')} (<span id="lblDownloadFormat">${currentFormat === 'm4b' ? '.m4b' : '.zip'}</span>)`;
         }
     });
+
+    if (elements.btnDownloadMp3Zip) {
+        elements.btnDownloadMp3Zip.addEventListener('click', async () => {
+            if (generatedAudioFiles.length === 0) return;
+            elements.btnDownloadMp3Zip.disabled = true;
+            elements.btnDownloadMp3Zip.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Emballage...`;
+            try {
+                await generateZipArchive();
+            } catch (err) {
+                alert(`Erreur d'exportation : ${err.message}`);
+            } finally {
+                elements.btnDownloadMp3Zip.disabled = false;
+                elements.btnDownloadMp3Zip.innerHTML = `<i class="fa-solid fa-file-zipper"></i> <span data-i18n="save_zip_btn">${window.t('save_zip_btn') || "Télécharger en MP3 (.zip)"}</span>`;
+            }
+        });
+    }
 
     elements.btnDownloadTranscript.addEventListener('click', () => {
         if (!currentBookData) return;

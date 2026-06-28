@@ -43,6 +43,7 @@ const translations = {
         fin_title: "Audiobook Synthétisé avec Succès !",
         fin_desc: "Tous les chapitres ont été générés directement sur votre navigateur.",
         save_audio_btn: "<i class=\"fa-solid fa-file-audio\"></i> Sauvegarder l'Audiobook",
+        save_zip_btn: "Télécharger en MP3 (.zip)",
         save_txt_btn: "<i class=\"fa-solid fa-file-lines\"></i> Sauvegarder Texte (.txt)",
         new_conv_btn: "<i class=\"fa-solid fa-rotate-left\"></i> Convertir un autre livre",
         footer_text: "Créé en Python 🐍 et JavaScript par <strong>Julien</strong> (Édition Bureau v0.7.0)",

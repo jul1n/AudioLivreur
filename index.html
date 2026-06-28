@@ -46,6 +46,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/browser-id3-writer/4.4.0/browser-id3-writer.min.js"></script>
 
     <!-- JSON-LD Structured Data for Google Search -->
     <script type="application/ld+json">
@@ -325,6 +326,9 @@
                     <div style="display:flex; gap:1rem; width:100%; max-width:500px; flex-wrap:wrap; margin-top:0.5rem;">
                         <button id="btnDownloadAudiobook" class="btn-main yellow flex-1">
                             <span data-i18n="save_audio_btn"><i class="fa-solid fa-file-audio"></i> Sauvegarder l'Audiobook</span> (<span id="lblDownloadFormat">.zip</span>)
+                        </button>
+                        <button id="btnDownloadMp3Zip" class="btn-main purple flex-1 hidden">
+                            <i class="fa-solid fa-file-zipper"></i> <span data-i18n="save_zip_btn">Télécharger en MP3 (.zip)</span>
                         </button>
                         <button id="btnDownloadTranscript" class="btn-main purple flex-1" data-i18n="save_txt_btn">
                             <i class="fa-solid fa-file-lines"></i> Sauvegarder Texte (.txt)

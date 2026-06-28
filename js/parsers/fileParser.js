@@ -125,8 +125,10 @@ class FileParser {
                     chapTitle = heading.textContent.trim().substring(0, 50);
                 }
 
-                // Nettoyer les sauts de lignes multiples
-                const cleanText = rawText.replace(/\n\s*\n/g, '\n\n');
+                // Nettoyer les sauts de lignes multiples et la ponctuation
+                let cleanText = rawText.replace(/\n\s*\n/g, '\n\n');
+                cleanText = FileParser.sanitizeText(cleanText);
+                
                 chapters.push({
                     title: chapTitle,
                     text: cleanText
@@ -225,7 +227,7 @@ class FileParser {
                     const firstLine = text.split('\n')[0].substring(0, 40);
                     chapters.push({
                         title: firstLine.length > 3 ? firstLine : `Partie ${idx + 1}`,
-                        text: text
+                        text: FileParser.sanitizeText(text)
                     });
                 }
             });
@@ -241,12 +243,26 @@ class FileParser {
                 const chunkIndex = Math.floor(i / wordsPerChunk) + 1;
                 chapters.push({
                     title: `${defaultTitle} - Partie ${chunkIndex}`,
-                    text: chunkText
+                    text: FileParser.sanitizeText(chunkText)
                 });
             }
         }
 
         return chapters;
+    }
+
+    /**
+     * Force l'ajout d'un espace après une ponctuation si celle-ci est directement
+     * collée à une majuscule ou un tiret (ex: Quigley.C'était -> Quigley. C'était).
+     */
+    static sanitizeText(text) {
+        if (!text) return "";
+        // Ajoute un espace entre la ponctuation (. ? ! :) et une majuscule ou un tiret
+        // Évite que le moteur vocal lise le point à haute voix comme une adresse web.
+        let sanitized = text.replace(/([.?!:])([A-ZÀ-Ÿ-])/g, '$1 $2');
+        // Gérer le cas spécifique de l'espace suivi d'un tiret collé à la ponctuation (ex: ".-")
+        sanitized = sanitized.replace(/([.?!:]) -/g, '$1 -');
+        return sanitized;
     }
 }
 
