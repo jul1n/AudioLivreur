@@ -21,23 +21,24 @@ class EdgeTtsClient {
 
     getVoices(locale = "fr") {
         if (!this.synth) return [];
-        this.systemVoices = this.synth.getVoices();
+        const allVoices = this.synth.getVoices();
         const baseLang = locale.split('-')[0].toLowerCase();
-        
-        let matches = this.systemVoices.filter(v => v.lang.toLowerCase().replace('_', '-').startsWith(baseLang));
-        if (matches.length === 0) {
-            matches = this.systemVoices;
-        }
 
-        // Ne garder que les voix 100% locales (localService === true)
-        const localOnly = matches.filter(v => v.localService === true);
-        if (localOnly.length > 0) {
-            matches = localOnly;
+        // 1. Filtrer en premier sur les voix 100% locales (jamais d'internet)
+        const allLocal = allVoices.filter(v => v.localService === true);
+        const pool = allLocal.length > 0 ? allLocal : allVoices;
+
+        // 2. Filtrer par langue dans le pool local
+        let matches = pool.filter(v => v.lang.toLowerCase().replace('_', '-').startsWith(baseLang));
+
+        // 3. Si aucune voix locale pour cette langue, afficher toutes les voix locales disponibles
+        if (matches.length === 0) {
+            matches = pool;
         }
 
         if (matches.length === 0) {
             return [{
-                ShortName: "Voix Système Synthèse",
+                ShortName: "default",
                 LocalName: "Voix Système (Par Défaut)",
                 Gender: "Neutral",
                 Locale: locale
