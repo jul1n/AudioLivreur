@@ -10,24 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let cancelRequested = false;
     let currentFormat = 'm4b';
 
-    // Discord-style funny loading messages
-    const funnyLoadingMessages = [
-        "Chauffage des cordes vocales de l'IA... 🎤",
-        "Préparation du café pour la voix neuronale... ☕",
-        "Dépoussiérage des vieux parchemins... 📜",
-        "Convocation des lutins liseurs d'audiobooks... 🧙‍♂️",
-        "Nettoyage des lunettes de lecture... 👓",
-        "Vérification que les chats ne marchent pas sur le clavier... 🐾",
-        "Vérification des règles de grammaire (on fait de notre mieux !)... 🤓",
-        "Conversion des mots en décibels de pur bonheur... 🎧",
-        "Hydratation de l'IA avec de l'eau déminéralisée... 💧",
-        "Réglage du volume jusqu'à 11... 🔊",
-        "Répétition générale avant le grand oral... 🎭",
-        "Inspiration profonde... et c'est parti ! 🌬️"
-    ];
-
+    // Discord-style funny loading messages are now in i18n
     function getRandomFunnyMessage() {
-        return funnyLoadingMessages[Math.floor(Math.random() * funnyLoadingMessages.length)];
+        return window.t(`funny_${Math.floor(Math.random() * 12) + 1}`);
     }
 
     // DOM Elements
@@ -89,12 +74,44 @@ document.addEventListener('DOMContentLoaded', () => {
         btnOpenModalCredits: document.getElementById('btnOpenModalCredits')
     };
 
+    // Initialisation i18n
+    const uiLangSelect = document.getElementById('uiLangSelect');
+    if (uiLangSelect) {
+        uiLangSelect.addEventListener('change', (e) => {
+            window.applyTranslations(e.target.value);
+            // Re-render programmatic strings if needed
+            if(currentFormat === 'mp3') {
+                elements.formatHint.innerHTML = window.t('format_hint_text');
+            } else {
+                elements.formatHint.innerHTML = window.t('format_m4b_hint_text') || `🔥 <strong>Mode M4B Unique (Attention les cuisses !) :</strong> Ton navigateur va faire de la musculation intensive pour tout fusionner. Risque de faire chauffer ton PC ou ton smartphone en mode radiateur d'appoint ! 🏋️‍♂️🔥`;
+            }
+            if (currentBookData && currentBookData.chapters.length > 0 && !isConverting) {
+                // Update badge words label
+                const totalWords = currentBookData.chapters.reduce((sum, ch) => sum + ch.text.split(/\\s+/).length, 0);
+                const totalMinutes = Math.round(totalWords / 150);
+                elements.statChapters.innerHTML = `<i class="fa-solid fa-list-ol"></i> <strong id="statChapters">${currentBookData.chapters.length}</strong> <span data-i18n="stat_chapters">${window.t('stat_chapters')}</span>`;
+                elements.statWords.innerHTML = `<strong id="statWords">${totalWords.toLocaleString()}</strong> <span data-i18n="stat_words">${window.t('stat_words')}</span>`;
+                elements.statEstTime.innerHTML = `<i class="fa-solid fa-clock"></i> ~<strong id="statEstTime">${totalMinutes > 60 ? `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}min` : `${totalMinutes}`}</strong> <span data-i18n="stat_time_min">${window.t('stat_time_min')}</span>`;
+                
+                // Update chapter rows
+                currentBookData.chapters.forEach((ch, idx) => {
+                    const badge = document.getElementById(`chapter-badge-${idx}`);
+                    if(badge) {
+                        const wordCount = ch.text.split(/\\s+/).length;
+                        badge.innerHTML = `<span id="chapter-status-${idx}"><i class="fa-solid fa-clock" style="color:var(--text-muted)"></i></span> &nbsp;${wordCount.toLocaleString()} ${window.t('stat_words')}`;
+                    }
+                });
+            }
+        });
+        window.applyTranslations(uiLangSelect.value);
+    }
+
     // Toggle MP3 / M4B Format Handler avec textes super funs
     elements.toggleMp3.addEventListener('click', () => {
         currentFormat = 'mp3';
         elements.toggleMp3.classList.add('active');
         elements.toggleM4b.classList.remove('active');
-        elements.formatHint.innerHTML = `⚡ <strong>Le Choix des Boss (MP3) :</strong> Rapide comme l'éclair ! Ton PC/Mac/Phone reste au frais et ta batterie te dira merci. 🚀`;
+        elements.formatHint.innerHTML = window.t('format_hint_text');
         if (elements.lblDownloadFormat) elements.lblDownloadFormat.textContent = `.zip MP3`;
     });
 
@@ -102,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentFormat = 'm4b';
         elements.toggleM4b.classList.add('active');
         elements.toggleMp3.classList.remove('active');
-        elements.formatHint.innerHTML = `🔥 <strong>Mode M4B Unique (Attention les cuisses !) :</strong> Ton navigateur va faire de la musculation intensive pour tout fusionner. Risque de faire chauffer ton PC ou ton smartphone en mode radiateur d'appoint ! 🏋️‍♂️🔥`;
+        elements.formatHint.innerHTML = window.t('format_m4b_hint_text') || `🔥 <strong>Mode M4B Unique (Attention les cuisses !) :</strong> Ton navigateur va faire de la musculation intensive pour tout fusionner. Risque de faire chauffer ton PC ou ton smartphone en mode radiateur d'appoint ! 🏋️‍♂️🔥`;
         if (elements.lblDownloadFormat) elements.lblDownloadFormat.textContent = `.m4b Unique`;
     });
 
@@ -262,10 +279,10 @@ document.addEventListener('DOMContentLoaded', () => {
             await ttsClient.testVoice(testText, { voice, rate, pitch }, (status) => {
                 elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${status}`;
             });
-            showToast("Lecture audio en cours...");
+            showToast(window.t('toast_test_playing') || "Lecture audio en cours...");
         } catch (err) {
             console.warn("Test vocal : ", err);
-            showToast("Serveur temporairement indisponible. Réessayez.", true);
+            showToast(window.t('toast_test_err') || "Serveur temporairement indisponible. Réessayez.", true);
         } finally {
             elements.btnTestVoice.disabled = false;
             elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-volume-high"></i> Tester la Voix`;
@@ -331,15 +348,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function handleFileSelect(file) {
         try {
-            log(`Analyse du fichier : ${file.name}...`);
+            log(window.t('msg_parsing'), 'info');
             elements.dropzone.innerHTML = `
                 <div class="dropzone-icon-box"><i class="fa-solid fa-spinner fa-spin"></i></div>
-                <h2>Dépoussiérage du livre en cours... 📜</h2>
-                <p style="color:var(--text-muted); font-weight:500;">On extrait les chapitres à la vitesse de la lumière !</p>
+                <h2>${window.t('funny_3')}</h2>
+                <p style="color:var(--text-muted); font-weight:500;">${window.t('msg_parsing')}</p>
             `;
 
             currentBookData = await FileParser.parse(file);
-            log(`🎉 Livre extrait avec succès ! (${currentBookData.chapters.length} chapitres trouvés)`, 'success');
+            log(window.t('msg_book_ready', { chapters: currentBookData.chapters.length, words: 0 }), 'success');
 
             // Auto-détection de la langue
             if (currentBookData.chapters.length > 0) {
@@ -378,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const wordCount = ch.text.split(/\s+/).length;
                 item.innerHTML = `
                     <span><strong>${idx + 1}.</strong> ${ch.title}</span>
-                    <span id="chapter-badge-${idx}" class="pill-badge" style="font-size:0.75rem; transition: background-color 0.3s;"><span id="chapter-status-${idx}"><i class="fa-solid fa-clock" style="color:var(--text-muted)"></i></span> &nbsp;${wordCount.toLocaleString()} mots</span>
+                    <span id="chapter-badge-${idx}" class="pill-badge" style="font-size:0.75rem; transition: background-color 0.3s;"><span id="chapter-status-${idx}"><i class="fa-solid fa-clock" style="color:var(--text-muted)"></i></span> &nbsp;${wordCount.toLocaleString()} ${window.t('stat_words')}</span>
                 `;
                 elements.chaptersList.appendChild(item);
             });
@@ -445,7 +462,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const rate = parseInt(elements.rangeRate.value);
         const pitch = parseInt(elements.rangePitch.value);
 
-        log(`🚀 Démarrage de la synthèse vocale pour "${elements.metaTitle.value}"...`, 'info');
+        const safeTitle = elements.metaTitle.value || 'Audiobook';
+        log(window.t('msg_start_synth', { title: safeTitle }), 'info');
         log(`💡 ${getRandomFunnyMessage()}`, 'info');
 
         const totalWordsOverall = currentBookData.chapters.reduce((sum, ch) => sum + ch.text.split(/\s+/).length, 0);
@@ -460,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const workerTask = async () => {
             while (currentIndex < totalChapters) {
                 if (cancelRequested) {
-                    log("🛑 Synthèse annulée par l'utilisateur.", 'warning');
+                    log(window.t('msg_cancel_req'), 'warning');
                     break;
                 }
 
@@ -469,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const chapWords = chapter.text.split(/\s+/).length;
                 
                 const funnyStatus = getRandomFunnyMessage();
-                document.getElementById('progressStatusText').textContent = `Synthèse Chapitre ${i + 1}/${totalChapters} : ${funnyStatus}`;
+                document.getElementById('progressStatusText').textContent = window.t('msg_chap_progress', { i: i + 1, total: totalChapters, funny: funnyStatus });
                 
                 // Maj UI Chapitre en cours
                 const row = document.getElementById(`chapter-row-${i}`);
@@ -495,7 +513,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     elements.progressPercentText.textContent = `${percent}%`;
                     
                     elements.metricWords.textContent = `${processedWordsOverall.toLocaleString()} / ${totalWordsOverall.toLocaleString()}`;
-                    elements.metricSpeed.textContent = `${speed} mots/sec`;
+                    elements.metricSpeed.textContent = `${speed} ${window.t('metric_speed_val')}`;
                     elements.metricEta.textContent = `${Math.floor(etaSec / 60)}m ${etaSec % 60}s`;
 
                     // Maj UI Chapitre terminé
@@ -505,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (badge) badge.style.backgroundColor = 'var(--accent-mint)';
 
                 } catch (err) {
-                    log(`❌ Erreur au chapitre ${i + 1} : ${err.message}`, 'error');
+                    log(window.t('msg_chap_err', { i: i + 1, err: err.message }), 'error');
                     // Maj UI Chapitre erreur
                     if (row) row.style.border = '2px solid var(--accent-pink)';
                     if (statIcon) statIcon.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:var(--accent-pink)"></i>`;
@@ -522,13 +540,13 @@ document.addEventListener('DOMContentLoaded', () => {
         isConverting = false;
 
         if (!cancelRequested && generatedAudioFiles.length > 0) {
-            log("🎉 Synthèse terminée avec succès ! Préparez vos écouteurs !", 'success');
+            log(window.t('msg_synth_success'), 'success');
             elements.progressCard.classList.add('hidden');
             elements.bookDetailsCard.classList.add('hidden');
             document.getElementById('actionButtonsRow').classList.remove('hidden');
             elements.finishedCard.classList.remove('hidden');
 
-            elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> Sauvegarder l'Audiobook (<span id="lblDownloadFormat">${currentFormat === 'm4b' ? '.m4b' : '.zip'}</span>)`;
+            elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> ${window.t('save_audio_btn')} (<span id="lblDownloadFormat">${currentFormat === 'm4b' ? '.m4b' : '.zip'}</span>)`;
         }
     });
 
