@@ -458,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.statChapters.textContent = currentBookData.chapters.length;
             elements.statWords.textContent = totalWords.toLocaleString();
             const totalMinutes = Math.round(totalWords / 150);
-            elements.statEstTime.textContent = totalMinutes > 60 ? `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}min` : `${totalMinutes} min`;
+            elements.statEstTime.textContent = totalMinutes > 60 ? `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}` : `${totalMinutes}`;
 
             if (currentBookData.coverUrl) {
                 elements.coverPreview.src = currentBookData.coverUrl;
