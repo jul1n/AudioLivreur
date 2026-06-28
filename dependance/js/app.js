@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bookDetailsCard: document.getElementById('bookDetailsCard'),
         coverPreview: document.getElementById('coverPreview'),
         coverPlaceholderIcon: document.getElementById('coverPlaceholderIcon'),
+        btnCropCover: document.getElementById('btnCropCover'),
         metaTitle: document.getElementById('metaTitle'),
         metaAuthor: document.getElementById('metaAuthor'),
         statChapters: document.getElementById('statChapters'),
@@ -462,9 +463,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.coverPreview.src = currentBookData.coverUrl;
                 elements.coverPreview.classList.remove('hidden');
                 elements.coverPlaceholderIcon.classList.add('hidden');
+                if (elements.btnCropCover) elements.btnCropCover.classList.remove('hidden');
             } else {
                 elements.coverPreview.classList.add('hidden');
                 elements.coverPlaceholderIcon.classList.remove('hidden');
+                if (elements.btnCropCover) elements.btnCropCover.classList.add('hidden');
             }
 
             elements.chaptersList.innerHTML = '';
@@ -860,4 +863,55 @@ document.addEventListener('DOMContentLoaded', () => {
         a.click();
         document.body.removeChild(a);
     });
+
+    // Cropper Logic
+    let cropperInstance = null;
+    const cropperModal = document.getElementById('cropperModal');
+    const cropperImage = document.getElementById('cropperImage');
+    const btnCancelCrop = document.getElementById('btnCancelCrop');
+    const btnApplyCrop = document.getElementById('btnApplyCrop');
+
+    if (elements.btnCropCover && typeof Cropper !== 'undefined') {
+        elements.btnCropCover.addEventListener('click', () => {
+            if (!currentBookData || !currentBookData.coverUrl) return;
+            cropperImage.src = currentBookData.coverUrl;
+            cropperModal.classList.remove('hidden');
+            
+            if (cropperInstance) cropperInstance.destroy();
+            cropperInstance = new Cropper(cropperImage, {
+                aspectRatio: 1,
+                viewMode: 1,
+                autoCropArea: 1,
+                background: false
+            });
+        });
+    }
+
+    if (btnCancelCrop) {
+        btnCancelCrop.addEventListener('click', () => {
+            cropperModal.classList.add('hidden');
+            if (cropperInstance) {
+                cropperInstance.destroy();
+                cropperInstance = null;
+            }
+        });
+    }
+
+    if (btnApplyCrop) {
+        btnApplyCrop.addEventListener('click', () => {
+            if (!cropperInstance) return;
+            const canvas = cropperInstance.getCroppedCanvas({
+                width: 800,
+                height: 800
+            });
+            const newCoverUrl = canvas.toDataURL('image/jpeg', 0.9);
+            currentBookData.coverUrl = newCoverUrl;
+            elements.coverPreview.src = newCoverUrl;
+            
+            cropperModal.classList.add('hidden');
+            cropperInstance.destroy();
+            cropperInstance = null;
+        });
+    }
+
 });
