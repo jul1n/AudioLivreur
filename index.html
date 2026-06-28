@@ -80,7 +80,7 @@
             </div>
             <div class="brand-text">
                 <h1><a href="https://github.com/jul1n/CalibAudio" target="_blank" style="text-decoration:none; color:inherit;">audiolivreur.ai</a></h1>
-                <span class="version">V 0.7.0</span>
+                <span class="version">V 0.7.1</span>
             </div>
         </div>
 
@@ -104,7 +104,7 @@
                     <div class="custom-select-option" data-value="ar" style="display: flex; align-items: center; gap: 6px;"><img src="https://flagcdn.com/w20/sa.png" style="width: 20px; border-radius: 2px;"> العربية</div>
                 </div>
             </div>
-            <span class="status-pill-static" data-i18n="top_demo_badge">
+            <span class="status-pill-static">
                 🌐 Démo Web &bull; Voix Système
             </span>
             <button id="btnPwaInstall" class="pill-btn hidden" data-i18n="nav_install">
@@ -198,23 +198,35 @@
                 </div>
 
                 <!-- Mode Web : 1 canal, threads non applicables -->
-                <div class="form-group">
+                <div id="modeWebBox" class="form-group">
                     <label data-i18n="mode_web_label">⚡ Mode Web (Canal Unique)</label>
                     <div style="background:var(--bg-main); border:2px solid var(--border-black); padding:0.6rem 0.8rem; border-radius:8px; font-size:0.85rem; font-weight:600;" data-i18n="mode_web_desc">
                         🔉 1 flux audio en direct. Jusqu'à 20 processus parallèles avec l'App Desktop !
                     </div>
-                    <select id="selectThreads" style="display:none;"><option value="1" selected>1</option></select>
+                    <select id="selectThreadsWeb" style="display:none;"><option value="1" selected>1</option></select>
+                </div>
+
+                <!-- Mode Local : 20 threads applicables (caché en version web) -->
+                <div id="modeLocalBox" class="form-group" style="display:none;">
+                    <label for="selectThreadsLocal" data-i18n="speed_label">Vitesse de génération (Threads)</label>
+                    <select id="selectThreadsLocal" class="input-neubrutal">
+                        <option value="1" data-i18n="speed_1">🐢 1 (Mode Tortue / Ultra-Sûr)</option>
+                        <option value="2" data-i18n="speed_2">🚴 2 (Tranquille Pilou)</option>
+                        <option value="5" data-i18n="speed_5">🚀 5 (Vitesse de Croisière)</option>
+                        <option value="10" selected data-i18n="speed_10">⚡ 10 (Recommandé / Turbo)</option>
+                        <option value="20" data-i18n="speed_20">🔥 20 (Mode Supersonique Extrême !)</option>
+                    </select>
                 </div>
 
                 <!-- Transition Dropdown -->
                 <div class="form-group">
                     <label for="selectTransition" data-i18n="transition_label">Transition Sonore</label>
                     <select id="selectTransition" class="input-neubrutal">
-                        <option value="none" selected data-i18n="trans_none">🚫 Sans transition (Enchaînement direct)</option>
+                        <option value="none" data-i18n="trans_none">🚫 Sans transition (Enchaînement direct)</option>
                         <option value="silence" data-i18n="trans_silence">🤫 1.5s de silence profond</option>
                         <option value="chime1" data-i18n="trans_chime1">🔔 Clochette 1 (Cristalline & Douce)</option>
                         <option value="chime2" data-i18n="trans_chime2">✨ Clochette 2 (Aérienne & Zen)</option>
-                        <option value="chime3" data-i18n="trans_chime3">🎶 Clochette 3 (Profonde & Majestueuse)</option>
+                        <option value="chime3" selected data-i18n="trans_chime3">🎶 Clochette 3 (Profonde & Majestueuse)</option>
                     </select>
                 </div>
 
@@ -399,8 +411,9 @@
 
     <!-- Application Scripts avec Cache Busting v0.7.3 -->
     <script src="js/i18n.js?v=0.7.3"></script>
-    <script src="js/tts/edgeTts.js?v=0.7.3"></script>
     <script src="js/parsers/fileParser.js?v=0.7.3"></script>
+    <script src="js/tts/webSpeechTts.js?v=0.7.3"></script>
+    <script src="js/tts/edgeTts.js?v=0.7.3"></script>
     <script src="js/app.js?v=0.7.3"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Extracteur et analyseur de livres côté client (EPUB, PDF, DOCX, TXT)
  */
 
@@ -55,6 +55,7 @@ class FileParser {
 
         // 2. Extraire métadonnées et liste des fichiers HTML
         const htmlFilesToRead = [];
+        const coverPromises = [];
         if (opfPath) {
             const opfFile = zip.file(opfPath);
             if (opfFile) {
@@ -81,17 +82,20 @@ class FileParser {
                     // Chercher la couverture
                     const id = item.getAttribute("id") || "";
                     const properties = item.getAttribute("properties") || "";
-                    if (properties.includes("cover-image") || id.includes("cover") || href.includes("cover")) {
+                    if (properties.includes("cover-image") || id.includes("cover") || href.includes("cover") || mediaType.startsWith("image/")) {
                         const imgFile = zip.file(basePath + href);
-                        if (imgFile) {
-                            imgFile.async("blob").then(blob => {
-                                coverUrl = URL.createObjectURL(blob);
-                            });
+                        if (!coverUrl && imgFile) {
+                            coverPromises.push(
+                                imgFile.async("blob").then(blob => {
+                                    if (!coverUrl) coverUrl = URL.createObjectURL(blob);
+                                })
+                            );
                         }
                     }
                 });
             }
         }
+        await Promise.all(coverPromises);
 
         // Fallback si la structure OPF n'a pas listé les HTML : prendre tous les html
         if (htmlFilesToRead.length === 0) {

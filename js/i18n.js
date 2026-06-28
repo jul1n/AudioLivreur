@@ -1,4 +1,4 @@
-const translations = {
+﻿const translations = {
     fr: {
         nav_local: "🚀 Moteur Local Activé",
         nav_install: "Installer App",
