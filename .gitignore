@@ -58,3 +58,5 @@ AudioLivreur_Source.zip
 build.old/
 dist.old/
 old/
+.old/
+cache/

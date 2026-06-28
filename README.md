@@ -26,8 +26,8 @@ Vous avez des dizaines d'ebooks ou de documents PDF que vous n'avez pas le temps
    Oubliez les synthèses vocales des années 2000. AudioLivreur utilise les algorithmes de pointe de *Microsoft Edge TTS* pour vous offrir des narrateurs qui respirent, intonnent et racontent avec émotion.
 2. **⚡ Vitesse Foudroyante (Multi-Threads)**  
    Un livre de 400 pages ? Généré en quelques minutes ! Grâce au traitement multi-threads (jusqu'à 20 processus simultanés), exploitez toute la puissance de votre ordinateur. 
-3. **🔒 Confidentialité Absolue (100% Local)**  
-   Vos livres, vos données. L'extraction du texte, le découpage en chapitres et la création des fichiers audio se font **entièrement sur votre propre machine**. Aucun fichier n'est stocké sur un serveur distant.
+3. **🔒 Traitement Local & Respect de la Vie Privée**  
+   Vos livres restent chez vous ! L'extraction des textes, l'analyse des chapitres et la création des fichiers d'export (ZIP, M4B) sont réalisées **100% en local sur votre machine**. Seules les requêtes de synthèse vocale sont transmises de manière sécurisée à l'API *Microsoft Azure (Edge TTS)* sans qu'aucun de vos documents originaux ne soit stocké sur un serveur tiers.
 4. **📦 Un Fichier, Une Écoute**  
    Exportez vos livres au format classique **Archive ZIP (MP3 par chapitre)** pour une flexibilité maximale, ou en format **M4B Unique** pour l'importer directement dans votre application de livres audio préférée (Audible, Apple Books, Smart Audiobook Player).
 

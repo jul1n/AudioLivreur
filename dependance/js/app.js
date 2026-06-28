@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         selectLanguage: document.getElementById('selectLanguage'),
         selectVoice: document.getElementById('selectVoice'),
         selectThreads: document.getElementById('selectThreads'),
+        selectTransition: document.getElementById('selectTransition'),
         btnTestVoice: document.getElementById('btnTestVoice'),
         rangeRate: document.getElementById('rangeRate'),
         valRate: document.getElementById('valRate'),
@@ -297,6 +298,16 @@ document.addEventListener('DOMContentLoaded', () => {
             toast.style.opacity = '0';
             toast.style.transform = 'translateY(20px)';
         }, 4000);
+    }
+
+    if (elements.selectTransition) {
+        elements.selectTransition.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val && val.startsWith('chime')) {
+                const audio = new Audio(`assets/sounds/${val}.mp3`);
+                audio.play().catch(err => console.log("Audio preview failed:", err));
+            }
+        });
     }
 
 
