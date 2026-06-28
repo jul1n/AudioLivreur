@@ -172,12 +172,13 @@ async def merge_m4b(
         ]
         
         if cover_path:
-            ffmpeg_cmd.extend(["-i", cover_path, "-map", "0:a", "-map", "2:v", "-c:v", "copy", "-disposition:v", "attached_pic"])
+            ffmpeg_cmd.extend(["-i", cover_path, "-map", "0:a", "-map", "2:v", "-c:v", "mjpeg", "-disposition:v", "attached_pic"])
         else:
             ffmpeg_cmd.extend(["-map", "0:a"])
 
         ffmpeg_cmd.extend([
-            "-c:a", "copy", # On garde le format d'origine (MP3) ou on peut transcode "-c:a", "aac", "-b:a", "64k" 
+            "-map_chapters", "1",
+            "-c:a", "aac", "-b:a", "64k",
             output_m4b
         ])
 

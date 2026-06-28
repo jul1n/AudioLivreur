@@ -589,7 +589,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (res.ok) {
                                 const chimeBuf = await res.arrayBuffer();
                                 const chimeBlob = new Blob([chimeBuf], { type: 'audio/mp3' });
-                                audioBlob = new Blob([audioBlob, chimeBlob], { type: 'audio/mp3' });
+                                // On ajoute 1.5s de silence AVANT la clochette
+                                audioBlob = new Blob([audioBlob, silenceBlob, chimeBlob], { type: 'audio/mp3' });
                             }
                         } catch (e) {
                             console.error("Failed to load chime", e);
@@ -783,7 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Erreur d'exportation : ${err.message}`);
         } finally {
             elements.btnDownloadAudiobook.disabled = false;
-            elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> ${window.t('save_audio_btn')} (<span id="lblDownloadFormat">${currentFormat === 'm4b' ? '.m4b' : '.zip'}</span>)`;
+            elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> <span data-i18n="save_audio_btn">${window.t ? window.t('save_audio_btn') : "Sauvegarder l'Audiobook"}</span> (<span id="lblDownloadFormat">${currentFormat === 'm4b' ? '.m4b' : '.zip'}</span>)`;
         }
     });
 
