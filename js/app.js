@@ -521,6 +521,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (statIcon) statIcon.innerHTML = `<i class="fa-solid fa-check" style="color:var(--text-main)"></i>`;
                     const badge = document.getElementById(`chapter-badge-${i}`);
                     if (badge) badge.style.backgroundColor = 'var(--accent-mint)';
+                    
+                    log(window.t('msg_chap_done', { i: i + 1, total: totalChapters, words: chapWords.toLocaleString(), fallback: `✅ Chapitre ${i + 1}/${totalChapters} converti (${chapWords.toLocaleString()} mots)` }), 'success');
 
                 } catch (err) {
                     log(window.t('msg_chap_err', { i: i + 1, err: err.message }), 'error');
