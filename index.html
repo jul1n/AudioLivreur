@@ -79,13 +79,13 @@
             </div>
             <div class="brand-text">
                 <h1>audiolivreur.ai</h1>
-                <span class="version">V 0.7.0 · CLIENT IP</span>
+                <span class="version">V 0.7.0</span>
             </div>
         </div>
 
         <div class="nav-actions">
             <span class="status-pill-static">
-                🟢 Mode Desktop (Local)
+                🟢 Application Bureau
             </span>
             <button id="btnPwaInstall" class="pill-btn hidden">
                 <i class="fa-solid fa-download"></i> Installer App
@@ -99,7 +99,7 @@
         <!-- Hero Header -->
         <section class="hero-header-clean">
             <div class="info-badge">
-                ⚡ APPLICATION BUREAU (PROXY LOCAL ACTIF)
+                ⚡ STUDIO DE SYNTHÈSE VOCALE
             </div>
             <h1 class="hero-title">Convertissez vos livres en audiobooks.</h1>
             <p class="hero-subtitle">Transformez vos fichiers EPUB, PDF et DOCX en fichiers audio MP3 avec les voix neuronales Microsoft.</p>
@@ -116,18 +116,16 @@
                 <div class="form-group">
                     <label>Format de Sortie</label>
                     <div class="toggle-switch-group">
-                        <button class="toggle-btn" id="toggleMp3">
+                        <button class="toggle-btn" id="toggleMp3" title="Rapide & Léger">
                             <i class="fa-solid fa-compact-disc toggle-icon"></i>
                             <div class="toggle-text-stack">
                                 <span class="toggle-title">MP3</span>
-                                <span class="toggle-subtitle">Rapide & Léger</span>
                             </div>
                         </button>
-                        <button class="toggle-btn active" id="toggleM4b">
+                        <button class="toggle-btn active" id="toggleM4b" title="Fichier Unique">
                             <i class="fa-solid fa-book-bookmark toggle-icon"></i>
                             <div class="toggle-text-stack">
                                 <span class="toggle-title">M4B</span>
-                                <span class="toggle-subtitle">Fichier Unique</span>
                             </div>
                         </button>
                     </div>
@@ -313,10 +311,10 @@
 
                     <div style="display:flex; gap:1rem; width:100%; max-width:500px; flex-wrap:wrap; margin-top:0.5rem;">
                         <button id="btnDownloadAudiobook" class="btn-main yellow flex-1">
-                            <i class="fa-solid fa-file-audio"></i> Télécharger les Audiobooks (<span id="lblDownloadFormat">.zip MP3</span>)
+                            <i class="fa-solid fa-file-audio"></i> Sauvegarder l'Audiobook (<span id="lblDownloadFormat">.zip</span>)
                         </button>
                         <button id="btnDownloadTranscript" class="btn-main purple flex-1">
-                            <i class="fa-solid fa-file-lines"></i> Télécharger Texte (.txt)
+                            <i class="fa-solid fa-file-lines"></i> Sauvegarder Texte (.txt)
                         </button>
                     </div>
 

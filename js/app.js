@@ -448,6 +448,8 @@ document.addEventListener('DOMContentLoaded', () => {
             log("🎉 Synthèse terminée avec succès ! Préparez vos écouteurs !", 'success');
             elements.progressCard.classList.add('hidden');
             elements.finishedCard.classList.remove('hidden');
+
+            elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> Sauvegarder l'Audiobook (<span id="lblDownloadFormat">${currentFormat === 'm4b' ? '.m4b' : '.zip'}</span>)`;
         }
     });
 
@@ -497,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Erreur d'exportation : ${err.message}`);
         } finally {
             elements.btnDownloadAudiobook.disabled = false;
-            elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> Télécharger les Audiobooks (<span id="lblDownloadFormat">${currentFormat === 'm4b' ? '.m4b Unique' : '.zip MP3'}</span>)`;
+            elements.btnDownloadAudiobook.innerHTML = `<i class="fa-solid fa-file-audio"></i> Sauvegarder l'Audiobook (<span id="lblDownloadFormat">${currentFormat === 'm4b' ? '.m4b' : '.zip'}</span>)`;
         }
     });
 
