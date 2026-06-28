@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (detectedLang && elements.selectLanguage.value !== detectedLang) {
                     elements.selectLanguage.value = detectedLang;
                     elements.selectLanguage.dispatchEvent(new Event('change')); // Met à jour la liste des voix
-                    log(`🌍 Langue détectée automatiquement : ${elements.selectLanguage.options[elements.selectLanguage.selectedIndex].text}`, 'info');
+                    log(window.t('toast_lang_detected', { lang: elements.selectLanguage.options[elements.selectLanguage.selectedIndex].text }) || `🌍 Langue détectée automatiquement : ${elements.selectLanguage.options[elements.selectLanguage.selectedIndex].text}`, 'info');
                 }
             }
 
@@ -458,8 +458,8 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.bookDetailsCard.classList.remove('hidden');
 
         } catch (err) {
-            log(`Erreur d'analyse : ${err.message}`, 'error');
-            alert(`Impossible de lire le fichier : ${err.message}`);
+            log(window.t('toast_parse_err', { err: err.message }) || `Erreur d'analyse : ${err.message}`, 'error');
+            alert(window.t('toast_file_err', { err: err.message }) || `Impossible de lire le fichier : ${err.message}`);
             resetToDropzone();
         }
     }
@@ -702,7 +702,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const a = document.createElement('a');
                 a.href = downloadUrl;
-                a.download = `${elements.metaTitle.value || 'Audiobook'}.m4b`;
+                const author = elements.metaAuthor.value || window.t('unknown_author') || 'Auteur inconnu';
+                const title = elements.metaTitle.value || window.t('unknown_title') || 'Audiobook';
+                a.download = `${author} - ${title}.m4b`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);

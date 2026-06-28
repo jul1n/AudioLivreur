@@ -81,7 +81,13 @@ const translations = {
         funny_9: "Hydratation de l'IA avec de l'eau déminéralisée... 💧",
         funny_10: "Réglage du volume jusqu'à 11... 🔊",
         funny_11: "Répétition générale avant le grand oral... 🎭",
-        funny_12: "Inspiration profonde... et c'est parti ! 🌬️"
+        funny_12: "Inspiration profonde... et c'est parti ! 🌬️",
+        toast_test_playing: "Lecture audio en cours...",
+        toast_test_err: "Serveur temporairement indisponible. Réessayez.",
+        toast_lang_detected: "🌍 Langue détectée automatiquement : {lang}",
+        toast_parse_err: "Erreur d'analyse : {err}",
+        toast_file_err: "Impossible de lire le fichier : {err}",
+
     },
     en: {
         nav_local: "🚀 Local Engine Activated",
@@ -165,7 +171,13 @@ const translations = {
         funny_9: "Hydrating the AI with demineralized water... 💧",
         funny_10: "Turning the volume up to 11... 🔊",
         funny_11: "Dress rehearsal before the big speech... 🎭",
-        funny_12: "Deep breath... and here we go! 🌬️"
+        funny_12: "Deep breath... and here we go! 🌬️",
+        toast_test_playing: "Audio playback in progress...",
+        toast_test_err: "Server temporarily unavailable. Try again.",
+        toast_lang_detected: "🌍 Language automatically detected: {lang}",
+        toast_parse_err: "Parsing error: {err}",
+        toast_file_err: "Unable to read file: {err}",
+
     },
     es: {
         nav_local: "🚀 Motor Local Activado",
@@ -249,7 +261,13 @@ const translations = {
         funny_9: "Hidratando a la IA con agua desmineralizada... 💧",
         funny_10: "Subiendo el volumen al 11... 🔊",
         funny_11: "Ensayo general antes del gran discurso... 🎭",
-        funny_12: "Respiración profunda... ¡y allá vamos! 🌬️"
+        funny_12: "Respiración profunda... ¡y allá vamos! 🌬️",
+        toast_test_playing: "Reproducción de audio en curso...",
+        toast_test_err: "Servidor temporalmente no disponible. Inténtalo de nuevo.",
+        toast_lang_detected: "🌍 Idioma detectado automáticamente: {lang}",
+        toast_parse_err: "Error de análisis: {err}",
+        toast_file_err: "Imposible leer el archivo: {err}",
+
     },
     de: {
         nav_local: "🚀 Lokale Engine Aktiviert",
@@ -333,7 +351,13 @@ const translations = {
         funny_9: "Hydratisiere die KI mit demineralisiertem Wasser... 💧",
         funny_10: "Drehe die Lautstärke auf 11... 🔊",
         funny_11: "Generalprobe vor der großen Rede... 🎭",
-        funny_12: "Tief durchatmen... und los geht's! 🌬️"
+        funny_12: "Tief durchatmen... und los geht's! 🌬️",
+        toast_test_playing: "Audiowiedergabe läuft...",
+        toast_test_err: "Server vorübergehend nicht erreichbar. Erneut versuchen.",
+        toast_lang_detected: "🌍 Sprache automatisch erkannt: {lang}",
+        toast_parse_err: "Analysefehler: {err}",
+        toast_file_err: "Datei kann nicht gelesen werden: {err}",
+
     },
     it: {
         nav_local: "🚀 Motore Locale Attivo",
@@ -417,7 +441,13 @@ const translations = {
         funny_9: "Idratando l'IA con acqua demineralizzata... 💧",
         funny_10: "Alzando il volume fino a 11... 🔊",
         funny_11: "Prova generale prima del grande discorso... 🎭",
-        funny_12: "Un respiro profondo... e si parte! 🌬️"
+        funny_12: "Un respiro profondo... e si parte! 🌬️",
+        toast_test_playing: "Riproduzione audio in corso...",
+        toast_test_err: "Server temporaneamente non disponibile. Riprova.",
+        toast_lang_detected: "🌍 Lingua rilevata automaticamente: {lang}",
+        toast_parse_err: "Errore di analisi: {err}",
+        toast_file_err: "Impossibile leggere il file: {err}",
+
     },
     pt: {
         nav_local: "🚀 Motor Local Ativado",
@@ -501,7 +531,13 @@ const translations = {
         funny_10: "A aumentar o volume até ao 11... 🔊",
         funny_11: "Ensaio geral antes do grande discurso... 🎭",
         funny_12: "Uma respiração profunda... e aqui vamos nós! 🌬️",
-        chapter_default: "Capítulo"
+        chapter_default: "Capítulo",
+        toast_test_playing: "Reprodução de áudio em andamento...",
+        toast_test_err: "Servidor temporariamente indisponível. Tente novamente.",
+        toast_lang_detected: "🌍 Idioma detectado automaticamente: {lang}",
+        toast_parse_err: "Erro de análise: {err}",
+        toast_file_err: "Não foi possível ler o arquivo: {err}",
+
     },
     ru: {
         nav_local: "🚀 Локальный движок",
@@ -585,7 +621,13 @@ const translations = {
         funny_10: "Выкручиваем громкость на 11... 🔊",
         funny_11: "Генеральная репетиция перед большим выступлением... 🎭",
         funny_12: "Глубокий вдох... поехали! 🌬️",
-        chapter_default: "Глава"
+        chapter_default: "Глава",
+        toast_test_playing: "Идет воспроизведение аудио...",
+        toast_test_err: "Сервер временно недоступен. Попробуйте еще раз.",
+        toast_lang_detected: "🌍 Язык определен автоматически: {lang}",
+        toast_parse_err: "Ошибка анализа: {err}",
+        toast_file_err: "Невозможно прочитать файл: {err}",
+
     },
     zh: {
         nav_local: "🚀 本地引擎已激活",
@@ -669,7 +711,13 @@ const translations = {
         funny_10: "正在把音量调到 11... 🔊",
         funny_11: "大演讲前的彩排... 🎭",
         funny_12: "深呼吸... 开始！ 🌬️",
-        chapter_default: "章节"
+        chapter_default: "章节",
+        toast_test_playing: "音频播放中...",
+        toast_test_err: "服务器暂时不可用。请重试。",
+        toast_lang_detected: "🌍 自动检测到语言：{lang}",
+        toast_parse_err: "解析错误：{err}",
+        toast_file_err: "无法读取文件：{err}",
+
     },
     ja: {
         nav_local: "🚀 ローカルエンジン",
@@ -753,7 +801,13 @@ const translations = {
         funny_10: "音量を11まで上げています... 🔊",
         funny_11: "大演説前のリハーサル... 🎭",
         funny_12: "深呼吸... さあ、行きましょう！ 🌬️",
-        chapter_default: "チャプター"
+        chapter_default: "チャプター",
+        toast_test_playing: "音声再生中...",
+        toast_test_err: "サーバーは一時的に利用できません。再試行してください。",
+        toast_lang_detected: "🌍 自動検出された言語: {lang}",
+        toast_parse_err: "解析エラー: {err}",
+        toast_file_err: "ファイルを読み取れません: {err}",
+
     },
     ar: {
         nav_local: "🚀 المحرك المحلي",
@@ -837,7 +891,13 @@ const translations = {
         funny_10: "رفع مستوى الصوت إلى 11... 🔊",
         funny_11: "البروفة العامة قبل الخطاب الكبير... 🎭",
         funny_12: "خذ نفساً عميقاً... لنبدأ! 🌬️",
-        chapter_default: "الفصل"
+        chapter_default: "الفصل",
+        toast_test_playing: "جاري تشغيل الصوت...",
+        toast_test_err: "الخادم غير متاح مؤقتا. حاول مرة أخرى.",
+        toast_lang_detected: "🌍 تم اكتشاف اللغة تلقائيا: {lang}",
+        toast_parse_err: "خطأ في التحليل: {err}",
+        toast_file_err: "تعذرت قراءة الملف: {err}",
+
     }
 };
 

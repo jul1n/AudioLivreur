@@ -36,6 +36,7 @@ echo Ne fermez pas cette fenetre noire pendant que vous utilisez l'application.
 echo.
 
 start http://localhost:8000
+cd dependance
 python server.py
 
 pause
