@@ -197,7 +197,7 @@ async def merge_m4b(
 
         ffmpeg_cmd.extend([
             "-map_chapters", "1",
-            "-c:a", "aac", "-b:a", "64k",
+            "-c:a", "copy",
             output_m4b
         ])
 
