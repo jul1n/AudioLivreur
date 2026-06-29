@@ -1,5 +1,6 @@
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
+import shutil
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,6 +9,8 @@ import edge_tts
 import uvicorn
 import logging
 import hashlib
+from kokoro_tts import generate_kokoro_tts
+from piper_tts import generate_piper_tts
 
 CACHE_DIR = "cache"
 if not os.path.exists(CACHE_DIR):
@@ -47,8 +50,46 @@ class TTSRequest(BaseModel):
     rate: int = 0
     pitch: int = 0
 
+def ensure_aac_cached(audio_bytes: bytes, original_extension: str):
+    import tempfile
+    import subprocess
+    audio_hash = hashlib.md5(audio_bytes).hexdigest()
+    aac_cache_path = os.path.join(CACHE_DIR, f"aac_{audio_hash}.aac")
+    if os.path.exists(aac_cache_path):
+        return
+        
+    temp_in_fd, temp_in_name = tempfile.mkstemp(suffix=original_extension)
+    temp_out_fd, temp_out_name = tempfile.mkstemp(suffix=".aac")
+    try:
+        with os.fdopen(temp_in_fd, "wb") as f:
+            f.write(audio_bytes)
+        os.close(temp_out_fd)
+        
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", temp_in_name,
+            "-c:a", "aac",
+            "-b:a", "128k",
+            temp_out_name
+        ]
+        subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        
+        with open(temp_out_name, "rb") as f:
+            aac_bytes = f.read()
+        
+        with open(aac_cache_path, "wb") as f:
+            f.write(aac_bytes)
+    except Exception as e:
+        print(f"Error pre-caching AAC in background: {e}")
+    finally:
+        try:
+            os.unlink(temp_in_name)
+            os.unlink(temp_out_name)
+        except:
+            pass
+
 @app.post("/api/tts")
-async def generate_tts(req: TTSRequest):
+async def generate_tts(req: TTSRequest, background_tasks: BackgroundTasks):
     try:
         # Création d'une clé de cache unique basée sur le texte et les paramètres
         raw_key = f"{req.text}|{req.voice}|{req.rate}|{req.pitch}".encode('utf-8')
@@ -59,8 +100,25 @@ async def generate_tts(req: TTSRequest):
         if os.path.exists(cache_file):
             with open(cache_file, "rb") as f:
                 cached_data = f.read()
+            background_tasks.add_task(ensure_aac_cached, cached_data, ".mp3")
             return Response(content=cached_data, media_type="audio/mpeg")
 
+        # Edge TTS handling
+        if req.voice.startswith("kokoro_"):
+            # voice format: kokoro_af_bella -> af_bella
+            k_voice = req.voice.replace("kokoro_", "")
+            response = await generate_kokoro_tts(req.text, k_voice, req.rate, req.pitch, CACHE_DIR)
+            background_tasks.add_task(ensure_aac_cached, response.body, ".wav")
+            return response
+
+        # Piper handling
+        if req.voice.startswith("piper_"):
+            # voice format: piper_fr_FR-gilles-low -> fr_FR-gilles-low
+            p_voice = req.voice.replace("piper_", "")
+            response = await generate_piper_tts(req.text, p_voice, req.rate, req.pitch, CACHE_DIR)
+            background_tasks.add_task(ensure_aac_cached, response.body, ".wav")
+            return response
+            
         # Format rate and pitch as required by edge_tts (e.g. "+0%", "+0Hz")
         rate_str = f"+{req.rate}%" if req.rate >= 0 else f"{req.rate}%"
         pitch_str = f"+{req.pitch}Hz" if req.pitch >= 0 else f"{req.pitch}Hz"
@@ -84,6 +142,7 @@ async def generate_tts(req: TTSRequest):
         with open(cache_file, "wb") as f:
             f.write(audio_data)
             
+        background_tasks.add_task(ensure_aac_cached, bytes(audio_data), ".mp3")
         return Response(content=bytes(audio_data), media_type="audio/mpeg")
         
     except Exception as e:
@@ -110,6 +169,7 @@ import uuid
 async def merge_m4b(
     title: str = Form("Audiobook"),
     author: str = Form("Auteur inconnu"),
+    codec: str = Form("aac"),
     cover: Optional[UploadFile] = File(None),
     chapters: List[UploadFile] = File(...),
     chapter_titles: List[str] = Form(...)
@@ -130,13 +190,33 @@ async def merge_m4b(
             with open(cover_path, "wb") as buffer:
                 shutil.copyfileobj(cover.file, buffer)
 
-        # Save chapters
+        # Save chapters and check AAC cache
         chapter_paths = []
+        aac_paths = []
+        chapters_to_transcode = [] # list of (idx, mp3_p, target_aac_p, cache_aac_p)
+
         for i, chap_file in enumerate(chapters):
-            chap_path = os.path.join(temp_dir, f"chap_{i}.mp3")
-            with open(chap_path, "wb") as buffer:
-                shutil.copyfileobj(chap_file.file, buffer)
-            chapter_paths.append(chap_path)
+            file_bytes = chap_file.file.read()
+            chap_file.file.seek(0)
+            
+            audio_hash = hashlib.md5(file_bytes).hexdigest()
+            cache_aac_path = os.path.join(CACHE_DIR, f"aac_{audio_hash}.aac")
+            target_aac_path = os.path.join(temp_dir, f"chap_{i}.aac")
+            
+            mp3_path = os.path.join(temp_dir, f"chap_{i}.mp3")
+            with open(mp3_path, "wb") as f:
+                f.write(file_bytes)
+                
+            chapter_paths.append(mp3_path)
+            
+            if codec != "copy":
+                if os.path.exists(cache_aac_path):
+                    # Cache hit!
+                    shutil.copy2(cache_aac_path, target_aac_path)
+                else:
+                    # Cache miss!
+                    chapters_to_transcode.append((i, mp3_path, target_aac_path, cache_aac_path))
+                aac_paths.append(target_aac_path)
 
         # Create FFmpeg concat file
         concat_path = os.path.join(temp_dir, "concat.txt")
@@ -147,7 +227,6 @@ async def merge_m4b(
         # Get durations to build metadata
         durations = []
         for chap_path in chapter_paths:
-            # We use ffprobe to get duration in seconds
             ffprobe_cmd = [
                 "ffprobe", "-v", "error", "-show_entries",
                 "format=duration", "-of", "default=noprint_wrappers=1:nokey=1",
@@ -177,50 +256,118 @@ async def merge_m4b(
                 f.write(f"title={chap_title}\n\n")
                 current_time_ms = end_time
 
-        temp_mp3 = os.path.join(temp_dir, "temp.mp3")
-        
-        # Step 1: Concat to raw MP3 to fix any timestamp gaps
-        ffmpeg_cmd_concat = [
-            "ffmpeg", "-y",
-            "-f", "concat", "-safe", "0", "-i", concat_path,
-            "-c", "copy",
-            temp_mp3
-        ]
-        process_concat = subprocess.run(ffmpeg_cmd_concat, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        if process_concat.returncode != 0:
-            print("FFmpeg Concat Error:", process_concat.stderr)
-            raise HTTPException(status_code=500, detail="Erreur lors de la pre-fusion par FFmpeg.")
+        if codec == "copy":
+            temp_mp3 = os.path.join(temp_dir, "temp.mp3")
+            ffmpeg_cmd_concat = [
+                "ffmpeg", "-y",
+                "-f", "concat", "-safe", "0", "-i", concat_path,
+                "-c", "copy",
+                temp_mp3
+            ]
+            process_concat = subprocess.run(ffmpeg_cmd_concat, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if process_concat.returncode != 0:
+                print("FFmpeg Concat Error:", process_concat.stderr)
+                raise HTTPException(status_code=500, detail="Erreur lors de la pre-fusion par FFmpeg.")
 
-        output_m4b = os.path.join(temp_dir, "output.m4b")
-        
-        # Step 2: Mux to M4B with chapters and cover
-        ffmpeg_cmd = [
-            "ffmpeg", "-y",
-            "-i", temp_mp3,
-            "-i", metadata_path
-        ]
-        
-        if cover_path:
-            ffmpeg_cmd.extend(["-i", cover_path])
-            
-        ffmpeg_cmd.extend(["-map_metadata", "1"])
-        
-        if cover_path:
-            ffmpeg_cmd.extend(["-map", "0:a", "-map", "2:v", "-c:v", "mjpeg", "-disposition:v", "attached_pic"])
+            output_m4b = os.path.join(temp_dir, "output.m4b")
+            ffmpeg_cmd = [
+                "ffmpeg", "-y",
+                "-i", temp_mp3,
+                "-i", metadata_path
+            ]
+            if cover_path:
+                ffmpeg_cmd.extend(["-i", cover_path])
+            ffmpeg_cmd.extend(["-map_metadata", "1"])
+            if cover_path:
+                ffmpeg_cmd.extend(["-map", "0:a", "-map", "2:v", "-c:v", "mjpeg", "-disposition:v", "attached_pic"])
+            else:
+                ffmpeg_cmd.extend(["-map", "0:a"])
+            ffmpeg_cmd.extend([
+                "-map_chapters", "1",
+                "-c:a", "copy",
+                "-f", "mp4",
+                output_m4b
+            ])
+            process = subprocess.run(ffmpeg_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if process.returncode != 0:
+                print("FFmpeg Error:", process.stderr)
+                raise HTTPException(status_code=500, detail="Erreur lors de la fusion par FFmpeg.")
         else:
-            ffmpeg_cmd.extend(["-map", "0:a"])
+            # Mode standard (AAC) : Encodage parallèle des chapitres manquants
+            import asyncio
+            
+            async def transcode_chapter(idx, mp3_p, aac_p, cache_aac_p, sem):
+                async with sem:
+                    cmd = [
+                        "ffmpeg", "-y",
+                        "-i", mp3_p,
+                        "-c:a", "aac",
+                        "-b:a", "128k",
+                        aac_p
+                    ]
+                    proc = await asyncio.create_subprocess_exec(
+                        *cmd,
+                        stdout=asyncio.subprocess.PIPE,
+                        stderr=asyncio.subprocess.PIPE
+                    )
+                    stdout, stderr = await proc.communicate()
+                    if proc.returncode != 0:
+                        raise Exception(f"Echec encodage chapitre {idx}: {stderr.decode('utf-8', errors='ignore')}")
+                    # Cache the encoded AAC file
+                    try:
+                        shutil.copy2(aac_p, cache_aac_p)
+                    except Exception as e:
+                        print(f"Error caching AAC: {e}")
 
-        ffmpeg_cmd.extend([
-            "-map_chapters", "1",
-            "-c:a", "copy",
-            "-f", "mp4",
-            output_m4b
-        ])
+            tasks = []
+            sem = asyncio.Semaphore(6) # Limite à 6 encodages simultanés pour le CPU
+            for idx, mp3_path, target_aac_path, cache_aac_path in chapters_to_transcode:
+                tasks.append(transcode_chapter(idx, mp3_path, target_aac_path, cache_aac_path, sem))
+            
+            if tasks:
+                await asyncio.gather(*tasks)
 
-        process = subprocess.run(ffmpeg_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        if process.returncode != 0:
-            print("FFmpeg Error:", process.stderr)
-            raise HTTPException(status_code=500, detail="Erreur lors de la fusion par FFmpeg.")
+            # Création du fichier concat pour les AAC
+            concat_aac_path = os.path.join(temp_dir, "concat_aac.txt")
+            with open(concat_aac_path, "w", encoding="utf-8") as f:
+                for aac_path in aac_paths:
+                    f.write(f"file '{os.path.basename(aac_path)}'\n")
+
+            temp_aac = os.path.join(temp_dir, "temp.aac")
+            ffmpeg_cmd_concat = [
+                "ffmpeg", "-y",
+                "-f", "concat", "-safe", "0", "-i", concat_aac_path,
+                "-c", "copy",
+                temp_aac
+            ]
+            process_concat = subprocess.run(ffmpeg_cmd_concat, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if process_concat.returncode != 0:
+                print("FFmpeg Concat AAC Error:", process_concat.stderr)
+                raise HTTPException(status_code=500, detail="Erreur lors de la pre-fusion des pistes AAC.")
+
+            output_m4b = os.path.join(temp_dir, "output.m4b")
+            ffmpeg_cmd = [
+                "ffmpeg", "-y",
+                "-i", temp_aac,
+                "-i", metadata_path
+            ]
+            if cover_path:
+                ffmpeg_cmd.extend(["-i", cover_path])
+            ffmpeg_cmd.extend(["-map_metadata", "1"])
+            if cover_path:
+                ffmpeg_cmd.extend(["-map", "0:a", "-map", "2:v", "-c:v", "mjpeg", "-disposition:v", "attached_pic"])
+            else:
+                ffmpeg_cmd.extend(["-map", "0:a"])
+            ffmpeg_cmd.extend([
+                "-map_chapters", "1",
+                "-c:a", "copy", # Copie directe du flux AAC pré-encodé
+                "-f", "mp4",
+                output_m4b
+            ])
+            process = subprocess.run(ffmpeg_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if process.returncode != 0:
+                print("FFmpeg Error:", process.stderr)
+                raise HTTPException(status_code=500, detail="Erreur lors de la fusion finale M4B.")
 
         with open(output_m4b, "rb") as f:
             m4b_data = f.read()

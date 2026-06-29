@@ -22,25 +22,27 @@ Vous avez des dizaines d'ebooks ou de documents PDF que vous n'avez pas le temps
 
 ### ✨ Les 4 Piliers d'AudioLivreur
 
-1. **🎙️ Voix Neuronales Hyper-Réalistes**  
-   Oubliez les synthèses vocales des années 2000. AudioLivreur utilise les algorithmes de pointe de *Microsoft Edge TTS* pour vous offrir des narrateurs qui respirent, intonnent et racontent avec émotion.
-2. **⚡ Vitesse Foudroyante (Multi-Threads)**  
-   Un livre de 400 pages ? Généré en quelques minutes ! Grâce au traitement multi-threads (jusqu'à 20 processus simultanés), exploitez toute la puissance de votre ordinateur. 
+1. **🎙️ Voix Neuronales Hyper-Réalistes & Mode Hors-ligne**  
+   Oubliez les synthèses vocales robotiques. AudioLivreur utilise les algorithmes de pointe de *Microsoft Edge TTS* en ligne, ainsi que les modèles ultra-réalistes **Kokoro-TTS** et **Piper** fonctionnant **100% hors-ligne** directement depuis votre machine (sans envoi de données).
+2. **⚡ Vitesse Foudroyante & Reprises Instantanées**  
+   Générez un livre de 400 pages en quelques minutes grâce au traitement multi-threads parallèle (jusqu'à 20 processus). Si la génération s'interrompt, l'application reprend là où elle s'est arrêtée en une fraction de seconde grâce au cache intelligent.
 3. **🔒 Traitement Local & Respect de la Vie Privée**  
-   Vos livres restent chez vous ! L'extraction des textes, l'analyse des chapitres et la création des fichiers d'export (ZIP, M4B) sont réalisées **100% en local sur votre machine**. Seules les requêtes de synthèse vocale sont transmises de manière sécurisée à l'API *Microsoft Azure (Edge TTS)* sans qu'aucun de vos documents originaux ne soit stocké sur un serveur tiers.
-4. **📦 Un Fichier, Une Écoute**  
-   Exportez vos livres au format classique **Archive ZIP (MP3 par chapitre)** pour une flexibilité maximale, ou en format **M4B Unique** pour l'importer directement dans votre application de livres audio préférée (Audible, Apple Books, Smart Audiobook Player).
+   Vos livres restent chez vous ! L'extraction des textes, l'analyse des chapitres et la création des fichiers d'export (ZIP, M4B) sont réalisées **100% en local**. Aucun document original n'est envoyé sur le Cloud.
+4. **📦 Exports Optimisés (MP3 / M4B avec Chapitres)**  
+   Exportez vos livres au format classique **Archive ZIP (MP3 par chapitre)**, ou en fichier **M4B Unique** avec chapitrage intégré. Le serveur gère le transcodage AAC parallèle et le cache intelligent des pistes AAC pour une vitesse de fusion maximale.
 
 ---
 
 ## 🎯 Fonctionnalités Clés
 
 - **Formats supportés** : `EPUB`, `PDF`, `DOCX`, `TXT`. Le texte et les chapitres sont extraits automatiquement.
-- **Support multilingue** : Interface et voix disponibles dans plus de 15 langues (Français, Anglais, Espagnol, Japonais, Arabe, etc.)
-- **Personnalisation fine** : Ajustez la vitesse de lecture et la hauteur de la voix en temps réel.
-- **Transitions immersives** : Ajoutez des jingles ("Chime") ou des secondes de silence profond entre vos chapitres pour une véritable expérience "Studio".
+- **Moteurs TTS locaux** : Intégration transparente de **Kokoro** (Qualité Studio) et **Piper** (Super-rapide sur CPU) pour une utilisation sans connexion internet.
+- **Écoute progressive** : Écoutez chaque chapitre dès qu'il est terminé directement depuis la file d'attente de génération avec affichage du décompte de temps.
+- **Fusion M4B avancée** : Choisissez entre le mode standard (Encodage AAC de haute compatibilité) et le mode ultra-rapide (Copie directe).
+- **Support multilingue** : Interface et voix disponibles dans 10 langues traduites (Français, Anglais, Espagnol, Allemand, Italien, Portugais, Russe, Chinois, Japonais, Arabe).
+- **Transitions immersives** : Ajoutez plus de 15 transitions sonores personnalisées (jingles, bol tibétain, page tournée, craquement de vinyle, etc.) ou du silence profond entre vos chapitres.
 - **Métadonnées intégrées** : Couverture, Auteur, Titre et Numéro de chapitre sont injectés automatiquement dans les fichiers audio.
-- **Design "Neubrutalist"** : Une interface utilisateur percutante, moderne et intuitive.
+- **Design "Neubrutalist"** : Une interface utilisateur moderne, fluide et réactive.
 
 ---
 

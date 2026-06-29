@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const badge = document.getElementById(`chapter-badge-${idx}`);
                     if(badge) {
                         const wordCount = ch.text.split(/\\s+/).length;
-                        badge.innerHTML = `<span id="chapter-status-${idx}"><i class="fa-solid fa-clock" style="color:var(--text-muted)"></i></span> &nbsp;${wordCount.toLocaleString()} ${window.t('stat_words')}`;
+                        badge.innerHTML = `<span id="chapter-status-${idx}"><i class="fa-solid fa-clock" style="color:var(--text-muted)"></i></span> &nbsp;${wordCount.toLocaleString('fr-FR')} ${window.t('stat_words')}`;
                     }
                 });
             }
@@ -195,6 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.toggleM4b.classList.remove('active');
         elements.formatHint.innerHTML = window.t('format_hint_text');
         if (elements.lblDownloadFormat) elements.lblDownloadFormat.textContent = `.zip MP3`;
+        const m4bOpts = document.getElementById('m4bOptionsContainer');
+        if (m4bOpts) m4bOpts.style.display = 'none';
     });
 
     elements.toggleM4b.addEventListener('click', () => {
@@ -203,6 +205,8 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.toggleMp3.classList.remove('active');
         elements.formatHint.innerHTML = window.t('format_m4b_hint_text') || `🔥 <strong>Mode M4B Unique (Attention les cuisses !) :</strong> Ton navigateur va faire de la musculation intensive pour tout fusionner. Risque de faire chauffer ton PC ou ton smartphone en mode radiateur d'appoint ! 🏋️‍♂️🔥`;
         if (elements.lblDownloadFormat) elements.lblDownloadFormat.textContent = `.m4b Unique`;
+        const m4bOpts = document.getElementById('m4bOptionsContainer');
+        if (m4bOpts) m4bOpts.style.display = 'block';
     });
 
     const sampleTextsByLang = {
@@ -358,7 +362,11 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const testText = sampleTextsByLang[lang] || sampleTextsByLang['fr'];
             await ttsClient.testVoice(testText, { voice, rate, pitch }, (status) => {
-                elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${status}`;
+                if (voice.startsWith('kokoro_') && status.includes('Connexion')) {
+                    elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Chargement IA (1er lancement lent)...`;
+                } else {
+                    elements.btnTestVoice.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${status}`;
+                }
             });
             showToast(window.t('toast_test_playing') || "Lecture audio en cours...");
         } catch (err) {
@@ -456,9 +464,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const totalWords = currentBookData.chapters.reduce((sum, ch) => sum + ch.text.split(/\s+/).length, 0);
             elements.statChapters.textContent = currentBookData.chapters.length;
-            elements.statWords.textContent = totalWords.toLocaleString();
+            elements.statWords.textContent = totalWords.toLocaleString('fr-FR');
             const totalMinutes = Math.round(totalWords / 150);
-            elements.statEstTime.textContent = totalMinutes > 60 ? `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}` : `${totalMinutes}`;
+            const minLabel = window.t('stat_time_min') || "min";
+            elements.statEstTime.textContent = totalMinutes > 60 ? `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60} ${minLabel}` : `${totalMinutes} ${minLabel}`;
 
             if (currentBookData.coverUrl) {
                 elements.coverPreview.src = currentBookData.coverUrl;
@@ -479,7 +488,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const wordCount = ch.text.split(/\s+/).length;
                 item.innerHTML = `
                     <span><strong>${idx + 1}.</strong> ${ch.title}</span>
-                    <span id="chapter-badge-${idx}" class="pill-badge" style="font-size:0.75rem; transition: background-color 0.3s;"><span id="chapter-status-${idx}"><i class="fa-solid fa-clock" style="color:var(--text-muted)"></i></span> &nbsp;${wordCount.toLocaleString()} ${window.t('stat_words')}</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span id="chapter-play-${idx}" style="display:none; align-items:center; gap:6px; cursor:pointer;" title="${window.t('play_chapter_title')}">
+                            <span id="chapter-play-icon-${idx}"><i class="fa-solid fa-circle-play fa-xl" style="color:var(--accent-mint)"></i></span>
+                            <span id="chapter-play-time-${idx}" style="font-size:0.75rem; color:var(--text-muted); font-family:monospace; display:none;"></span>
+                        </span>
+                        <span id="chapter-badge-${idx}" class="pill-badge" style="font-size:0.75rem; transition: background-color 0.3s;"><span id="chapter-status-${idx}"><i class="fa-solid fa-clock" style="color:var(--text-muted)"></i></span> &nbsp;${wordCount.toLocaleString('fr-FR')} ${window.t('stat_words')}</span>
+                    </div>
                 `;
                 elements.chaptersList.appendChild(item);
             });
@@ -557,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let processedWordsOverall = 0;
         const startTime = Date.now();
 
-        elements.metricWords.textContent = `0 / ${totalWordsOverall.toLocaleString()}`;
+        elements.metricWords.textContent = `0 / ${totalWordsOverall.toLocaleString('fr-FR')}`;
 
         const maxThreads = parseInt(elements.selectThreads.value) || 5;
         let currentIndex = 0;
@@ -602,7 +617,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const chapWords = chapter.text.split(/\s+/).length;
                 
                 const funnyStatus = getRandomFunnyMessage();
-                document.getElementById('progressStatusText').textContent = window.t('msg_chap_progress', { i: i + 1, total: totalChapters, funny: funnyStatus });
+                let statusMsg = window.t('msg_chap_progress', { i: i + 1, total: totalChapters, funny: funnyStatus });
+                if (voice.startsWith('kokoro_') && i === 0) {
+                    statusMsg += " ⏳ (Initialisation IA Kokoro... Cela peut prendre plusieurs minutes au 1er lancement)";
+                }
+                document.getElementById('progressStatusText').textContent = statusMsg;
                 
                 // Maj UI Chapitre en cours
                 const row = document.getElementById(`chapter-row-${i}`);
@@ -662,9 +681,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     elements.progressBarFill.style.width = `${percent}%`;
                     elements.progressPercentText.textContent = `${percent}%`;
                     
-                    elements.metricWords.textContent = `${processedWordsOverall.toLocaleString()} / ${totalWordsOverall.toLocaleString()}`;
-                    elements.metricSpeed.textContent = `${speed} ${window.t('metric_speed_val')}`;
-                    elements.metricEta.textContent = `${Math.floor(etaSec / 60)}m ${etaSec % 60}s`;
+                    elements.metricWords.textContent = `${processedWordsOverall.toLocaleString('fr-FR')} / ${totalWordsOverall.toLocaleString('fr-FR')}`;
+                    elements.metricSpeed.textContent = `${speed.toLocaleString('fr-FR')} ${window.t('metric_speed_val')}`;
+                    
+                    let etaText = '';
+                    if (etaSec >= 3600) {
+                        const hours = Math.floor(etaSec / 3600);
+                        const mins = Math.floor((etaSec % 3600) / 60);
+                        const secs = etaSec % 60;
+                        etaText = `${hours}h ${mins}m ${secs}s`;
+                    } else {
+                        etaText = `${Math.floor(etaSec / 60)}m ${etaSec % 60}s`;
+                    }
+                    elements.metricEta.textContent = etaText;
 
                     // Maj UI Chapitre terminé
                     if (row) row.style.border = '2px solid var(--accent-mint)';
@@ -672,7 +701,73 @@ document.addEventListener('DOMContentLoaded', () => {
                     const badge = document.getElementById(`chapter-badge-${i}`);
                     if (badge) badge.style.backgroundColor = 'var(--accent-mint)';
                     
-                    log(window.t('msg_chap_done', { i: i + 1, total: totalChapters, words: chapWords.toLocaleString(), fallback: `✅ Chapitre ${i + 1}/${totalChapters} converti (${chapWords.toLocaleString()} mots)` }), 'success');
+                    const playBtn = document.getElementById(`chapter-play-${i}`);
+                    if (playBtn) {
+                        playBtn.style.display = 'inline-flex';
+                        playBtn.onclick = () => {
+                            const timeSpan = document.getElementById(`chapter-play-time-${i}`);
+                            const playIcon = document.getElementById(`chapter-play-icon-${i}`);
+                            const formatTime = (secs) => {
+                                if (isNaN(secs) || secs === Infinity) return '00:00';
+                                const mins = Math.floor(secs / 60);
+                                const s = Math.floor(secs % 60);
+                                return `${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                            };
+                            
+                            if (window.currentPlayingAudio) {
+                                window.currentPlayingAudio.pause();
+                                if (window.currentPlayingAudioBtn) {
+                                    const prevIdx = window.currentPlayingIndex;
+                                    const prevIcon = document.getElementById(`chapter-play-icon-${prevIdx}`);
+                                    const prevTime = document.getElementById(`chapter-play-time-${prevIdx}`);
+                                    if (prevIcon) prevIcon.innerHTML = '<i class="fa-solid fa-circle-play fa-xl" style="color:var(--accent-mint)"></i>';
+                                    if (prevTime) {
+                                        prevTime.style.display = 'none';
+                                        prevTime.textContent = '';
+                                    }
+                                }
+                                if (window.currentPlayingIndex === i) {
+                                    window.currentPlayingAudio = null;
+                                    window.currentPlayingIndex = null;
+                                    return;
+                                }
+                            }
+                            const url = URL.createObjectURL(audioBlob);
+                            const audio = new Audio(url);
+                            audio.play();
+                            window.currentPlayingAudio = audio;
+                            window.currentPlayingIndex = i;
+                            window.currentPlayingAudioBtn = playBtn;
+                            
+                            if (playIcon) playIcon.innerHTML = '<i class="fa-solid fa-circle-pause fa-xl" style="color:var(--accent-mint)"></i>';
+                            if (timeSpan) {
+                                timeSpan.style.display = 'inline';
+                                timeSpan.textContent = '00:00 / --:--';
+                            }
+                            
+                            audio.ontimeupdate = () => {
+                                if (timeSpan) {
+                                    timeSpan.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+                                }
+                            };
+                            audio.onloadedmetadata = () => {
+                                if (timeSpan) {
+                                    timeSpan.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+                                }
+                            };
+                            audio.onended = () => {
+                                if (playIcon) playIcon.innerHTML = '<i class="fa-solid fa-circle-play fa-xl" style="color:var(--accent-mint)"></i>';
+                                if (timeSpan) {
+                                    timeSpan.style.display = 'none';
+                                    timeSpan.textContent = '';
+                                }
+                                window.currentPlayingAudio = null;
+                                window.currentPlayingIndex = null;
+                            };
+                        };
+                    }
+                    
+                    log(window.t('msg_chap_done', { i: i + 1, total: totalChapters, words: chapWords.toLocaleString('fr-FR'), fallback: `✅ Chapitre ${i + 1}/${totalChapters} converti (${chapWords.toLocaleString('fr-FR')} mots)` }), 'success');
 
                 } catch (err) {
                     log(window.t('msg_chap_err', { i: i + 1, err: err.message }), 'error');
@@ -758,6 +853,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     const formData = new FormData();
                     formData.append('title', title);
                     formData.append('author', author);
+                    const codecVal = document.querySelector('input[name="m4bMergeCodec"]:checked')?.value || 'aac';
+                    formData.append('codec', codecVal);
+                    
+                    log("🎁 Envoi des chapitres au serveur pour fusion M4B (FFmpeg)...", 'info');
+                    if (codecVal === 'aac') {
+                        log("⚙️ Encodage parallèle en AAC activé. Le serveur convertit vos chapitres à toute vitesse...", 'info');
+                    } else {
+                        log("⚡ Copie ultra-rapide sans ré-encodage activée...", 'info');
+                    }
+                    
                     if (currentBookData.coverUrl) {
                         const coverResp = await fetch(currentBookData.coverUrl);
                         const coverBlob = await coverResp.blob();
@@ -772,9 +877,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         method: 'POST',
                         body: formData
                     });
-                    if (!mergeRes.ok) throw new Error("Erreur du serveur lors de la fusion M4B");
+                    if (!mergeRes.ok) {
+                        log("❌ Erreur de fusion M4B sur le serveur.", 'error');
+                        throw new Error("Erreur du serveur lors de la fusion M4B");
+                    }
                     const m4bBlob = await mergeRes.blob();
                     downloadUrl = URL.createObjectURL(m4bBlob);
+                    log("✅ Livre M4B généré avec succès ! Le téléchargement démarre.", 'success');
                 } else {
                     // Fallback Web : Tag ID3 Global + Raw MP3s
                     let globalId3Buffer = new ArrayBuffer(0);

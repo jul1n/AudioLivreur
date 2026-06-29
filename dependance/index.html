@@ -162,6 +162,19 @@
                             </div>
                         </button>
                     </div>
+                    <div id="m4bOptionsContainer" class="form-group" style="margin-top: 10px;">
+                        <label style="font-size: 0.85rem; font-weight: normal; margin-bottom: 4px; display: block;" data-i18n="m4b_merge_method">Méthode de fusion M4B</label>
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; border: 2px solid var(--border-black); padding: 8px; border-radius: 4px; background: var(--bg-card);">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal; margin: 0;">
+                                <input type="radio" name="m4bMergeCodec" value="aac" checked style="accent-color: var(--accent-mint);">
+                                <span data-i18n="m4b_method_aac"><strong>Standard (AAC)</strong> : Qualité & compatibilité max (CPU intensif)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal; margin: 0;">
+                                <input type="radio" name="m4bMergeCodec" value="copy" style="accent-color: var(--accent-mint);">
+                                <span data-i18n="m4b_method_copy"><strong>Ultra-Rapide (Copie)</strong> : Concatène sans ré-encodage (risque de bugs de lecture)</span>
+                            </label>
+                        </div>
+                    </div>
                     <div class="format-hint" id="formatHint" data-i18n="format_hint_text">
                         ⚡ <strong>Le Choix des Boss (MP3) :</strong> Rapide comme l'éclair ! Ton PC/Mac/Phone reste au frais et ta batterie te dira merci. 🚀
                     </div>
@@ -229,6 +242,18 @@
                         <option value="chime1" data-i18n="trans_chime1">🔔 Clochette 1 (Cristalline & Douce)</option>
                         <option value="chime2" data-i18n="trans_chime2">✨ Clochette 2 (Aérienne & Zen)</option>
                         <option value="chime3" selected data-i18n="trans_chime3">🎶 Clochette 3 (Profonde & Majestueuse)</option>
+                        <option value="chime4" data-i18n="trans_chime4">🔔 Cloche en Bronze (Méditative)</option>
+                        <option value="chime5" data-i18n="trans_chime5">🥣 Bol Tibétain (Vibrant & Profond)</option>
+                        <option value="chime6" data-i18n="trans_chime6">🎵 Harpe en Cascade (Poétique)</option>
+                        <option value="chime7" data-i18n="trans_chime7">📟 Glitch Sci-Fi (Moderne & Cyber)</option>
+                        <option value="chime8" data-i18n="trans_chime8">🎹 Piano Note Unique (Chaleureux)</option>
+                        <option value="chime9" data-i18n="trans_chime9">🍃 Sifflement de Vent Doux (Nature)</option>
+                        <option value="chime10" data-i18n="trans_chime10">📖 Page Tournée (Classique & Livre)</option>
+                        <option value="chime11" data-i18n="trans_chime11">📐 Triangle d'Orchestre (Brillant)</option>
+                        <option value="chime12" data-i18n="trans_chime12">🎼 Marimba Ascendant (Ludique)</option>
+                        <option value="chime13" data-i18n="trans_chime13">🥁 Gong Traditionnel (Historique)</option>
+                        <option value="chime14" data-i18n="trans_chime14">🌾 Flûte de Pan (Folk & Léger)</option>
+                        <option value="chime15" data-i18n="trans_chime15">📻 Craquement Vinyle (Vintage)</option>
                     </select>
                 </div>
 
@@ -312,7 +337,7 @@
                             <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
                                 <span class="pill-badge accent-mint"><i class="fa-solid fa-list-ol"></i> <strong id="statChapters">0</strong> <span data-i18n="stat_chapters">chapitres</span></span>
                                 <span class="pill-badge accent-blue"><strong id="statWords">0</strong> <span data-i18n="stat_words">mots</span></span>
-                                <span class="pill-badge accent-yellow"><i class="fa-solid fa-clock"></i> ~<strong id="statEstTime">0</strong> <span data-i18n="stat_time_min">min</span></span>
+                                <span class="pill-badge accent-yellow"><i class="fa-solid fa-clock"></i> ~<strong id="statEstTime">0 min</strong></span>
                             </div>
                         </div>
                     </div>
@@ -428,11 +453,11 @@
         </div>
     </div>
 
-    <!-- Application Scripts avec Cache Busting v0.7.5 -->
-    <script src="js/i18n.js?v=0.7.5"></script>
-    <script src="js/parsers/fileParser.js?v=0.7.5"></script>
-    <script src="js/tts/webSpeechTts.js?v=0.7.5"></script>
-    <script src="js/tts/edgeTts.js?v=0.7.5"></script>
-    <script src="js/app.js?v=0.7.5"></script>
+    <!-- Application Scripts avec Cache Busting v0.7.6 -->
+    <script src="js/i18n.js?v=0.7.6"></script>
+    <script src="js/parsers/fileParser.js?v=0.7.6"></script>
+    <script src="js/tts/webSpeechTts.js?v=0.7.6"></script>
+    <script src="js/tts/edgeTts.js?v=0.7.7"></script>
+    <script src="js/app.js?v=0.7.13"></script>
 </body>
 </html>
