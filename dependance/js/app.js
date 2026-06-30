@@ -964,6 +964,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+    if (elements.coverPreview) {
+        elements.coverPreview.addEventListener('error', () => {
+            elements.coverPreview.classList.add('hidden');
+            elements.coverPlaceholderIcon.classList.remove('hidden');
+            if (elements.btnCropCover) elements.btnCropCover.classList.add('hidden');
+        });
+    }
 
     if (btnCancelCrop) {
         btnCancelCrop.addEventListener('click', () => {
