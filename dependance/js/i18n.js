@@ -1460,16 +1460,58 @@ window.t = t;
 window.applyTranslations = applyTranslations;
 
 const extraKeys = {
-    fr: { adv_settings_show: "⚙️ Plus d'options ▾", adv_settings_hide: "⚙️ Moins d'options ▴" },
-    en: { adv_settings_show: "⚙️ More options ▾", adv_settings_hide: "⚙️ Less options ▴" },
-    es: { adv_settings_show: "⚙️ Más opciones ▾", adv_settings_hide: "⚙️ Menos opciones ▴" },
-    de: { adv_settings_show: "⚙️ Mehr Optionen ▾", adv_settings_hide: "⚙️ Weniger Optionen ▴" },
-    it: { adv_settings_show: "⚙️ Più opzioni ▾", adv_settings_hide: "⚙️ Meno opzioni ▴" },
-    pt: { adv_settings_show: "⚙️ Mais opções ▾", adv_settings_hide: "⚙️ Menos opções ▴" },
-    ru: { adv_settings_show: "⚙️ Больше настроек ▾", adv_settings_hide: "⚙️ Меньше настроек ▴" },
-    zh: { adv_settings_show: "⚙️ 更多选项 ▾", adv_settings_hide: "⚙️ 隐藏选项 ▴" },
-    ja: { adv_settings_show: "⚙️ 詳細設定 ▾", adv_settings_hide: "⚙️ 設定を閉じる ▴" },
-    ar: { adv_settings_show: "⚙️ خيارات إضافية ▾", adv_settings_hide: "⚙️ خيارات أقل ▴" }
+    fr: { 
+        adv_settings_show: "⚙️ Plus d'options ▾", 
+        adv_settings_hide: "⚙️ Moins d'options ▴",
+        footer_text: "Créé en Python 🐍 et JavaScript par <strong>Julien</strong>",
+        modal_credits_body: "<p>Créé en Python 🐍 et JavaScript avec ❤️ par <strong>Julien</strong> (Édition Bureau v0.7.2) et soutenu par la communauté open-source :</p>             <ul style=\"margin-left: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;\">                 <li><strong>Web Speech API</strong> - Moteur de synthèse vocale système (version web).</li>                 <li><strong>Microsoft Edge TTS API</strong> - Voix neuronales haute définition (version desktop).</li>                 <li><strong>ePub.js</strong> - Lecture et extraction des livres EPUB.</li>                 <li><strong>pdf.js</strong> - Lecture et extraction des documents PDF.</li>                 <li><strong>mammoth.js</strong> - Extraction des fichiers Word (DOCX).</li>                 <li><strong>fflate</strong> - Compression ZIP ultra-rapide côté client.</li>             </ul>"
+    },
+    en: { 
+        adv_settings_show: "⚙️ More options ▾", 
+        adv_settings_hide: "⚙️ Less options ▴",
+        footer_text: "Built in Python 🐍 and JavaScript by <strong>Julien</strong>",
+        modal_credits_body: "<p>Created in Python 🐍 and JavaScript with ❤️ by <strong>Julien</strong> (Desktop Edition v0.7.2) and supported by the amazing open-source community:</p>             <ul style=\"margin-left: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;\">                 <li><strong>Web Speech API</strong> - System voice synthesis engine (web version).</li>                 <li><strong>Microsoft Edge TTS API</strong> - HD Neural voices (desktop version).</li>                 <li><strong>ePub.js</strong> - Reading and extracting EPUB books.</li>                 <li><strong>pdf.js</strong> - Reading and extracting PDF documents.</li>                 <li><strong>mammoth.js</strong> - Extracting Word files (DOCX).</li>                 <li><strong>fflate</strong> - Ultra-fast client-side ZIP compression.</li>             </ul>"
+    },
+    es: { 
+        adv_settings_show: "⚙️ Más opciones ▾", 
+        adv_settings_hide: "⚙️ Menos opciones ▴",
+        footer_text: "Creado en Python 🐍 y JavaScript por <strong>Julien</strong>"
+    },
+    de: { 
+        adv_settings_show: "⚙️ Mehr Optionen ▾", 
+        adv_settings_hide: "⚙️ Weniger Optionen ▴",
+        footer_text: "Erstellt in Python 🐍 und JavaScript von <strong>Julien</strong>"
+    },
+    it: { 
+        adv_settings_show: "⚙️ Più opzioni ▾", 
+        adv_settings_hide: "⚙️ Meno opzioni ▴",
+        footer_text: "Creato in Python 🐍 e JavaScript da <strong>Julien</strong>"
+    },
+    pt: { 
+        adv_settings_show: "⚙️ Mais opções ▾", 
+        adv_settings_hide: "⚙️ Menos opções ▴",
+        footer_text: "Criado em Python 🐍 e JavaScript por <strong>Julien</strong>"
+    },
+    ru: { 
+        adv_settings_show: "⚙️ Больше настроек ▾", 
+        adv_settings_hide: "⚙️ Меньше настроек ▴",
+        footer_text: "Создано на Python 🐍 и JavaScript <strong>Julien</strong>"
+    },
+    zh: { 
+        adv_settings_show: "⚙️ 更多选项 ▾", 
+        adv_settings_hide: "⚙️ 隐藏选项 ▴",
+        footer_text: "由 <strong>Julien</strong> 使用 Python 🐍 和 JavaScript 制作"
+    },
+    ja: { 
+        adv_settings_show: "⚙️ 詳細設定 ▾", 
+        adv_settings_hide: "⚙️ 設定を閉じる ▴",
+        footer_text: "Python 🐍 と JavaScript で <strong>Julien</strong> によって作成されました"
+    },
+    ar: { 
+        adv_settings_show: "⚙️ خيارات إضافية ▾", 
+        adv_settings_hide: "⚙️ خيارات أقل ▴",
+        footer_text: "تم الإنشاء باستخدام بايثون 🐍 وجافا سكريبت بواسطة <strong>Julien</strong>"
+    }
 };
 for (const lang in extraKeys) {
     if (translations[lang]) {
