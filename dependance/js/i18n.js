@@ -1337,6 +1337,95 @@ for (const lang in extensions) {
     }
 }
 
+const historyExtensions = {
+    fr: {
+        nav_history: "Projets Récents",
+        history_title: "Historique des Projets",
+        history_empty: "Aucun projet récent trouvé",
+        history_load: "Charger",
+        history_delete_confirm: "Voulez-vous vraiment supprimer ce projet ?",
+        progress_label: "Progression"
+    },
+    en: {
+        nav_history: "Recent Projects",
+        history_title: "Project History",
+        history_empty: "No recent projects found",
+        history_load: "Load",
+        history_delete_confirm: "Are you sure you want to delete this project?",
+        progress_label: "Progress"
+    },
+    es: {
+        nav_history: "Proyectos recientes",
+        history_title: "Historial de proyectos",
+        history_empty: "No se encontraron proyectos recientes",
+        history_load: "Cargar",
+        history_delete_confirm: "¿Está seguro de que desea eliminar este proyecto?",
+        progress_label: "Progreso"
+    },
+    de: {
+        nav_history: "Kürzliche Projekte",
+        history_title: "Projektverlauf",
+        history_empty: "Keine kürzlichen Projekte gefunden",
+        history_load: "Laden",
+        history_delete_confirm: "Möchten Sie dieses Projekt wirklich löschen?",
+        progress_label: "Fortschritt"
+    },
+    it: {
+        nav_history: "Progetti recenti",
+        history_title: "Cronologia progetti",
+        history_empty: "Nessun progetto recente trovato",
+        history_load: "Carica",
+        history_delete_confirm: "Sei sicuro di voler eliminare questo progetto?",
+        progress_label: "Progresso"
+    },
+    pt: {
+        nav_history: "Projetos recentes",
+        history_title: "Histórico de projetos",
+        history_empty: "Nenhum projeto recente encontrado",
+        history_load: "Carregar",
+        history_delete_confirm: "Tem certeza de que deseja excluir este projeto?",
+        progress_label: "Progresso"
+    },
+    ru: {
+        nav_history: "Недавние проекты",
+        history_title: "История проектов",
+        history_empty: "Недавние проекты не найдены",
+        history_load: "Загрузить",
+        history_delete_confirm: "Вы действительно хотите удалить этот проект?",
+        progress_label: "Прогресс"
+    },
+    zh: {
+        nav_history: "最近的项目",
+        history_title: "项目历史",
+        history_empty: "未找到最近的项目",
+        history_load: "加载",
+        history_delete_confirm: "您确定要删除这个项目吗？",
+        progress_label: "进度"
+    },
+    ja: {
+        nav_history: "最近のプロジェクト",
+        history_title: "プロジェクト履歴",
+        history_empty: "最近のプロジェクトが見つかりません",
+        history_load: "読み込む",
+        history_delete_confirm: "このプロジェクトを削除してもよろしいですか？",
+        progress_label: "進捗"
+    },
+    ar: {
+        nav_history: "المشاريع الأخيرة",
+        history_title: "سجل المشاريع",
+        history_empty: "لم يتم العثور على مشاريع أخيرة",
+        history_load: "تحميل",
+        history_delete_confirm: "هل أنت متأكد من رغبتك في حذف هذا المشروع؟",
+        progress_label: "التقدم"
+    }
+};
+
+for (const lang in historyExtensions) {
+    if (translations[lang]) {
+        Object.assign(translations[lang], historyExtensions[lang]);
+    }
+}
+
 // Fallback logic and helper functions
 let currentLang = 'fr';
 
@@ -1369,3 +1458,21 @@ function applyTranslations(lang) {
 
 window.t = t;
 window.applyTranslations = applyTranslations;
+
+const extraKeys = {
+    fr: { adv_settings_show: "⚙️ Plus d'options ▾", adv_settings_hide: "⚙️ Moins d'options ▴" },
+    en: { adv_settings_show: "⚙️ More options ▾", adv_settings_hide: "⚙️ Less options ▴" },
+    es: { adv_settings_show: "⚙️ Más opciones ▾", adv_settings_hide: "⚙️ Menos opciones ▴" },
+    de: { adv_settings_show: "⚙️ Mehr Optionen ▾", adv_settings_hide: "⚙️ Weniger Optionen ▴" },
+    it: { adv_settings_show: "⚙️ Più opzioni ▾", adv_settings_hide: "⚙️ Meno opzioni ▴" },
+    pt: { adv_settings_show: "⚙️ Mais opções ▾", adv_settings_hide: "⚙️ Menos opções ▴" },
+    ru: { adv_settings_show: "⚙️ Больше настроек ▾", adv_settings_hide: "⚙️ Меньше настроек ▴" },
+    zh: { adv_settings_show: "⚙️ 更多选项 ▾", adv_settings_hide: "⚙️ 隐藏选项 ▴" },
+    ja: { adv_settings_show: "⚙️ 詳細設定 ▾", adv_settings_hide: "⚙️ 設定を閉じる ▴" },
+    ar: { adv_settings_show: "⚙️ خيارات إضافية ▾", adv_settings_hide: "⚙️ خيارات أقل ▴" }
+};
+for (const lang in extraKeys) {
+    if (translations[lang]) {
+        Object.assign(translations[lang], extraKeys[lang]);
+    }
+}

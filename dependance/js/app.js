@@ -34,6 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
         historyModalOverlay: document.getElementById('historyModalOverlay'),
         btnCloseHistoryModal: document.getElementById('btnCloseHistoryModal'),
         historyListContainer: document.getElementById('historyListContainer'),
+        btnToggleAdvanced: document.getElementById('btnToggleAdvanced'),
+        lblToggleAdvanced: document.getElementById('lblToggleAdvanced'),
+        advancedSettingsBlock: document.getElementById('advancedSettingsBlock'),
 
         dropzoneCard: document.getElementById('dropzoneCard'),
         dropzone: document.getElementById('dropzone'),
@@ -507,6 +510,15 @@ document.addEventListener('DOMContentLoaded', () => {
             currentProjectId = 'proj_' + Date.now();
             saveProjectToServer();
 
+            // Expand advanced settings automatically on book load
+            if (elements.advancedSettingsBlock && elements.advancedSettingsBlock.classList.contains('hidden')) {
+                elements.advancedSettingsBlock.classList.remove('hidden');
+                if (elements.lblToggleAdvanced) {
+                    elements.lblToggleAdvanced.setAttribute('data-i18n', 'adv_settings_hide');
+                    elements.lblToggleAdvanced.textContent = window.t('adv_settings_hide');
+                }
+            }
+
             elements.dropzoneCard.classList.add('hidden');
             elements.bookDetailsCard.classList.remove('hidden');
 
@@ -520,6 +532,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetToDropzone() {
         currentBookData = null;
         currentProjectId = null;
+        
+        // Collapse advanced settings on reset
+        if (elements.advancedSettingsBlock && !elements.advancedSettingsBlock.classList.contains('hidden')) {
+            elements.advancedSettingsBlock.classList.add('hidden');
+            if (elements.lblToggleAdvanced) {
+                elements.lblToggleAdvanced.setAttribute('data-i18n', 'adv_settings_show');
+                elements.lblToggleAdvanced.textContent = window.t('adv_settings_show');
+            }
+        }
+        
         if (elements.fileInput) {
             elements.fileInput.value = ''; // Reset the input so the same file can trigger 'change'
         }
@@ -1301,5 +1323,38 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    if (elements.btnToggleAdvanced) {
+        elements.btnToggleAdvanced.addEventListener('click', () => {
+            if (!elements.advancedSettingsBlock) return;
+            const isHidden = elements.advancedSettingsBlock.classList.contains('hidden');
+            if (isHidden) {
+                elements.advancedSettingsBlock.classList.remove('hidden');
+                if (elements.lblToggleAdvanced) {
+                    elements.lblToggleAdvanced.setAttribute('data-i18n', 'adv_settings_hide');
+                    elements.lblToggleAdvanced.textContent = window.t('adv_settings_hide');
+                }
+            } else {
+                elements.advancedSettingsBlock.classList.add('hidden');
+                if (elements.lblToggleAdvanced) {
+                    elements.lblToggleAdvanced.setAttribute('data-i18n', 'adv_settings_show');
+                    elements.lblToggleAdvanced.textContent = window.t('adv_settings_show');
+                }
+            }
+        });
+    }
+
+    // Also auto-expand advanced settings when a project is loaded from history
+    const originalLoadProject = loadProject;
+    loadProject = async function(id) {
+        await originalLoadProject(id);
+        if (elements.advancedSettingsBlock && elements.advancedSettingsBlock.classList.contains('hidden')) {
+            elements.advancedSettingsBlock.classList.remove('hidden');
+            if (elements.lblToggleAdvanced) {
+                elements.lblToggleAdvanced.setAttribute('data-i18n', 'adv_settings_hide');
+                elements.lblToggleAdvanced.textContent = window.t('adv_settings_hide');
+            }
+        }
+    };
 
 });

@@ -148,43 +148,6 @@
             <aside class="card-box settings-panel">
                 <h3 class="panel-title"><i class="fa-solid fa-sliders"></i> <span data-i18n="settings_title">Réglages de Synthèse</span></h3>
                 
-                <!-- Format Toggle MP3 vs M4B Redesign Sleek -->
-                <div class="form-group">
-                    <label data-i18n="format_label">Format de Sortie</label>
-                    <div class="toggle-switch-group">
-                        <button class="toggle-btn" id="toggleMp3" title="Rapide & Léger">
-                            <i class="fa-solid fa-compact-disc toggle-icon"></i>
-                            <div class="toggle-text-stack">
-                                <span class="toggle-title" data-i18n="format_mp3">MP3</span>
-                            </div>
-                        </button>
-                        <button class="toggle-btn active" id="toggleM4b" title="Fichier Unique">
-                            <i class="fa-solid fa-book-bookmark toggle-icon"></i>
-                            <div class="toggle-text-stack">
-                                <span class="toggle-title" data-i18n="format_m4b">M4B</span>
-                            </div>
-                        </button>
-                    </div>
-                    <div id="m4bOptionsContainer" class="form-group" style="margin-top: 10px;">
-                        <label style="font-size: 0.85rem; font-weight: normal; margin-bottom: 4px; display: block;" data-i18n="m4b_merge_method">Méthode de fusion M4B</label>
-                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; border: 2px solid var(--border-black); padding: 8px; border-radius: 4px; background: var(--bg-card);">
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal; margin: 0;">
-                                <input type="radio" name="m4bMergeCodec" value="aac" checked style="accent-color: var(--accent-mint);">
-                                <span data-i18n="m4b_method_aac"><strong>Standard (AAC)</strong> : Qualité & compatibilité max (CPU intensif)</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal; margin: 0;">
-                                <input type="radio" name="m4bMergeCodec" value="copy" style="accent-color: var(--accent-mint);">
-                                <span data-i18n="m4b_method_copy"><strong>Ultra-Rapide (Copie)</strong> : Concatène sans ré-encodage (risque de bugs de lecture)</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="format-hint" id="formatHint" data-i18n="format_hint_text">
-                        ⚡ <strong>Le Choix des Boss (MP3) :</strong> Rapide comme l'éclair ! Ton PC/Mac/Phone reste au frais et ta batterie te dira merci. 🚀
-                    </div>
-                </div>
-
-                <hr style="border:none; border-top:2px solid var(--border-black); margin:0.5rem 0 1rem 0;">
-
                 <!-- Language Dropdown -->
                 <div class="form-group">
                     <label for="selectLanguage" data-i18n="lang_label">Langue du Livre</label>
@@ -215,74 +178,121 @@
                     </select>
                 </div>
 
-                <!-- Mode Web : 1 canal, threads non applicables -->
-                <div id="modeWebBox" class="form-group">
-                    <label data-i18n="mode_web_label">⚡ Mode Web (Canal Unique)</label>
-                    <div style="background:var(--bg-main); border:2px solid var(--border-black); padding:0.6rem 0.8rem; border-radius:8px; font-size:0.85rem; font-weight:600;" data-i18n="mode_web_desc">
-                        🔉 1 flux audio en direct. Jusqu'à 20 processus parallèles avec l'App Desktop !
-                    </div>
-                    <select id="selectThreadsWeb" style="display:none;"><option value="1" selected>1</option></select>
-                </div>
-
-                <!-- Mode Local : 20 threads applicables -->
-                <div id="modeLocalBox" class="form-group" style="display:none;">
-                    <label for="selectThreadsLocal" data-i18n="speed_label">Vitesse de génération (Threads)</label>
-                    <select id="selectThreadsLocal" class="input-neubrutal">
-                        <option value="1" data-i18n="speed_1">🐢 1 (Mode Tortue / Ultra-Sûr)</option>
-                        <option value="2" data-i18n="speed_2">🚴 2 (Tranquille Pilou)</option>
-                        <option value="5" data-i18n="speed_5">🚀 5 (Vitesse de Croisière)</option>
-                        <option value="10" selected data-i18n="speed_10">⚡ 10 (Recommandé / Turbo)</option>
-                        <option value="20" data-i18n="speed_20">🔥 20 (Mode Supersonique Extrême !)</option>
-                    </select>
-                </div>
-
-                <!-- Transition Dropdown -->
-                <div class="form-group">
-                    <label for="selectTransition" data-i18n="transition_label">Transition Sonore</label>
-                    <select id="selectTransition" class="input-neubrutal">
-                        <option value="none" data-i18n="trans_none">🚫 Sans transition (Enchaînement direct)</option>
-                        <option value="silence" data-i18n="trans_silence">🤫 1.5s de silence profond</option>
-                        <option value="chime1" data-i18n="trans_chime1">🔔 Clochette 1 (Cristalline & Douce)</option>
-                        <option value="chime2" data-i18n="trans_chime2">✨ Clochette 2 (Aérienne & Zen)</option>
-                        <option value="chime3" selected data-i18n="trans_chime3">🎶 Clochette 3 (Profonde & Majestueuse)</option>
-                        <option value="chime4" data-i18n="trans_chime4">🔔 Cloche en Bronze (Méditative)</option>
-                        <option value="chime5" data-i18n="trans_chime5">🥣 Bol Tibétain (Vibrant & Profond)</option>
-                        <option value="chime6" data-i18n="trans_chime6">🎵 Harpe en Cascade (Poétique)</option>
-                        <option value="chime7" data-i18n="trans_chime7">📟 Glitch Sci-Fi (Moderne & Cyber)</option>
-                        <option value="chime8" data-i18n="trans_chime8">🎹 Piano Note Unique (Chaleureux)</option>
-                        <option value="chime9" data-i18n="trans_chime9">🍃 Sifflement de Vent Doux (Nature)</option>
-                        <option value="chime10" data-i18n="trans_chime10">📖 Page Tournée (Classique & Livre)</option>
-                        <option value="chime11" data-i18n="trans_chime11">📐 Triangle d'Orchestre (Brillant)</option>
-                        <option value="chime12" data-i18n="trans_chime12">🎼 Marimba Ascendant (Ludique)</option>
-                        <option value="chime13" data-i18n="trans_chime13">🥁 Gong Traditionnel (Historique)</option>
-                        <option value="chime14" data-i18n="trans_chime14">🌾 Flûte de Pan (Folk & Léger)</option>
-                        <option value="chime15" data-i18n="trans_chime15">📻 Craquement Vinyle (Vintage)</option>
-                    </select>
-                </div>
-
                 <!-- Test Voice Button -->
-                <button id="btnTestVoice" class="btn-main yellow" style="padding:0.7rem 1rem; font-size:0.95rem;">
-                    <i class="fa-solid fa-volume-high"></i> <span data-i18n="test_voice_btn">Tester la Voix</span>
-                </button>
-
-                <hr style="border:none; border-top:2px solid var(--border-black); margin:0.8rem 0;">
-
-                <!-- Rate / Speed Range -->
-                <div class="form-group">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <label for="rangeRate" data-i18n="rate_label">Vitesse de Lecture</label>
-                        <span id="valRate" style="font-weight:700; font-family:monospace;">0%</span>
-                    </div>
-                    <input type="range" id="rangeRate" min="-50" max="100" value="0" class="range-neubrutal">
+                <div class="form-group" style="margin-bottom: 0.8rem;">
+                    <button id="btnTestVoice" class="btn-main yellow" style="padding:0.7rem 1rem; font-size:0.95rem; width: 100%;">
+                        <i class="fa-solid fa-volume-high"></i> <span data-i18n="test_voice_btn">Tester la Voix</span>
+                    </button>
                 </div>
 
-                <!-- Pitch Range -->
-                <div class="form-group">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <label for="rangePitch" data-i18n="pitch_label">Hauteur (Pitch)</label>
-                        <span id="valPitch" style="font-weight:700; font-family:monospace;">0Hz</span>
+                <!-- Advanced Settings Toggle Button -->
+                <div style="text-align: center; margin-bottom: 0.5rem; margin-top: 0.8rem;">
+                    <button id="btnToggleAdvanced" class="footer-link-btn" style="font-weight: bold; font-size: 0.9rem; text-decoration: underline; cursor: pointer; color: var(--text-main); background: none; border: none; padding: 4px 8px;">
+                        <span id="lblToggleAdvanced" data-i18n="adv_settings_show">⚙️ Plus d'options ▾</span>
+                    </button>
+                </div>
+
+                <!-- Advanced Settings Block (Hidden by default) -->
+                <div id="advancedSettingsBlock" class="hidden">
+                    <hr style="border:none; border-top:2px solid var(--border-black); margin:0.5rem 0 1rem 0;">
+
+                    <!-- Format Toggle MP3 vs M4B Redesign Sleek -->
+                    <div class="form-group">
+                        <label data-i18n="format_label">Format de Sortie</label>
+                        <div class="toggle-switch-group">
+                            <button class="toggle-btn" id="toggleMp3" title="Rapide & Léger">
+                                <i class="fa-solid fa-compact-disc toggle-icon"></i>
+                                <div class="toggle-text-stack">
+                                    <span class="toggle-title" data-i18n="format_mp3">MP3</span>
+                                </div>
+                            </button>
+                            <button class="toggle-btn active" id="toggleM4b" title="Fichier Unique">
+                                <i class="fa-solid fa-book-bookmark toggle-icon"></i>
+                                <div class="toggle-text-stack">
+                                    <span class="toggle-title" data-i18n="format_m4b">M4B</span>
+                                </div>
+                            </button>
+                        </div>
+                        <div id="m4bOptionsContainer" class="form-group" style="margin-top: 10px;">
+                            <label style="font-size: 0.85rem; font-weight: normal; margin-bottom: 4px; display: block;" data-i18n="m4b_merge_method">Méthode de fusion M4B</label>
+                            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; border: 2px solid var(--border-black); padding: 8px; border-radius: 4px; background: var(--bg-card);">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal; margin: 0;">
+                                    <input type="radio" name="m4bMergeCodec" value="aac" checked style="accent-color: var(--accent-mint);">
+                                    <span data-i18n="m4b_method_aac"><strong>Standard (AAC)</strong> : Qualité & compatibilité max (CPU intensif)</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal; margin: 0;">
+                                    <input type="radio" name="m4bMergeCodec" value="copy" style="accent-color: var(--accent-mint);">
+                                    <span data-i18n="m4b_method_copy"><strong>Ultra-Rapide (Copie)</strong> : Concatène sans ré-encodage (risque de bugs de lecture)</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="format-hint" id="formatHint" data-i18n="format_hint_text">
+                            ⚡ <strong>Le Choix des Boss (MP3) :</strong> Rapide comme l'éclair ! Ton PC/Mac/Phone reste au frais et ta batterie te dira merci. 🚀
+                        </div>
                     </div>
-                    <input type="range" id="rangePitch" min="-50" max="50" value="0" class="range-neubrutal">
+
+                    <!-- Mode Web : 1 canal, threads non applicables -->
+                    <div id="modeWebBox" class="form-group">
+                        <label data-i18n="mode_web_label">⚡ Mode Web (Canal Unique)</label>
+                        <div style="background:var(--bg-main); border:2px solid var(--border-black); padding:0.6rem 0.8rem; border-radius:8px; font-size:0.85rem; font-weight:600;" data-i18n="mode_web_desc">
+                            🔉 1 flux audio en direct. Jusqu'à 20 processus parallèles avec l'App Desktop !
+                        </div>
+                        <select id="selectThreadsWeb" style="display:none;"><option value="1" selected>1</option></select>
+                    </div>
+
+                    <!-- Mode Local : 20 threads applicables -->
+                    <div id="modeLocalBox" class="form-group" style="display:none;">
+                        <label for="selectThreadsLocal" data-i18n="speed_label">Vitesse de génération (Threads)</label>
+                        <select id="selectThreadsLocal" class="input-neubrutal">
+                            <option value="1" data-i18n="speed_1">🐢 1 (Mode Tortue / Ultra-Sûr)</option>
+                            <option value="2" data-i18n="speed_2">🚴 2 (Tranquille Pilou)</option>
+                            <option value="5" data-i18n="speed_5">🚀 5 (Vitesse de Croisière)</option>
+                            <option value="10" selected data-i18n="speed_10">⚡ 10 (Recommandé / Turbo)</option>
+                            <option value="20" data-i18n="speed_20">🔥 20 (Mode Supersonique Extrême !)</option>
+                        </select>
+                    </div>
+
+                    <!-- Transition Dropdown -->
+                    <div class="form-group">
+                        <label for="selectTransition" data-i18n="transition_label">Transition Sonore</label>
+                        <select id="selectTransition" class="input-neubrutal">
+                            <option value="none" data-i18n="trans_none">🚫 Sans transition (Enchaînement direct)</option>
+                            <option value="silence" data-i18n="trans_silence">🤫 1.5s de silence profond</option>
+                            <option value="chime1" data-i18n="trans_chime1">🔔 Clochette 1 (Cristalline & Douce)</option>
+                            <option value="chime2" data-i18n="trans_chime2">✨ Clochette 2 (Aérienne & Zen)</option>
+                            <option value="chime3" selected data-i18n="trans_chime3">🎶 Clochette 3 (Profonde & Majestueuse)</option>
+                            <option value="chime4" data-i18n="trans_chime4">🔔 Cloche en Bronze (Méditative)</option>
+                            <option value="chime5" data-i18n="trans_chime5">🥣 Bol Tibétain (Vibrant & Profond)</option>
+                            <option value="chime6" data-i18n="trans_chime6">🎵 Harpe en Cascade (Poétique)</option>
+                            <option value="chime7" data-i18n="trans_chime7">📟 Glitch Sci-Fi (Moderne & Cyber)</option>
+                            <option value="chime8" data-i18n="trans_chime8">🎹 Piano Note Unique (Chaleureux)</option>
+                            <option value="chime9" data-i18n="trans_chime9">🍃 Sifflement de Vent Doux (Nature)</option>
+                            <option value="chime10" data-i18n="trans_chime10">📖 Page Tournée (Classique & Livre)</option>
+                            <option value="chime11" data-i18n="trans_chime11">📐 Triangle d'Orchestre (Brillant)</option>
+                            <option value="chime12" data-i18n="trans_chime12">🎼 Marimba Ascendant (Ludique)</option>
+                            <option value="chime13" data-i18n="trans_chime13">🥁 Gong Traditionnel (Historique)</option>
+                            <option value="chime14" data-i18n="trans_chime14">🌾 Flûte de Pan (Folk & Léger)</option>
+                            <option value="chime15" data-i18n="trans_chime15">📻 Craquement Vinyle (Vintage)</option>
+                        </select>
+                    </div>
+
+                    <!-- Rate / Speed Range -->
+                    <div class="form-group">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label for="rangeRate" data-i18n="rate_label">Vitesse de Lecture</label>
+                            <span id="valRate" style="font-weight:700; font-family:monospace;">0%</span>
+                        </div>
+                        <input type="range" id="rangeRate" min="-50" max="100" value="0" class="range-neubrutal">
+                    </div>
+
+                    <!-- Pitch Range -->
+                    <div class="form-group">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label for="rangePitch" data-i18n="pitch_label">Hauteur (Pitch)</label>
+                            <span id="valPitch" style="font-weight:700; font-family:monospace;">0Hz</span>
+                        </div>
+                        <input type="range" id="rangePitch" min="-50" max="50" value="0" class="range-neubrutal">
+                    </div>
                 </div>
             </aside>
 
