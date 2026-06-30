@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const isGitHubPages = window.location.hostname.includes('github.io');
     const ttsClient = isGitHubPages ? new WebSpeechTtsClient() : new EdgeTtsClient();
     let currentBookData = null;
+    let currentProjectId = null;
     let generatedAudioFiles = [];
     let isConverting = false;
     let cancelRequested = false;
@@ -29,6 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
         valRate: document.getElementById('valRate'),
         rangePitch: document.getElementById('rangePitch'),
         valPitch: document.getElementById('valPitch'),
+        btnHistory: document.getElementById('btnHistory'),
+        historyModalOverlay: document.getElementById('historyModalOverlay'),
+        btnCloseHistoryModal: document.getElementById('btnCloseHistoryModal'),
+        historyListContainer: document.getElementById('historyListContainer'),
 
         dropzoneCard: document.getElementById('dropzoneCard'),
         dropzone: document.getElementById('dropzone'),
@@ -499,6 +504,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.chaptersList.appendChild(item);
             });
 
+            currentProjectId = 'proj_' + Date.now();
+            saveProjectToServer();
+
             elements.dropzoneCard.classList.add('hidden');
             elements.bookDetailsCard.classList.remove('hidden');
 
@@ -511,6 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetToDropzone() {
         currentBookData = null;
+        currentProjectId = null;
         if (elements.fileInput) {
             elements.fileInput.value = ''; // Reset the input so the same file can trigger 'change'
         }
@@ -670,6 +679,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const filename = `${(i + 1).toString().padStart(3, '0')}_${safeTitle || chapFallback}.${currentFormat === 'm4b' ? 'm4b' : 'mp3'}`;
 
                     generatedAudioFiles.push({ filename, title: chapter.title, blob: audioBlob, rawBlob: rawAudioBlob, index: i });
+                    saveProjectToServer();
                     processedWordsOverall += chapWords;
                     
                     const elapsedSec = (Date.now() - startTime) / 1000;
@@ -701,71 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const badge = document.getElementById(`chapter-badge-${i}`);
                     if (badge) badge.style.backgroundColor = 'var(--accent-mint)';
                     
-                    const playBtn = document.getElementById(`chapter-play-${i}`);
-                    if (playBtn) {
-                        playBtn.style.display = 'inline-flex';
-                        playBtn.onclick = () => {
-                            const timeSpan = document.getElementById(`chapter-play-time-${i}`);
-                            const playIcon = document.getElementById(`chapter-play-icon-${i}`);
-                            const formatTime = (secs) => {
-                                if (isNaN(secs) || secs === Infinity) return '00:00';
-                                const mins = Math.floor(secs / 60);
-                                const s = Math.floor(secs % 60);
-                                return `${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                            };
-                            
-                            if (window.currentPlayingAudio) {
-                                window.currentPlayingAudio.pause();
-                                if (window.currentPlayingAudioBtn) {
-                                    const prevIdx = window.currentPlayingIndex;
-                                    const prevIcon = document.getElementById(`chapter-play-icon-${prevIdx}`);
-                                    const prevTime = document.getElementById(`chapter-play-time-${prevIdx}`);
-                                    if (prevIcon) prevIcon.innerHTML = '<i class="fa-solid fa-circle-play fa-xl" style="color:var(--accent-mint)"></i>';
-                                    if (prevTime) {
-                                        prevTime.style.display = 'none';
-                                        prevTime.textContent = '';
-                                    }
-                                }
-                                if (window.currentPlayingIndex === i) {
-                                    window.currentPlayingAudio = null;
-                                    window.currentPlayingIndex = null;
-                                    return;
-                                }
-                            }
-                            const url = URL.createObjectURL(audioBlob);
-                            const audio = new Audio(url);
-                            audio.play();
-                            window.currentPlayingAudio = audio;
-                            window.currentPlayingIndex = i;
-                            window.currentPlayingAudioBtn = playBtn;
-                            
-                            if (playIcon) playIcon.innerHTML = '<i class="fa-solid fa-circle-pause fa-xl" style="color:var(--accent-mint)"></i>';
-                            if (timeSpan) {
-                                timeSpan.style.display = 'inline';
-                                timeSpan.textContent = '00:00 / --:--';
-                            }
-                            
-                            audio.ontimeupdate = () => {
-                                if (timeSpan) {
-                                    timeSpan.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
-                                }
-                            };
-                            audio.onloadedmetadata = () => {
-                                if (timeSpan) {
-                                    timeSpan.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
-                                }
-                            };
-                            audio.onended = () => {
-                                if (playIcon) playIcon.innerHTML = '<i class="fa-solid fa-circle-play fa-xl" style="color:var(--accent-mint)"></i>';
-                                if (timeSpan) {
-                                    timeSpan.style.display = 'none';
-                                    timeSpan.textContent = '';
-                                }
-                                window.currentPlayingAudio = null;
-                                window.currentPlayingIndex = null;
-                            };
-                        };
-                    }
+                    bindPlayButton(i, audioBlob);
                     
                     log(window.t('msg_chap_done', { i: i + 1, total: totalChapters, words: chapWords.toLocaleString('fr-FR'), fallback: `✅ Chapitre ${i + 1}/${totalChapters} converti (${chapWords.toLocaleString('fr-FR')} mots)` }), 'success');
 
@@ -1022,6 +968,337 @@ document.addEventListener('DOMContentLoaded', () => {
             cropperModal.classList.add('hidden');
             cropperInstance.destroy();
             cropperInstance = null;
+        });
+    }
+
+    function bindPlayButton(idx, blob) {
+        const playBtn = document.getElementById(`chapter-play-${idx}`);
+        if (!playBtn) return;
+        
+        playBtn.style.display = 'inline-flex';
+        playBtn.onclick = () => {
+            const timeSpan = document.getElementById(`chapter-play-time-${idx}`);
+            const playIcon = document.getElementById(`chapter-play-icon-${idx}`);
+            const formatTime = (secs) => {
+                if (isNaN(secs) || secs === Infinity) return '00:00';
+                const mins = Math.floor(secs / 60);
+                const s = Math.floor(secs % 60);
+                return `${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            };
+            
+            if (window.currentPlayingAudio) {
+                window.currentPlayingAudio.pause();
+                if (window.currentPlayingAudioBtn) {
+                    const prevIdx = window.currentPlayingIndex;
+                    const prevIcon = document.getElementById(`chapter-play-icon-${prevIdx}`);
+                    const prevTime = document.getElementById(`chapter-play-time-${prevIdx}`);
+                    if (prevIcon) prevIcon.innerHTML = '<i class="fa-solid fa-circle-play fa-xl" style="color:var(--accent-mint)"></i>';
+                    if (prevTime) {
+                        prevTime.style.display = 'none';
+                        prevTime.textContent = '';
+                    }
+                }
+                if (window.currentPlayingIndex === idx) {
+                    window.currentPlayingAudio = null;
+                    window.currentPlayingIndex = null;
+                    return;
+                }
+            }
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            audio.play();
+            window.currentPlayingAudio = audio;
+            window.currentPlayingIndex = idx;
+            window.currentPlayingAudioBtn = playBtn;
+            
+            if (playIcon) playIcon.innerHTML = '<i class="fa-solid fa-circle-pause fa-xl" style="color:var(--accent-mint)"></i>';
+            if (timeSpan) {
+                timeSpan.style.display = 'inline';
+                timeSpan.textContent = '00:00 / --:--';
+            }
+            
+            audio.ontimeupdate = () => {
+                if (timeSpan) {
+                    timeSpan.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+                }
+            };
+            audio.onloadedmetadata = () => {
+                if (timeSpan) {
+                    timeSpan.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+                }
+            };
+            audio.onended = () => {
+                if (playIcon) playIcon.innerHTML = '<i class="fa-solid fa-circle-play fa-xl" style="color:var(--accent-mint)"></i>';
+                if (timeSpan) {
+                    timeSpan.style.display = 'none';
+                    timeSpan.textContent = '';
+                }
+                window.currentPlayingAudio = null;
+                window.currentPlayingIndex = null;
+            };
+        };
+    }
+
+    async function saveProjectToServer() {
+        if (!currentBookData || !currentProjectId || isGitHubPages) return;
+        
+        let coverBase64 = "";
+        if (elements.coverPreview && !elements.coverPreview.classList.contains('hidden')) {
+            coverBase64 = elements.coverPreview.src;
+        }
+        
+        const projectData = {
+            id: currentProjectId,
+            title: elements.metaTitle.value || currentBookData.title || "Livre sans titre",
+            author: elements.metaAuthor.value || currentBookData.author || "Auteur inconnu",
+            cover: coverBase64.startsWith("data:") ? coverBase64 : "",
+            settings: {
+                voice: elements.selectVoice.value,
+                rate: parseInt(elements.rangeRate.value),
+                pitch: parseInt(elements.rangePitch.value),
+                threads: parseInt(document.getElementById('selectSpeed').value),
+                transition: elements.selectTransition.value
+            },
+            chapters: currentBookData.chapters.map(ch => ({ title: ch.title, text: ch.text })),
+            generatedChapters: generatedAudioFiles.map(item => item.index)
+        };
+        
+        try {
+            await fetch('/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(projectData)
+            });
+        } catch (e) {
+            console.error("Failed to save project on server", e);
+        }
+    }
+
+    async function loadProjectsList() {
+        if (isGitHubPages) return;
+        try {
+            const res = await fetch('/api/projects');
+            const projects = await res.json();
+            
+            elements.historyListContainer.innerHTML = '';
+            if (projects.length === 0) {
+                elements.historyListContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 2rem;" data-i18n="history_empty">${window.t('history_empty')}</div>`;
+                return;
+            }
+            
+            projects.forEach(p => {
+                const row = document.createElement('div');
+                row.className = 'chapter-row';
+                row.style.display = 'flex';
+                row.style.alignItems = 'center';
+                row.style.justifyContent = 'space-between';
+                row.style.gap = '1rem';
+                row.style.padding = '0.8rem';
+                
+                const hasCover = p.cover && p.cover.startsWith("data:");
+                const coverImg = hasCover ? `<img src="${p.cover}" style="width: 50px; height: 75px; object-fit: cover; border: 2px solid var(--border-black); border-radius: 4px;" />` : `<div style="width: 50px; height: 75px; background: var(--bg-card); border: 2px solid var(--border-black); border-radius: 4px; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-book fa-lg" style="color: var(--text-muted);"></i></div>`;
+                
+                const pct = p.totalChapters > 0 ? Math.round((p.generatedChapters.length / p.totalChapters) * 100) : 0;
+                
+                row.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0;">
+                        ${coverImg}
+                        <div style="min-width: 0;">
+                            <strong style="display: block; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.title}</strong>
+                            <span style="display: block; font-size: 0.8rem; color: var(--text-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${p.author}</span>
+                            <span style="font-size: 0.75rem; font-weight: bold; color: var(--accent-purple); display: block; margin-top: 4px;">
+                                ${window.t('progress_label')} : ${p.generatedChapters.length}/${p.totalChapters} (${pct}%)
+                            </span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="pill-btn green btn-load-proj" data-id="${p.id}" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                            <i class="fa-solid fa-folder-open"></i> ${window.t('history_load')}
+                        </button>
+                        <button class="pill-btn red btn-delete-proj" data-id="${p.id}" style="padding: 0.4rem 0.6rem; font-size: 0.8rem;">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                elements.historyListContainer.appendChild(row);
+            });
+            
+            // Add click listeners
+            elements.historyListContainer.querySelectorAll('.btn-load-proj').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-id');
+                    await loadProject(id);
+                });
+            });
+            
+            elements.historyListContainer.querySelectorAll('.btn-delete-proj').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-id');
+                    if (confirm(window.t('history_delete_confirm'))) {
+                        await deleteProject(id);
+                        await loadProjectsList();
+                    }
+                });
+            });
+            
+        } catch (e) {
+            console.error("Failed to load projects list", e);
+        }
+    }
+
+    async function deleteProject(id) {
+        try {
+            await fetch(`/api/projects/${id}`, { method: 'DELETE' });
+        } catch (e) {
+            console.error("Failed to delete project", e);
+        }
+    }
+
+    async function loadProject(id) {
+        try {
+            const res = await fetch(`/api/projects/${id}`);
+            if (!res.ok) throw new Error("Failed to fetch project");
+            const data = await res.json();
+            
+            currentProjectId = data.id;
+            currentBookData = {
+                title: data.title,
+                author: data.author,
+                chapters: data.chapters,
+                coverUrl: data.cover || null
+            };
+            
+            // Restore settings
+            if (data.settings) {
+                elements.selectVoice.value = data.settings.voice || "";
+                elements.rangeRate.value = data.settings.rate || 0;
+                elements.valRate.textContent = `${data.settings.rate >= 0 ? '+' : ''}${data.settings.rate}%`;
+                elements.rangePitch.value = data.settings.pitch || 0;
+                elements.valPitch.textContent = `${data.settings.pitch >= 0 ? '+' : ''}${data.settings.pitch}Hz`;
+                document.getElementById('selectSpeed').value = data.settings.threads || 10;
+                elements.selectTransition.value = data.settings.transition || "chime3";
+                
+                const matchedLang = data.settings.voice.startsWith("kokoro_") ? "fr" : (data.settings.voice.startsWith("piper_") ? "fr" : data.settings.voice.split('-').slice(0, 2).join('-'));
+                elements.selectLanguage.value = matchedLang.split('-')[0];
+                elements.selectLanguage.dispatchEvent(new Event('change'));
+                elements.selectVoice.value = data.settings.voice;
+            }
+            
+            // Populate meta details card
+            elements.metaTitle.value = currentBookData.title;
+            elements.metaAuthor.value = currentBookData.author;
+            
+            const totalWords = currentBookData.chapters.reduce((sum, ch) => sum + ch.text.split(/\s+/).length, 0);
+            elements.statChapters.textContent = currentBookData.chapters.length;
+            elements.statWords.textContent = totalWords.toLocaleString('fr-FR');
+            const totalMinutes = Math.round(totalWords / 150);
+            const minLabel = window.t('stat_time_min') || "min";
+            elements.statEstTime.textContent = totalMinutes > 60 ? `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60} ${minLabel}` : `${totalMinutes} ${minLabel}`;
+            
+            if (currentBookData.coverUrl) {
+                elements.coverPreview.src = currentBookData.coverUrl;
+                elements.coverPreview.classList.remove('hidden');
+                elements.coverPlaceholderIcon.classList.add('hidden');
+                if (elements.btnCropCover) elements.btnCropCover.classList.remove('hidden');
+            } else {
+                elements.coverPreview.classList.add('hidden');
+                elements.coverPlaceholderIcon.classList.remove('hidden');
+                if (elements.btnCropCover) elements.btnCropCover.classList.add('hidden');
+            }
+            
+            // Build chapters list UI and restore completed chapters
+            elements.chaptersList.innerHTML = '';
+            generatedAudioFiles = [];
+            
+            const generatedSet = new Set(data.generatedChapters || []);
+            
+            currentBookData.chapters.forEach((ch, idx) => {
+                const item = document.createElement('div');
+                item.className = 'chapter-row';
+                item.id = `chapter-row-${idx}`;
+                const wordCount = ch.text.split(/\s+/).length;
+                const isGenerated = generatedSet.has(idx);
+                
+                item.innerHTML = `
+                    <span><strong>${idx + 1}.</strong> ${ch.title}</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span id="chapter-play-${idx}" style="${isGenerated ? 'display:inline-flex;' : 'display:none;'} align-items:center; gap:6px; cursor:pointer;" title="${window.t('play_chapter_title')}">
+                            <span id="chapter-play-icon-${idx}"><i class="fa-solid fa-circle-play fa-xl" style="color:var(--accent-mint)"></i></span>
+                            <span id="chapter-play-time-${idx}" style="font-size:0.75rem; color:var(--text-muted); font-family:monospace; display:none;"></span>
+                        </span>
+                        <span id="chapter-badge-${idx}" class="pill-badge" style="font-size:0.75rem; transition: background-color 0.3s; ${isGenerated ? 'background-color: var(--accent-mint);' : ''}">
+                            <span id="chapter-status-${idx}">
+                                ${isGenerated ? '<i class="fa-solid fa-circle-check" style="color:var(--text-main)"></i>' : '<i class="fa-solid fa-clock" style="color:var(--text-muted)"></i>'}
+                            </span> 
+                            &nbsp;${wordCount.toLocaleString('fr-FR')} ${window.t('stat_words')}
+                        </span>
+                    </div>
+                `;
+                elements.chaptersList.appendChild(item);
+                
+                if (isGenerated) {
+                    // Fetch completed chapter blob in background
+                    (async () => {
+                        try {
+                            const filename = `chap_${idx}.mp3`;
+                            const payload = {
+                                text: ch.text,
+                                voice: elements.selectVoice.value,
+                                rate: parseInt(elements.rangeRate.value),
+                                pitch: parseInt(elements.rangePitch.value)
+                            };
+                            const response = await fetch('/api/tts', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+                            if (response.ok) {
+                                const audioBlob = await response.blob();
+                                generatedAudioFiles.push({
+                                    filename: filename,
+                                    title: ch.title,
+                                    blob: audioBlob,
+                                    rawBlob: audioBlob,
+                                    index: idx
+                                });
+                                bindPlayButton(idx, audioBlob);
+                            }
+                        } catch (err) {
+                            console.error(`Failed to pre-fetch chapter ${idx} audio:`, err);
+                        }
+                    })();
+                }
+            });
+            
+            // Switch views
+            elements.dropzoneCard.classList.add('hidden');
+            elements.bookDetailsCard.classList.remove('hidden');
+            elements.historyModalOverlay.classList.add('hidden');
+            
+        } catch (e) {
+            console.error("Failed to load project", e);
+            alert("Erreur lors du chargement du projet.");
+        }
+    }
+
+    if (elements.btnHistory) {
+        elements.btnHistory.addEventListener('click', () => {
+            elements.historyModalOverlay.classList.remove('hidden');
+            loadProjectsList();
+        });
+    }
+    
+    if (elements.btnCloseHistoryModal) {
+        elements.btnCloseHistoryModal.addEventListener('click', () => {
+            elements.historyModalOverlay.classList.add('hidden');
+        });
+    }
+    
+    if (elements.historyModalOverlay) {
+        elements.historyModalOverlay.addEventListener('click', (e) => {
+            if (e.target === elements.historyModalOverlay) {
+                elements.historyModalOverlay.classList.add('hidden');
+            }
         });
     }
 
