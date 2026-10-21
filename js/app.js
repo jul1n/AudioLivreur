@@ -326,10 +326,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const item = document.createElement('div');
                 item.className = 'chapter-row';
                 const wordCount = ch.text.split(/\s+/).length;
-                item.innerHTML = `
-                    <span><strong>${idx + 1}.</strong> ${ch.title}</span>
-                    <span class="pill-badge" style="font-size:0.75rem;">${wordCount.toLocaleString()} mots</span>
-                `;
+                // Le titre vient du fichier importé (non fiable) : jamais via innerHTML.
+                const label = document.createElement('span');
+                const num = document.createElement('strong');
+                num.textContent = `${idx + 1}.`;
+                label.append(num, ' ', ch.title);
+                const badge = document.createElement('span');
+                badge.className = 'pill-badge';
+                badge.style.fontSize = '0.75rem';
+                badge.textContent = `${wordCount.toLocaleString()} mots`;
+                item.append(label, badge);
                 elements.chaptersList.appendChild(item);
             });
 
